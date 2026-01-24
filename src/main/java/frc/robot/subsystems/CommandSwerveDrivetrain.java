@@ -96,6 +96,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             null, // Use default timeout (10 s)
             // Log state with SignalLogger class
             state -> SignalLogger.writeString("SysIdRotation_State", state.toString())
+            
         ),
         new SysIdRoutine.Mechanism(
             output -> {
@@ -108,6 +109,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this
         )
     );
+   
 
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
