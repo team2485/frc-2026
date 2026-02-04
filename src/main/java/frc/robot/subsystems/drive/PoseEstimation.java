@@ -42,14 +42,14 @@ public class PoseEstimation extends SubsystemBase {
     private final Supplier<Rotation2d> rotation;
     private final Supplier<SwerveModulePosition[]> modulePosition;
     private final SwerveDrivePoseEstimator poseEstimator;
-    private final SwerveDrivePoseEstimator noVisionPoseEstimator;
+    // private final SwerveDrivePoseEstimator noVisionPoseEstimator;
     private final Field2d field2d = new Field2d();
     private final Vision photonEstimator = new Vision("TestCam"); // TODO
     private final Notifier photonNotifier = new Notifier(photonEstimator);
     // private final WL_CommandXboxController m_driver;
     // private final WL_CommandXboxController m_operator;
 
-    private OriginPosition originPosition = OriginPosition.kRedAllianceWallRightSide;
+    // private OriginPosition originPosition = OriginPosition.kBlueAllianceWallRightSide;
     private boolean sawTag = false;
     private double angleToTags = 0;
     Supplier<ChassisSpeeds> speeds;
@@ -81,11 +81,11 @@ public class PoseEstimation extends SubsystemBase {
                 modulePosition.get(),
                 new Pose2d(), stateStdDevs, visionMeasurementStdDevs);
 
-        noVisionPoseEstimator = new SwerveDrivePoseEstimator(
-                m_drivetrain.getKinematics(),
-                rotation.get(),
-                modulePosition.get(),
-                new Pose2d());
+        // noVisionPoseEstimator = new SwerveDrivePoseEstimator(
+        //         m_drivetrain.getKinematics(),
+        //         rotation.get(),
+        //         modulePosition.get(),
+        //         new Pose2d());
 
         this.m_drivetrain = m_drivetrain;
 
@@ -106,15 +106,16 @@ public class PoseEstimation extends SubsystemBase {
     @Override
     public void periodic() {
         poseEstimator.update(rotation.get(), modulePosition.get());
-        noVisionPoseEstimator.update(rotation.get(), modulePosition.get());
+        // noVisionPoseEstimator.update(rotation.get(), modulePosition.get());
         var visionPose = photonEstimator.grabLatestEstimatedPose();
         if (visionPose != null) {
             var pose2d = visionPose.estimatedPose.toPose2d();
+            // m_drivetrain.getPigeon2().setYaw(pose2d.getRotation().getDegrees());
             m_drivetrain.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
             // poseEstimator.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
         }
 
-        var dashboardPose = poseEstimator.getEstimatedPosition();
+        // var dashboardPose = poseEstimator.getEstimatedPosition();
         // if (originPosition == OriginPosition.kRedAllianceWallRightSide) {
         // dashboardPose = flipAlliance(dashboardPose);
         // }
@@ -136,10 +137,10 @@ public class PoseEstimation extends SubsystemBase {
     //     return String.format("(%.3f, %.3f) %.2f radians", pose.getX(), pose.getY(), pose.getRotation().getRadians());
     // }
 
-    public Pose2d getCurrentVisionlessPose() {
-        var pos = noVisionPoseEstimator.getEstimatedPosition();
-        return pos;
-    }
+    // public Pose2d getCurrentVisionlessPose() {
+    //     var pos = noVisionPoseEstimator.getEstimatedPosition();
+    //     return pos;
+    // }
 
     public Pose2d getCurrentPose() {
         var pos = poseEstimator.getEstimatedPosition();
@@ -155,9 +156,9 @@ public class PoseEstimation extends SubsystemBase {
         return pos;
     }
 
-    public Pose2d getCurrentPoseNoVision() {
-        return noVisionPoseEstimator.getEstimatedPosition();
-    }
+    // public Pose2d getCurrentPoseNoVision() {
+    //     return noVisionPoseEstimator.getEstimatedPosition();
+    // }
 
     public void setCurrentPose(Pose2d newPose) {
         poseEstimator.resetPosition(rotation.get(), modulePosition.get(), newPose);

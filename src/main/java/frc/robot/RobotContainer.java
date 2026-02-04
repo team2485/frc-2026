@@ -38,7 +38,7 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     public final Drivetrain drivetrain = Constants.createDrivetrain();
-    public final PoseEstimation m_poseEstimation = new PoseEstimation(() ->drivetrain.getRotation3d().toRotation2d(), () -> drivetrain.getState().ModulePositions, ()->drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates), drivetrain);
+    public final PoseEstimation m_poseEstimation = new PoseEstimation(() ->drivetrain.getPigeon2().getRotation2d(), () -> drivetrain.getState().ModulePositions, ()->drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates), drivetrain);
     public final PIDController m_PidController = new PIDController(0.05, 0, 0);
     
     

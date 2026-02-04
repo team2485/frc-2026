@@ -133,15 +133,16 @@ public class Vision implements Runnable {
             // kFieldLengthMeters, kFieldWidthMeters); // attempt to load the
             // AprilTagFieldLayout
             var layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-            // var layout = AprilTagFieldLayout.loadFromResource("C:\\Users\\RoboticsUser\\Desktop\\frc-2026\\src\\main\\java\\frc\\util\\2026-rebuilt-welded.json");
-            layout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
+            // var layout =
+            // AprilTagFieldLayout.loadFromResource("C:\\Users\\RoboticsUser\\Desktop\\frc-2026\\src\\main\\java\\frc\\util\\2026-rebuilt-welded.json");
+            layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
 
             if (m_camera != null) {
 
                 photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                         new Transform3d(Translation3d.kZero,
-                        new Rotation3d(0,0,Math.PI)
-                        
+                                new Rotation3d(0, 0, 0)
+
                         )); // MULTI_TAG_PNP uses all cameras in view for positioning
                 // estimatorWithError = new PhotonPoseEstimator(layout,
                 // PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
@@ -169,7 +170,6 @@ public class Vision implements Runnable {
 
         if (m_photonPoseEstimator != null && m_camera != null) { // environment and camera must be initialized properly
             var photonResults = m_camera.getLatestResult(); // continuously get latest camera reading
-            if (photonResults.hasTargets()) {
 
                 // photonResults.targets.removeIf(n->(n.getPoseAmbiguity() >0.0) ); // old
                 // filter :(
@@ -203,7 +203,7 @@ public class Vision implements Runnable {
                 // m_atomicEstimatedBadRobotPose.set(m_badPose);
                 // }}
                 // );
-            }
+            
             photonResults = m_camera.getLatestResult();
             // SmartDashboard.putString("Visible Tag", String.format("(%.3f, %.3f) %.2f
             // radians", photonResults.targets.get(0).getBestCameraToTarget().getX(),
@@ -216,25 +216,28 @@ public class Vision implements Runnable {
                 // readings
                 // photonResults.targets.removeIf(n->(n.getFiducialId() != 3 &&
                 // n.getFiducialId() != 4 && n.getFiducialId() != 7 && n.getFiducialId() != 8));
-                // if (photonResults.targets.size() > 0 && ((photonResults.targets.size() > 1)
-                // || (photonResults.targets.get(0).getBestCameraToTarget().getX() < 1.75 &&
-                // photonResults.targets.get(0).getPoseAmbiguity() < .2))) {
-                m_photonPoseEstimator.update(photonResults).ifPresent(estimatedRobotPose -> {
-                    var estimatedPose = estimatedRobotPose.estimatedPose;
+                /*                         || (photonResults.targets.get(0).getBestCameraToTarget().getX() < 1.75 &&
+                                photonResults.targets.get(0).getPoseAmbiguity() < .2) && ((photonResults.targets.size() > 1) */
+                if (photonResults.targets.size() > 0) {
+                    m_photonPoseEstimator.update(photonResults).ifPresent(estimatedRobotPose -> {
+                        var estimatedPose = estimatedRobotPose.estimatedPose;
 
-                    SmartDashboard.putBoolean("Camera Positioned For Auto", true);
-                    // cameraExists.setDouble(photonResults.targets.get(0).getBestCameraToTarget().getX());
-                    // cameraExists.setDouble(photonResults.getMultiTagResult().estimatedPose.best.getX());
+                        SmartDashboard.putBoolean("Camera Positioned For Auto", true);
+                        // cameraExists.setDouble(photonResults.targets.get(0).getBestCameraToTarget().getX());
+                        // cameraExists.setDouble(photonResults.getMultiTagResult().estimatedPose.best.getX());
 
-                    if (estimatedPose.getX() > 0.0 && estimatedPose.getX() <= kFieldLengthMeters
-                            && estimatedPose.getY() > 0.0
-                            && estimatedPose.getY() <= kFieldWidthMeters) { // idiot check
-                        m_atomicEstimatedRobotPose.set(estimatedRobotPose);
-                    }
-                });
-                // }
-            } else
-                SmartDashboard.putBoolean("Camera Positioned For Auto", false);
+                        if (estimatedPose.getX() > 0.0 && estimatedPose.getX() <= kFieldLengthMeters
+                                && estimatedPose.getY() > 0.0
+                                && estimatedPose.getY() <= kFieldWidthMeters) { // idiot check
+                            m_atomicEstimatedRobotPose.set(estimatedRobotPose);
+                        }
+                    });
+                }
+            } else {
+                m_atomicEstimatedRobotPose.set(null);
+                // SmartDashboard.putBoolean("Camera Positioned For Auto", false);
+            }
+                
         }
 
     }

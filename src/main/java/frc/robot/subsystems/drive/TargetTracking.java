@@ -57,7 +57,10 @@ public class TargetTracking extends SubsystemBase {
                 }   
             
                 // m_drivetrain.runOnce(m_drivetrain::seedFieldCentric);
-                m_drivetrain.seedFieldCentric(m_drivetrain.getRotation3d().toRotation2d());
+                // m_drivetrain.seedFieldCentric();
+                
+                m_drivetrain.setOperatorPerspectiveForward(m_drivetrain.getPigeon2().getRotation2d());
+                // m_drivetrain.resetRotation();
                 requestedState = TargetingStates.StateDriverControlled;
                 // currentState = TargetingStates.StateDriverControlled;
                 break;
@@ -67,6 +70,7 @@ public class TargetTracking extends SubsystemBase {
             //         m_drivetrain.runOnce(m_drivetrain::seedFieldCentric)
                 
             //     ));
+                // m_drivetrain.setOperatorPerspectiveForward(m_drivetrain.getPigeon2().getRotation2d());
                 
                 CommandScheduler.getInstance()
                         .schedule(m_drivetrain.applyRequest(
