@@ -142,7 +142,7 @@ public class TargetTracking extends SubsystemBase {
         // double dist = m_poseEstimation.getCurrentPose().getTranslation().getDistance();
 
         Rotation2d hub = new Rotation2d(distX, distY);
-        Rotation2d currentRotation = m_drivetrain.getRotation3d().toRotation2d();
+        Rotation2d currentRotation = m_drivetrain.getPigeon2().getRotation2d();
 
         Rotation2d error = currentRotation.relativeTo(hub);
 
@@ -157,7 +157,7 @@ public class TargetTracking extends SubsystemBase {
                                                                                                           // with
                                                                                                           // negative X
                                                                                                           // (left)
-                                        .withRotationalRate(m_PidController.calculate(currentRotation.getDegrees(), hub.getDegrees())) // Drive
+                                        .withRotationalRate(m_PidController.calculate(currentRotation.getDegrees(), hub.getDegrees()-90)) // Drive
                                                                                                                       // counterclockwise
                                                                                                                       // with
                                                                                                                       // negative
