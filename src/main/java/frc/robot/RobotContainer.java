@@ -39,7 +39,8 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
     public final Drivetrain drivetrain = Constants.createDrivetrain();
     public final PoseEstimation m_poseEstimation = new PoseEstimation(() ->drivetrain.getPigeon2().getRotation2d(), () -> drivetrain.getState().ModulePositions, ()->drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates), drivetrain);
-    public final PIDController m_PidController = new PIDController(0.05, 0, 0);
+    public final PIDController m_PidController = new PIDController(1.67, 0, 0);
+    
     
     
     public final TargetTracking tracker = new TargetTracking(drivetrain, m_poseEstimation, joystick, drive, m_PidController);
@@ -75,10 +76,7 @@ public class RobotContainer {
         joystick.b().onTrue(new InstantCommand( () -> tracker.requestState(TargetingStates.StateDriverControlled)));
         // joystick.y().onTrue(() -> tracker.requestState(TargetingStates.StateDriverControlled));
         joystick.y().onTrue(new InstantCommand( () -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
-        joystick.x().onTrue(new InstantCommand( () -> tracker.requestState(TargetingStates.StateResetHeading)));
-        
-
-
+        joystick.x().onTrue(drivetrain.resetGyro());
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.

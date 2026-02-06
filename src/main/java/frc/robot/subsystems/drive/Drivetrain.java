@@ -16,11 +16,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -37,6 +40,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    private double newHeading;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.k180deg;
@@ -323,5 +327,16 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     @Override
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+    }
+    //NetworkTableInstance inst2 = NetworkTableInstance.getDefault();
+   // NetworkTable table2 = inst2.getTable("vars");
+    // Start publishing topics within that table that correspond to the X and Y values
+    // for some operation in your program.
+    // The topic names are actually "/datatable/x" and "/datatable/y".
+    //newHeading = table2.getDoubleTopic("newHeading").publish();
+
+    public Command resetGyro() {
+        return new InstantCommand( () -> super.setOperatorPerspectiveForward(super.getPigeon2().getRotation2d().rotateBy(new Rotation2d(Math.PI))));
+        // return new InstantCommand( () -> System.out.println("reset please"));
     }
 }
