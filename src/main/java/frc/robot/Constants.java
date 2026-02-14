@@ -28,11 +28,6 @@ import frc.robot.subsystems.drive.Drivetrain;
 import frc.util.COTSFalconSwerveConstants;
 
 // TODO: Remove duplicates
-import static edu.wpi.first.units.Units.*;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
 
 import javax.xml.transform.TransformerFactory;
 
@@ -52,9 +47,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Filesystem;
 import frc.util.COTSFalconSwerveConstants;
-import static edu.wpi.first.units.Units.*;
 // import static frc.robot.Constants.Swerve.angleGearRatio;
 
 import com.ctre.phoenix6.CANBus;
@@ -145,7 +138,8 @@ public class Constants {
                                                         .withStatorCurrentLimitEnable(true));
         private static final CANcoderConfiguration encoderInitialConfigs = new CANcoderConfiguration();
         // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
-        private static final Pigeon2Configuration pigeonConfigs = new Pigeon2Configuration().withMountPose(new MountPoseConfigs().withMountPoseYaw(180));
+        private static final Pigeon2Configuration pigeonConfigs = new Pigeon2Configuration()
+                        .withMountPose(new MountPoseConfigs().withMountPoseYaw(180));
 
         // CAN bus that the devices are located on;
         // All swerve devices must share the same CAN bus
@@ -203,12 +197,13 @@ public class Constants {
                         .withSteerFrictionVoltage(kSteerFrictionVoltage)
                         .withDriveFrictionVoltage(kDriveFrictionVoltage);
 
-        
-        public static double MaxSpeed = 1.0 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-        public static double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+        public static double MaxSpeed = 1.0 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
+                                                                                             // top speed
+        public static double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
+                                                                                                // second max angular
+                                                                                                // velocity
 
-        
-                        // Front Left
+        // Front Left
         private static final int kFrontLeftDriveMotorId = 1;
         private static final int kFrontLeftSteerMotorId = 2;
         private static final int kFrontLeftEncoderId = 9;
@@ -392,13 +387,15 @@ public class Constants {
                 public static final double kThetaTolerance = Units.degreesToRadians(0);
 
                 // // TODO: tune!
-                // public static final TrapezoidProfile.Constraints kDefaultXYContraints = new TrapezoidProfile.Constraints(
-                //                 m_drive.maxSpeed * 0.3,
-                //                 Swerve.maxAngularVelocity);
+                // public static final TrapezoidProfile.Constraints kDefaultXYContraints = new
+                // TrapezoidProfile.Constraints(
+                // m_drive.maxSpeed * 0.3,
+                // Swerve.maxAngularVelocity);
 
-                // public static final TrapezoidProfile.Constraints kDefaultOmegaConstraints = new TrapezoidProfile.Constraints(
-                //                 Swerve.maxAngularVelocity * 0.2,
-                //                 Swerve.maxAngularVelocity);
+                // public static final TrapezoidProfile.Constraints kDefaultOmegaConstraints =
+                // new TrapezoidProfile.Constraints(
+                // Swerve.maxAngularVelocity * 0.2,
+                // Swerve.maxAngularVelocity);
 
                 // // TODO: tune!
                 // public static final double X_kP = 1.25;
@@ -415,11 +412,11 @@ public class Constants {
 
                 // TODO: ensure validity of measurements
                 // public static final Transform3d kRobotToCameraLeft = new Transform3d(
-                //                 new Translation3d(0.3719, 0.27305, 0.09),
-                //                 new Rotation3d(0, .1745, 0));
+                // new Translation3d(0.3719, 0.27305, 0.09),
+                // new Rotation3d(0, .1745, 0));
                 // public static final Transform3d kRobotToCameraRight = new Transform3d(
-                //                 new Translation3d(0.3719, -0.27305, 0.09),
-                //                 new Rotation3d(0, .1745, 0));
+                // new Translation3d(0.3719, -0.27305, 0.09),
+                // new Rotation3d(0, .1745, 0));
                 // -0.698
 
                 public static final double kFieldLengthMeters = 17.55;
@@ -430,5 +427,53 @@ public class Constants {
                 // Rotation3d has roll first, then pitch, then yaw
 
                 // public static final List<AprilTag> kBlueTagList;
+        }
+
+        public static final class AnglerConstants {
+
+                public static final double kPAngler = 50;
+                public static final double kIAngler = 0.15;
+                public static final double kDAngler = 0.1;
+                public static final double kVAngler = 0.14;
+                public static final double kAAngler = 0.012;
+
+                public static final int kAnglerPort = 21;
+                public static final boolean kAnglerClockwisePositive = false;
+
+        }
+
+        public static final class ShooterConstants {
+
+                public static final double kPShooter = 2;
+                public static final double kIShooter = 0;
+                public static final double kDShooter = 0;
+                public static final double kVShooter = 0.12; // 0.4
+                public static final double kAShooter = 0.012; // 0.012
+
+                public static final int kShooterPortLeft = 22;
+                public static final int kShooterPortRight = 29;
+                public static final boolean kShooterLeftClockwisePositive = true;
+                public static final boolean kShooterRightClockwisePositive = true;
+
+        }
+
+        public static final class FeederConstants {
+                public static final double kPFeeder = 0.5;
+                public static final double kIFeeder = 0.02;
+                public static final double kDFeeder = 0.0;
+                public static final double kVFeeder = 0.20;
+                public static final double kAFeeder = 0.012;
+
+                public static final int kFeederPort = 28;
+                public static final boolean kFeederClockwisePositive = true;
+
+        }
+
+        public static final class SpindexerConstants {
+                public static final boolean kSpindexerClockwisePositive = false;
+
+                public static final double kPSpindexer = 1;
+                public static final double kISpindexer = 0.0;
+                public static final double kDSpindexer = 0.0;
         }
 }
