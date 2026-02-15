@@ -476,4 +476,13 @@ public class Constants {
                 public static final double kISpindexer = 0.0;
                 public static final double kDSpindexer = 0.0;
         }
+
+        public static final class IntakeConstants {
+                public static final boolean kIntakeClockwisePositive = true;
+                public static final boolean kWinchClockwisePositive = true;
+                public static final double kPIntake = 0.5;
+                public static final double kIIntake = 0;
+                public static final double kDIntake = 0;
+                
+        }
 }

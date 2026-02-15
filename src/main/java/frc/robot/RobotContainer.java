@@ -32,6 +32,7 @@ import frc.robot.subsystems.drive.TargetTracking.TargetingStates;
 import frc.robot.subsystems.Angler;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Intake;
 
 public class RobotContainer {
 
@@ -56,6 +57,7 @@ public class RobotContainer {
     public final Angler m_angler = new Angler();
     public final Shooter m_shooter = new Shooter();
     public final Feeder m_feeder = new Feeder();
+    public final Intake m_Intake = new Intake();
 
     public final TargetTracking tracker = new TargetTracking(drivetrain, m_poseEstimation, joystick, drive,
             m_PidController);
