@@ -19,11 +19,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
+import frc.robot.subsystems.*;
+import frc.robot.subsystems.Climber.ClimberStates;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drivetrain;
 import frc.robot.subsystems.drive.PoseEstimation;
 import frc.robot.subsystems.drive.TargetTracking;
 import frc.robot.subsystems.drive.TargetTracking.TargetingStates;
+
 import frc.robot.Constants.*;
 public class RobotContainer {
     
@@ -41,7 +44,7 @@ public class RobotContainer {
     public final PoseEstimation m_poseEstimation = new PoseEstimation(() ->drivetrain.getPigeon2().getRotation2d(), () -> drivetrain.getState().ModulePositions, ()->drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates), drivetrain);
     public final PIDController m_PidController = new PIDController(1.67, 0, 0);
     
-    
+    public final Climber m_climber = new Climber();
     
     public final TargetTracking tracker = new TargetTracking(drivetrain, m_poseEstimation, joystick, drive, m_PidController);
     
@@ -78,12 +81,7 @@ public class RobotContainer {
         joystick.y().onTrue(new InstantCommand( () -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
         joystick.x().onTrue(drivetrain.resetGyro());
 
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        joystick.a().onTrue(new InstantCommand( () -> m_climber.requestState(ClimberStates.StateMovingUp)));
 
         // Reset the field-centric heading on X press.
         // joystick.x().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
