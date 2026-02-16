@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.subsystems.Angler.AnglerStates;
 import frc.robot.subsystems.Feeder.FeederStates;
+import frc.robot.subsystems.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.ShooterStates;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.Spindexer.SpindexerStates;
@@ -46,7 +47,7 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(Constants.MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController m_driver = new CommandXboxController(0);
     private final CommandXboxController m_operator = new CommandXboxController(1);
     public final Drivetrain drivetrain = Constants.createDrivetrain();
     public final PoseEstimation m_poseEstimation = new PoseEstimation(() -> drivetrain.getPigeon2().getRotation2d(),
@@ -57,9 +58,9 @@ public class RobotContainer {
     public final Angler m_angler = new Angler();
     public final Shooter m_shooter = new Shooter();
     public final Feeder m_feeder = new Feeder();
-    public final Intake m_Intake = new Intake();
+    public final Intake m_intake = new Intake();
 
-    public final TargetTracking tracker = new TargetTracking(drivetrain, m_poseEstimation, joystick, drive,
+    public final TargetTracking tracker = new TargetTracking(drivetrain, m_poseEstimation, m_driver, drive,
             m_PidController);
 
     public RobotContainer() {
@@ -72,11 +73,11 @@ public class RobotContainer {
         // drivetrain.setDefaultCommand(
         // // Drivetrain will execute this command periodically
         // drivetrain.applyRequest(() ->
-        // drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
+        // drive.withVelocityX(-m_driver.getLeftY() * MaxSpeed) // Drive forward with
         // negative Y (forward)
-        // .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X
+        // .withVelocityY(-m_driver.getLeftX() * MaxSpeed) // Drive left with negative X
         // (left)
-        // .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive
+        // .withRotationalRate(-m_driver.getRightX() * MaxAngularRate) // Drive
         // counterclockwise with negative X (left)
         // )
         // );
@@ -84,39 +85,42 @@ public class RobotContainer {
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
-        RobotModeTriggers.disabled().whileTrue(
-                drivetrain.applyRequest(() -> idle).ignoringDisable(true));
+        RobotModeTriggers.disabled().whileTrue(drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-        // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        // joystick.b().whileTrue(drivetrain.applyRequest(() ->
-        // point.withModuleDirection(new Rotation2d(-joystick.getLeftY(),
-        // -joystick.getLeftX()))
+        // m_driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        // m_driver.b().whileTrue(drivetrain.applyRequest(() ->
+        // point.withModuleDirection(new Rotation2d(-m_driver.getLeftY(),
+        // -m_driver.getLeftX()))
         // ));
-        // joystick.b().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
-        // joystick.y().onTrue(() ->
+        // m_driver.b().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
+        // m_driver.y().onTrue(() ->
         // tracker.requestState(TargetingStates.StateDriverControlled));
-        // joystick.y().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
-        joystick.x().onTrue(drivetrain.resetGyro());
+        // m_driver.y().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
+        m_driver.x().onTrue(drivetrain.resetGyro());
 
-        joystick.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateShooting)));
-        joystick.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateOff)));
+        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateShooting)));
+        m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateOff)));
 
-        joystick.leftTrigger().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax)));
-        // joystick.leftBumper().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
-        joystick.leftBumper().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
-        joystick.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
-        joystick.y().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
-        joystick.a().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest3)));
+        m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax)));
+        m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
+        m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
+        m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
+        m_operator.rightStick().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest3)));
 
-        joystick.rightBumper().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
-        joystick.rightBumper().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
+        m_driver.leftTrigger().whileTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIntaking)));
+        m_driver.leftTrigger().whileFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
 
-        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
-        m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
+        m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
+
+        m_operator.rightBumper().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
+        m_operator.rightBumper().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
+
+        m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
+        m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero)));
 
         // Reset the field-centric heading on X press.
-        // joystick.x().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        // m_driver.x().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

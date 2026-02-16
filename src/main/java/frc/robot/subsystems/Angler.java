@@ -99,7 +99,7 @@ public class Angler extends SubsystemBase {
         desiredPosition = .2;
         break;
       case StateMax:
-        desiredPosition = .9;
+        desiredPosition = 1;
         break;
       case StateTest1:
         desiredPosition = .2;
@@ -127,7 +127,7 @@ public class Angler extends SubsystemBase {
         }
         break;
       }
-
+      desiredPosition*=23; // gear ratio
  
     runControlLoop();
 

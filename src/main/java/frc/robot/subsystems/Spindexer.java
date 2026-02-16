@@ -8,6 +8,10 @@ import static frc.robot.Constants.SpindexerConstants.*;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+
+import edu.wpi.first.math.controller.PIDController;
 
 public class Spindexer extends SubsystemBase {
   // Misc variables for specific subsystem go here
@@ -19,13 +23,13 @@ public class Spindexer extends SubsystemBase {
     StateReverse
   }
 
+  private double desiredVelocity = 0;
+   private final MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0).withSlot(0);
+
   public static SpindexerStates m_spindexerCurrentState;
   public static SpindexerStates m_spindexerRequestedState;
 
-  // set port!!! (ideally port 6 or 7)
   private final TalonFX m_talon = new TalonFX(23, "Other"); 
-
-   private double desiredVoltage = 0;
 
   public Spindexer() {
     // Misc setup goes here
@@ -41,14 +45,18 @@ public class Spindexer extends SubsystemBase {
     slot0Configs.kD = kDSpindexer;
 
     var motorOutputConfigs = talonFXConfigs.MotorOutput;
+
+    var motionMagicConfigs = talonFXConfigs.MotionMagic;
+    motionMagicConfigs.MotionMagicAcceleration = 50; // Target acceleration of 400 rps/s (0.25 seconds to max)
+    motionMagicConfigs.MotionMagicJerk = 500;
     if (kSpindexerClockwisePositive) 
       motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
     else motorOutputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
 
     m_talon.getConfigurator().apply(talonFXConfigs);
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;// edit later
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 40;// edit later
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 80;// edit later
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 20;// edit later
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     m_spindexerCurrentState = SpindexerStates.StateZero;
@@ -59,14 +67,14 @@ public class Spindexer extends SubsystemBase {
   public void periodic() {
     switch (m_spindexerRequestedState) {
       case StateZero:
-          desiredVoltage = 0;
+          desiredVelocity = 0;
           break;
       case StateFeed:
-      //remember to change this
-          desiredVoltage = 4;
+          // remember to change this
+          desiredVelocity = 75;
           break;
       case StateReverse:
-          desiredVoltage = -4;
+          desiredVelocity = -75;
           break;
 
     }
@@ -76,7 +84,12 @@ public class Spindexer extends SubsystemBase {
   }   
 
   public void runControlLoop() {
-    m_talon.setVoltage(desiredVoltage);
+  if(desiredVelocity == 0){
+      m_talon.setVoltage(0);
+  }
+  else{
+      m_talon.setControl(request.withVelocity(desiredVelocity));
+  }
   }
   
   // example of a "setter" method

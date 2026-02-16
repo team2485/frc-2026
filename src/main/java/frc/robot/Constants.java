@@ -438,7 +438,7 @@ public class Constants {
                 public static final double kAAngler = 0.012;
 
                 public static final int kAnglerPort = 21;
-                public static final boolean kAnglerClockwisePositive = false;
+                public static final boolean kAnglerClockwisePositive = true;
 
         }
 
@@ -478,11 +478,19 @@ public class Constants {
         }
 
         public static final class IntakeConstants {
-                public static final boolean kIntakeClockwisePositive = true;
+                public static final boolean kIntakeClockwisePositive = false;
                 public static final boolean kWinchClockwisePositive = true;
-                public static final double kPIntake = 0.5;
-                public static final double kIIntake = 0;
-                public static final double kDIntake = 0;
-                
+
+                public static final double kPIntakeRoller = 2;
+                public static final double kIIntakeRoller = 0;
+                public static final double kDIntakeRoller = 0;
+                public static final double kVIntakeRoller = 0.12;
+                public static final double kAIntakeRoller = 0.012;
+
+                public static final double kPIntakeWinch = 3;
+                public static final double kIIntakeWinch = 0.2;
+                public static final double kDIntakeWinch = 0;
+                public static final double kVIntakeWinch = 0.12;
+                public static final double kAIntakeWinch = 0.012;
         }
 }
