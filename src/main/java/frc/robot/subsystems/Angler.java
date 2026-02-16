@@ -12,6 +12,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.util.DistanceLookup;
+
 // Imports go here
 import static frc.robot.Constants.AnglerConstants.*;
 
@@ -34,7 +36,7 @@ public class Angler extends SubsystemBase {
 
   public static AnglerStates m_AnglerCurrentState;
   public static AnglerStates m_AnglerRequestedState;
-
+  public static final DistanceLookup lookupTable = new DistanceLookup();
   private final TalonFX m_talon = new TalonFX(kAnglerPort,"Other");
   private final MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(0);
   // private GenericEntry stateLog = Shuffleboard.getTab("Roller").addString("Roller State", "blah").;
@@ -99,9 +101,9 @@ public class Angler extends SubsystemBase {
         desiredPosition = .2;
         break;
       case StateMax:
-        desiredPosition = 1;
+        desiredPosition = 1; // This hits @ 4.648 metres
         break;
-      case StateTest1:
+      case StateTest1: // This hits at 50 inches from centre (1.27M)
         desiredPosition = .2;
         break;
 
