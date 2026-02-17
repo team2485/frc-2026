@@ -336,7 +336,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     //newHeading = table2.getDoubleTopic("newHeading").publish();
 
     public Command resetGyro() {
-        return new InstantCommand( () -> super.setOperatorPerspectiveForward(super.getPigeon2().getRotation2d().rotateBy(new Rotation2d(Math.PI))));
+        return new InstantCommand( () -> super.setOperatorPerspectiveForward(super.getPigeon2().getRotation2d().rotateBy(new Rotation2d(Math.PI/2.0))));
         // return new InstantCommand( () -> System.out.println("reset please"));
     }
 }

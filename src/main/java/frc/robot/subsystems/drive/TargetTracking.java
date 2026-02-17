@@ -61,6 +61,7 @@ public class TargetTracking extends SubsystemBase {
     xPub = table.getDoubleTopic("targetRotation").publish();
     yPub = table.getDoubleTopic("currentRotation").publish();
 
+    m_PidController.enableContinuousInput(-0.5, 0.5); // rotations
     }
 
     @Override
@@ -164,7 +165,7 @@ public class TargetTracking extends SubsystemBase {
         
         // double dist = m_poseEstimation.getCurrentPose().getTranslation().getDistance();
 
-        Rotation2d hub = new Rotation2d(Math.PI/4);
+        Rotation2d hub = new Rotation2d(Math.PI/3);
         Rotation2d currentRotation = m_poseEstimation.getCurrentPose().getRotation();
 
         Rotation2d error = currentRotation.relativeTo(hub);
@@ -199,7 +200,7 @@ public class TargetTracking extends SubsystemBase {
                                                                                                           // with
                                                                                                           // negative X
                                                                                                           // (left)
-                                        .withRotationalRate(m_PidController.calculate((currentAngleRadiansFinal), (targetAngleRadiansFinal))) // Drive // +5*Math.PI/4
+                                        .withRotationalRate(m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) // Drive // +5*Math.PI/4
                                                                                                                       // counterclockwise
                                                                                                                       // with
                                                                                                                       // negative

@@ -53,7 +53,7 @@ public class RobotContainer {
     public final PoseEstimation m_poseEstimation = new PoseEstimation(() -> drivetrain.getPigeon2().getRotation2d(),
             () -> drivetrain.getState().ModulePositions,
             () -> drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates), drivetrain);
-    public final PIDController m_PidController = new PIDController(1.67, 0, 0);
+    public final PIDController m_PidController = new PIDController(2, .1, 0.2);
     public final Spindexer m_spindexer = new Spindexer();
     public final Angler m_angler = new Angler();
     public final Shooter m_shooter = new Shooter();
@@ -92,10 +92,10 @@ public class RobotContainer {
         // point.withModuleDirection(new Rotation2d(-m_driver.getLeftY(),
         // -m_driver.getLeftX()))
         // ));
-        // m_driver.b().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
+        m_driver.b().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
         // m_driver.y().onTrue(() ->
         // tracker.requestState(TargetingStates.StateDriverControlled));
-        // m_driver.y().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
+        m_driver.y().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
         m_driver.x().onTrue(drivetrain.resetGyro());
 
         m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateShooting)));

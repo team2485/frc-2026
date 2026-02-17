@@ -31,7 +31,8 @@ public class Angler extends SubsystemBase {
     StateTest4,
     StateTest3,
     StateTest2,
-    StateTest1
+    StateTest1,
+    StateAuto
   }
 
   public static AnglerStates m_AnglerCurrentState;
@@ -96,6 +97,11 @@ public class Angler extends SubsystemBase {
     switch (m_AnglerRequestedState) {
       case StateZero:
         desiredPosition = 0.01;
+        break;
+      case StateAuto:
+
+    
+        desiredPosition = lookupTable.getValue(0.1);
         break;
       case StateMid:
         desiredPosition = .2;
