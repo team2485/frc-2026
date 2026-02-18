@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -20,7 +21,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
-
+import frc.robot.Constants.AimConstants;
+import frc.robot.Constants.AimConstants.*;
 
 
 
@@ -31,14 +33,15 @@ public class TargetTracking extends SubsystemBase {
     private TargetingStates currentState = TargetingStates.StateDriverControlled;
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
     private FieldCentric m_manualDrive;
-    private PIDController m_PidController= new PIDController(16, .5, 0);
+    private PIDController m_PidController= new PIDController(16, .5, 0); // TODO: Looks good right now but may need retuning later down the line :(
     private Pose2d aimPosition = new Pose2d();
 
     private double currentRotation;
     private double targetRotation;
-     DoublePublisher xPub;
-      DoublePublisher yPub;
-
+    DoublePublisher targetPublisher;
+    DoublePublisher anglePublisher;
+    BooleanPublisher targetLockPublisher;
+    
     // private CommandXboxController operatorController;
     public enum TargetingStates {
         StateIdle,
@@ -56,18 +59,16 @@ public class TargetTracking extends SubsystemBase {
         m_manualDrive = manualDrive;
         // m_PidController = pid;
 
-         NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    // Get the table within that instance that contains the data. There can
-    // be as many tables as you like and exist to make it easier to organize
-    // your data. In this case, it's a table called datatable.
-    NetworkTable table = inst.getTable("vars");
-    // Start publishing topics within that table that correspond to the X and Y values
-    // for some operation in your program.
-    // The topic names are actually "/datatable/x" and "/datatable/y".
-    xPub = table.getDoubleTopic("targetRotation").publish();
-    yPub = table.getDoubleTopic("currentRotation").publish();
+        NetworkTableInstance inst = NetworkTableInstance.getDefault();
+        // Get the table within that instance that contains the data. There can
+        // be as many tables as you like and exist to make it easier to organize
+        // your data. In this case, it's a table called Target tracking.
+        NetworkTable table = inst.getTable("Target Tracking");
 
-    m_PidController.enableContinuousInput(-0.5, 0.5); // rotations
+        targetPublisher = table.getDoubleTopic("targetRotation").publish(); // Various outputs the driver may want :)
+        anglePublisher = table.getDoubleTopic("currentRotation").publish();
+        targetLockPublisher = table.getBooleanTopic("target locked").publish();
+        m_PidController.enableContinuousInput(-0.5, 0.5); // rotations
     }
 
     @Override
@@ -173,12 +174,13 @@ public class TargetTracking extends SubsystemBase {
         return requestedState;
 
     }
+    public Pose2d getAimPose(){
 
+        return aimPosition;
+
+    }
     public Command alignToHub(Drivetrain m_drivetrain, PoseEstimation m_poseEstimation) {
 
-        // Since we are using a holonomic drivetrain, the rotation component of this
-        // pose
-        // represents the goal holonomic rotation
         Pose2d targetPose = getHubPose(); /// deprecating this and putting it into different member functions that more properly implement wpilib's kinematics classes :p
 
         double distX = targetPose.getTranslation().getX() - m_poseEstimation.getCurrentPose().getX();
@@ -208,17 +210,22 @@ public class TargetTracking extends SubsystemBase {
         // final double targetAngleRadiansFinal = targetAngleRadians;
         final double currentAngleRadiansFinal = currentAngleRadians; // plugging in different math stuff
         final double targetAngleRadiansFinal = calculateTargetLockAngle().getRadians();
-        xPub.set(targetAngleRadiansFinal);
-        yPub.set(currentAngleRadiansFinal);
-
-        return m_drivetrain.applyRequest(
-                                () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed) // Drive
+        targetPublisher.set(targetAngleRadiansFinal);
+        anglePublisher.set(currentAngleRadiansFinal);
+        if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < AimConstants.kTargetAngleTolerance){
+            targetLockPublisher.set( true);
+        }
+        else{
+            targetLockPublisher.set( false);
+        }
+        return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.
+                                () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed * .5) // Drive
                                                                                                                      // forward
                                                                                                                      // with
                                                                                                                      // negative
                                                                                                                      // Y
                                                                                                                      // (forward)
-                                        .withVelocityY(-driverController.getLeftX() * Constants.MaxSpeed)
+                                        .withVelocityY(-driverController.getLeftX() * Constants.MaxSpeed * .5)
                                                                                                           // with
                                                                                                           // negative X
                                                                                                           // (left)
@@ -228,7 +235,7 @@ public class TargetTracking extends SubsystemBase {
                                                                                                                       // negative
                                                                                                                       // X
                                                                                                                       // (left)
-                        ); // * Constants.MaxAngularRate
+                        ); 
 
     }
 }

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.Drivetrain;
 import frc.robot.subsystems.drive.PoseEstimation;
+import frc.robot.subsystems.drive.TargetTracking;
 import frc.util.DistanceLookup;
 
 // Imports go here
@@ -40,7 +41,7 @@ public class Angler extends SubsystemBase {
   public static AnglerStates m_AnglerCurrentState;
   public static AnglerStates m_AnglerRequestedState;
   public static Drivetrain m_drivetrain;
-  public static PoseEstimation m_PoseEstimation;
+  public static TargetTracking m_TargetTracking;
   public static final DistanceLookup lookupTable = new DistanceLookup();
   private final TalonFX m_talon = new TalonFX(kAnglerPort, "Other");
   private final MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(0);
@@ -58,9 +59,9 @@ public class Angler extends SubsystemBase {
   // Unit default for TalonFX libraries is rotations
   private double desiredPosition = 0;
 
-  public Angler(Drivetrain drive, PoseEstimation pe) {
+  public Angler(Drivetrain drive, TargetTracking tt) {
     m_drivetrain = drive;
-    m_PoseEstimation = pe;
+    m_TargetTracking = tt;
     // Misc setup goes here
     var talonFXConfigs = new TalonFXConfiguration();
     // These will be derived experimentally but in case you are wondering
@@ -111,8 +112,7 @@ public class Angler extends SubsystemBase {
         break;
       case StateAuto:
         // m_drivetrain.getState().Pose.getTranslation()
-        double dist = m_drivetrain.getState().Pose.getTranslation()
-            .getDistance(m_PoseEstimation.getHubPose().getTranslation());
+        double dist = m_TargetTracking.getAimPose().getTranslation().getDistance(m_drivetrain.getState().Pose.getTranslation());
         desiredPosition = lookupTable.getValue(dist);
         break;
       case StateMid:

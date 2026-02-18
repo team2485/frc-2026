@@ -369,7 +369,11 @@ public class Constants {
                                         odometryStandardDeviation, visionStandardDeviation, modules);
                 }
         }
+        public static final class AimConstants{
 
+                public static final double kTargetAngleTolerance = .1;
+
+        }
         public static final class VisionConstants {
                 public static final String kCameraName = "photonvision";
 
