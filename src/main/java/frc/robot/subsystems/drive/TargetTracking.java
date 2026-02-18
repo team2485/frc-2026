@@ -26,7 +26,9 @@ public class TargetTracking extends SubsystemBase {
     private TargetingStates currentState = TargetingStates.StateDriverControlled;
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
     private FieldCentric m_manualDrive;
-    private PIDController m_PidController;
+    private PIDController m_PidController= new PIDController(16, .5, 0);
+    
+
     private double currentRotation;
     private double targetRotation;
      DoublePublisher xPub;
@@ -40,15 +42,14 @@ public class TargetTracking extends SubsystemBase {
         StateDriveToAimTransition,
         StateResetHeading,
     }
-
      
 
-    public TargetTracking(Drivetrain dt, PoseEstimation pe, CommandXboxController cxc, FieldCentric manualDrive, PIDController pid) {
+    public TargetTracking(Drivetrain dt, PoseEstimation pe, CommandXboxController cxc, FieldCentric manualDrive) {
         m_drivetrain = dt;
         m_PoseEstimation = pe;
         driverController = cxc;
         m_manualDrive = manualDrive;
-        m_PidController = pid;
+        // m_PidController = pid;
 
          NetworkTableInstance inst = NetworkTableInstance.getDefault();
     // Get the table within that instance that contains the data. There can
@@ -200,7 +201,7 @@ public class TargetTracking extends SubsystemBase {
                                                                                                           // with
                                                                                                           // negative X
                                                                                                           // (left)
-                                        .withRotationalRate(2*m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) // Drive // +5*Math.PI/4
+                                        .withRotationalRate(m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) // Drive // +5*Math.PI/4
                                                                                                                       // counterclockwise
                                                                                                                       // with
                                                                                                                       // negative
