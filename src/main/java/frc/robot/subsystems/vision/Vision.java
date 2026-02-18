@@ -140,7 +140,7 @@ public class Vision implements Runnable {
             if (m_camera != null) {
 
                 photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                        new Transform3d(new Translation3d(13.5*0.0254,3.2*0.0254,17.7*0.0254),
+                        new Transform3d(new Translation3d(-13.5*0.0254,3.2*0.0254,17.7*0.0254),
                                 new Rotation3d(0, 15/(Math.PI/180), 0)
 
                         )); // MULTI_TAG_PNP uses all cameras in view for positioning

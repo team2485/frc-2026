@@ -444,8 +444,8 @@ public class Constants {
 
         public static final class ShooterConstants {
 
-                public static final double kPShooter = 2;
-                public static final double kIShooter = 0;
+                public static final double kPShooter = 2.67;
+                public static final double kIShooter = 0.1;
                 public static final double kDShooter = 0;
                 public static final double kVShooter = 0.12; // 0.4
                 public static final double kAShooter = 0.012; // 0.012

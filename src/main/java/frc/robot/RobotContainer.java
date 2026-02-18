@@ -53,9 +53,9 @@ public class RobotContainer {
     public final PoseEstimation m_poseEstimation = new PoseEstimation(() -> drivetrain.getPigeon2().getRotation2d(),
             () -> drivetrain.getState().ModulePositions,
             () -> drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates), drivetrain);
-    public final PIDController m_PidController = new PIDController(2, .1, 0.2);
+    public final PIDController m_PidController = new PIDController(8, .5, 0);
     public final Spindexer m_spindexer = new Spindexer();
-    public final Angler m_angler = new Angler();
+    public final Angler m_angler = new Angler(drivetrain,m_poseEstimation);
     public final Shooter m_shooter = new Shooter();
     public final Feeder m_feeder = new Feeder();
     public final Intake m_intake = new Intake();
@@ -104,13 +104,13 @@ public class RobotContainer {
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax)));
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
         m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
-        m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
-        m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest3)));
+        m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest3)));
+        m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
 
-        // m_driver.leftTrigger().whileTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIntaking)));
+        m_driver.leftTrigger().whileTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIntaking)));
         m_driver.leftTrigger().whileFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
 
-        // m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
+        m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
 
         m_operator.rightBumper().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
         m_operator.rightBumper().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
@@ -118,7 +118,8 @@ public class RobotContainer {
         m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero)));
-
+        m_operator.a().onTrue(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateAuto))));
+        m_operator.y().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateAmplify)));
         // Reset the field-centric heading on X press.
         // m_driver.x().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 

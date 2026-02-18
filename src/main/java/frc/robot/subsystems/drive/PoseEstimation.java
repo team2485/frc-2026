@@ -216,7 +216,7 @@ public class PoseEstimation extends SubsystemBase {
 
     public Pose2d getHubPose() {
         // return new Pose2d(VisionConstants.kBlueTagList.get(14).pose.getTranslation().toTranslation2d().plus(new Translation2d(20 * kInchesToMeters,0)), Rotation2d.kZero);\
-        return new Pose2d(4.035, 4.626, new Rotation2d(0));
+        return new Pose2d(11.864, 4.626, new Rotation2d(0)); // 
         // 4.626 from baseline
         // 4.035 from sideline
     }

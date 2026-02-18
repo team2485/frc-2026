@@ -8,6 +8,7 @@ import static frc.robot.Constants.SpindexerConstants.*;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
@@ -52,6 +53,7 @@ public class Spindexer extends SubsystemBase {
     if (kSpindexerClockwisePositive) 
       motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
     else motorOutputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
+    motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
 
     m_talon.getConfigurator().apply(talonFXConfigs);
     talonFXConfigs.CurrentLimits.StatorCurrentLimit = 40;// edit later
@@ -71,10 +73,10 @@ public class Spindexer extends SubsystemBase {
           break;
       case StateFeed:
           // remember to change this
-          desiredVelocity = 75;
+          desiredVelocity = 45;
           break;
       case StateReverse:
-          desiredVelocity = -75;
+          desiredVelocity = -45;
           break;
 
     }
