@@ -34,8 +34,8 @@ import frc.robot.Constants.VisionConstants;
 // import frc.robot.commands.Interpolation.ShotCalculator;
 import frc.robot.subsystems.drive.Drivetrain;
 import frc.robot.subsystems.vision.Vision;
-
-public class PoseEstimation extends SubsystemBase {
+@Deprecated
+public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrain.getState()!!!!!!
     private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1.5, 1.5, 1.5);
 
@@ -104,7 +104,7 @@ public class PoseEstimation extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
+    public void periodic() {// DEPRECATED: USE Drivetrain.getState()!!!!!!
         poseEstimator.update(rotation.get(), modulePosition.get());
         // noVisionPoseEstimator.update(rotation.get(), modulePosition.get());
         var visionPose = photonEstimator.grabLatestEstimatedPose();
@@ -142,7 +142,7 @@ public class PoseEstimation extends SubsystemBase {
     //     return pos;
     // }
 
-    public Pose2d getCurrentPose() {
+    public Pose2d getCurrentPose() {// DEPRECATED: USE Drivetrain.getState()!!!!!!
         var pos = poseEstimator.getEstimatedPosition();
 
         if (pos.getX() < 0)
@@ -214,11 +214,6 @@ public class PoseEstimation extends SubsystemBase {
         return Rotation2d.fromRadians(Math.atan2(deltaY, deltaX)).getDegrees();
     }
 
-    public Pose2d getHubPose() {
-        // return new Pose2d(VisionConstants.kBlueTagList.get(14).pose.getTranslation().toTranslation2d().plus(new Translation2d(20 * kInchesToMeters,0)), Rotation2d.kZero);\
-        return new Pose2d(11.864, 4.626, new Rotation2d(0)); // 
-        // 4.626 from baseline
-        // 4.035 from sideline
-    }
+
 
 }
