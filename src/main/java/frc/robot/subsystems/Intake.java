@@ -109,7 +109,7 @@ public class Intake extends SubsystemBase {
         } else {
             motorOutputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
         }
-        motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
+        motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
 
         m_talon_R.getConfigurator().apply(talonFXConfigs);
         m_talon_L.getConfigurator().apply(talonFXConfigs);

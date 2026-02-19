@@ -42,7 +42,7 @@ public class Angler extends SubsystemBase {
   public static AnglerStates m_AnglerRequestedState;
   public static Drivetrain m_drivetrain;
   public static TargetTracking m_TargetTracking;
-  public static final DistanceLookup lookupTable = new DistanceLookup();
+  public static final DistanceLookup lookupTable = DistanceLookup.getSelf();
   private final TalonFX m_talon = new TalonFX(kAnglerPort, "Other");
   private final MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(0);
   // private GenericEntry stateLog =

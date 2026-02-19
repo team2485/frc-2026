@@ -53,7 +53,7 @@ public class Spindexer extends SubsystemBase {
     if (kSpindexerClockwisePositive) 
       motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
     else motorOutputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
-    motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
+    motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
 
     m_talon.getConfigurator().apply(talonFXConfigs);
     talonFXConfigs.CurrentLimits.StatorCurrentLimit = 40;// edit later
