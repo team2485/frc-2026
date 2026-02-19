@@ -73,10 +73,10 @@ public class Spindexer extends SubsystemBase {
           break;
       case StateFeed:
           // remember to change this
-          desiredVelocity = 45;
+          desiredVelocity = 25;
           break;
       case StateReverse:
-          desiredVelocity = -45;
+          desiredVelocity = -25;
           break;
 
     }

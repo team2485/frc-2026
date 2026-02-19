@@ -86,8 +86,8 @@ public class Angler extends SubsystemBase {
     var motorOutputConfigs = talonFXConfigs.MotorOutput;
     talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 40;
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 60;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 20;
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 40;
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
     if (kAnglerClockwisePositive)
       motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
@@ -108,7 +108,7 @@ public class Angler extends SubsystemBase {
   public void periodic() {
     switch (m_AnglerRequestedState) {
       case StateZero:
-        desiredPosition = 0.01;
+        desiredPosition = 0.001;
         break;
       case StateAuto:
         // m_drivetrain.getState().Pose.getTranslation()

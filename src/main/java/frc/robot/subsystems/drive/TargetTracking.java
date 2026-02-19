@@ -15,6 +15,8 @@ import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.Publisher;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -33,7 +35,7 @@ public class TargetTracking extends SubsystemBase {
     private TargetingStates currentState = TargetingStates.StateDriverControlled;
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
     private FieldCentric m_manualDrive;
-    private PIDController m_PidController= new PIDController(16, .5, 0); // TODO: Looks good right now but may need retuning later down the line :(
+    private PIDController m_PidController= new PIDController(20,5,0.1); // TODO: Looks good right now but may need retuning later down the line :(
     private Pose2d aimPosition = new Pose2d();
 
     private double currentRotation;
@@ -57,6 +59,7 @@ public class TargetTracking extends SubsystemBase {
         m_PoseEstimation = pe;
         driverController = cxc;
         m_manualDrive = manualDrive;
+        m_PidController.setTolerance(0.001);
         // m_PidController = pid;
 
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -68,6 +71,7 @@ public class TargetTracking extends SubsystemBase {
         targetPublisher = table.getDoubleTopic("targetRotation").publish(); // Various outputs the driver may want :)
         anglePublisher = table.getDoubleTopic("currentRotation").publish();
         targetLockPublisher = table.getBooleanTopic("target locked").publish();
+        // targetPosePub = table.getTopic("target pose").genericPublish(getName(), null)
         m_PidController.enableContinuousInput(-0.5, 0.5); // rotations
     }
 
@@ -135,23 +139,26 @@ public class TargetTracking extends SubsystemBase {
     }
 
     public void recalculateAimPosition(){
+        // return new Pose2d(11.864, 4.626, new Rotation2d(0)); // 
 
         ChassisSpeeds curVelo = ChassisSpeeds.fromRobotRelativeSpeeds(m_drivetrain.getState().Speeds, m_drivetrain.getState().Pose.getRotation()); // find a field relative velocity of the chassis
-        Pose2d newAimPose = new Pose2d(getHubPose().getX() - curVelo.vxMetersPerSecond ,getHubPose().getY() - curVelo.vyMetersPerSecond , Rotation2d.k180deg); // subtract it from the pose of the target
+        Pose2d newAimPose = new Pose2d(getHubPose().getX() - curVelo.vxMetersPerSecond*1.5 ,getHubPose().getY() - curVelo.vyMetersPerSecond*1.5 , Rotation2d.k180deg); // subtract it from the pose of the target
         aimPosition = newAimPose;
-
+        // aimPosition= new Pose2d( 11.91, 4.0345, new Rotation2d(0));
     }
     public Rotation2d calculateTargetLockAngle(){
+        
 
         Translation2d selfPose = m_drivetrain.getState().Pose.getTranslation();
-        Translation2d dif = selfPose.minus(aimPosition.getTranslation());
+        Translation2d dif = aimPosition.getTranslation().minus(selfPose);
         return dif.getAngle();
+
 
 
     }
     public Pose2d getHubPose() {
         // return new Pose2d(VisionConstants.kBlueTagList.get(14).pose.getTranslation().toTranslation2d().plus(new Translation2d(20 * kInchesToMeters,0)), Rotation2d.kZero);\
-        return new Pose2d(11.864, 4.626, new Rotation2d(0)); // 
+        return new Pose2d(11.91, 4.0345, new Rotation2d(0)); // 
         // 4.626 from baseline
         // 4.035 from sideline
     }
@@ -182,7 +189,7 @@ public class TargetTracking extends SubsystemBase {
     public Command alignToHub(Drivetrain m_drivetrain, PoseEstimation m_poseEstimation) {
 
         Pose2d targetPose = getHubPose(); /// deprecating this and putting it into different member functions that more properly implement wpilib's kinematics classes :p
-
+        // SmartDashboard.putData("hi",targetPose);
         double distX = targetPose.getTranslation().getX() - m_poseEstimation.getCurrentPose().getX();
         double distY = targetPose.getTranslation().getY() - m_poseEstimation.getCurrentPose().getY();
 
@@ -195,22 +202,22 @@ public class TargetTracking extends SubsystemBase {
         Rotation2d error = currentRotation.relativeTo(hub);
         
         double targetAngleRadians = hub.getRadians();
-        double currentAngleRadians = currentRotation.getRadians();
-
-        while(targetAngleRadians < 0)
-        {
+        double currentAngleRotations = currentRotation.getRotations();
+        final double currentAngleRadiansFinal = (currentAngleRotations - (int) currentAngleRotations) * 2 * Math.PI; // plugging in different math stuff
+        final double targetAngleRadiansFinal = calculateTargetLockAngle().getRadians() ;
+ 
+        // while(targetAngleRadians < 0)
+        // {
             
-           targetAngleRadians += Math.PI *2;
-        } 
+        //    targetAngleRadians += Math.PI *2;
+        // } 
 
-         while(currentAngleRadians < 0)
-        {
-           currentAngleRadians += Math.PI *2;
-        }
+        //  while(currentAngleRadians < 0)
+        // {
+        //    currentAngleRadians += Math.PI *2;
+        // }
         // final double targetAngleRadiansFinal = targetAngleRadians;
-        final double currentAngleRadiansFinal = currentAngleRadians; // plugging in different math stuff
-        final double targetAngleRadiansFinal = calculateTargetLockAngle().getRadians();
-        targetPublisher.set(targetAngleRadiansFinal);
+       targetPublisher.set(targetAngleRadiansFinal- currentAngleRadiansFinal);
         anglePublisher.set(currentAngleRadiansFinal);
         if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < AimConstants.kTargetAngleTolerance){
             targetLockPublisher.set( true);
@@ -219,17 +226,17 @@ public class TargetTracking extends SubsystemBase {
             targetLockPublisher.set( false);
         }
         return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.
-                                () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed * .5) // Drive
+                                () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed * .2) // Drive
                                                                                                                      // forward
                                                                                                                      // with
                                                                                                                      // negative
                                                                                                                      // Y
                                                                                                                      // (forward)
-                                        .withVelocityY(-driverController.getLeftX() * Constants.MaxSpeed * .5)
+                                        .withVelocityY(-driverController.getLeftX() * Constants.MaxSpeed * .2)
                                                                                                           // with
                                                                                                           // negative X
                                                                                                           // (left)
-                                        .withRotationalRate(m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) // Drive // +5*Math.PI/4
+                                        .withRotationalRate( m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) // Drive // +5*Math.PI/4
                                                                                                                       // counterclockwise
                                                                                                                       // with
                                                                                                                       // negative

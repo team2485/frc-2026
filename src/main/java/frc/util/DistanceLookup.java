@@ -7,11 +7,12 @@ public class DistanceLookup {
         // intTable.put(4.468,1.0);
         // intTable.put(0.0,0.05);
 
-        intTable.put(1.48,0.2);
-        intTable.put(2.5,0.4);
-        intTable.put(2.38, 0.395);
+        intTable.put(1.48,0.2-0.020);
+        intTable.put(2.5,0.4-0.020);
+        intTable.put(2.38, 0.395-0.020);
         intTable.put(4.15, 0.6);
-        intTable.put(3.5, 0.5); // maybe
+        intTable.put(3.5, 0.5-0.020); // maybe
+        intTable.put(4.95, 0.8);
 
     }
     public double getValue(double ind){
