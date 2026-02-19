@@ -21,7 +21,9 @@ public class Spindexer extends SubsystemBase {
   public enum SpindexerStates {
     StateZero,
     StateFeed,
-    StateReverse
+    StateReverse,
+    StateAutomatedEnable,
+    StateAutomatedOff
   }
 
   private double desiredVelocity = 0;
@@ -78,9 +80,27 @@ public class Spindexer extends SubsystemBase {
       case StateReverse:
           desiredVelocity = -25;
           break;
+      case StateAutomatedEnable:
+          desiredVelocity = 25;
+          break;
+      case StateAutomatedOff:
+          desiredVelocity = 0;
+          break;
+    }
+  if(m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
+    if(m_spindexerCurrentState == SpindexerStates.StateZero || m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
+
+      m_spindexerCurrentState = m_spindexerRequestedState;
+      
 
     }
-  m_spindexerCurrentState = m_spindexerRequestedState;
+
+
+  }else{
+    m_spindexerCurrentState = m_spindexerRequestedState;
+
+
+  }
 
   runControlLoop();
   }   
@@ -96,6 +116,7 @@ public class Spindexer extends SubsystemBase {
   
   // example of a "setter" method
   public void requestState(SpindexerStates desiredState) {
+    
     m_spindexerRequestedState = desiredState;
   }
  

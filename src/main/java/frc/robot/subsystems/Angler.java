@@ -176,7 +176,11 @@ public class Angler extends SubsystemBase {
   public void runControlLoop() {
     // currentLog.setDouble(m_talon.getSupplyCurrent().getValueAsDouble());
     // veloLog.setDouble(m_talon.getVelocity().getValueAsDouble());
+    if(m_AnglerCurrentState == AnglerStates.StateZero && m_talon.getVelocity().getValueAsDouble() < 1){
 
+      m_talon.setVoltage( 0); // Setting voltage to zero if we're at zero position for battery conservation....
+
+    }
     m_talon.setControl(request.withPosition(desiredPosition));
   }
 

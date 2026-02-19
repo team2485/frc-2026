@@ -133,7 +133,15 @@ public class Feeder extends SubsystemBase {
         // currentLog.setDouble(m_talon.getSupplyCurrent().getValueAsDouble());
         // veloLog.setDouble(m_talon.getVelocity().getValueAsDouble());
 
-        m_talon.setControl(request.withVelocity(desiredVelocity));
+        if(desiredVelocity == 0){
+            m_talon.setVoltage(0);
+
+
+        }else{
+            m_talon.setControl(request.withVelocity(desiredVelocity));
+
+
+        }
         // m_talonRight.setControl(requestRight);
     }
 

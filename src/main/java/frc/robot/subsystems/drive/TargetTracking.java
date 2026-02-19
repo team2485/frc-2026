@@ -23,8 +23,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.AimConstants;
 import frc.robot.Constants.AimConstants.*;
+import frc.robot.subsystems.Spindexer.SpindexerStates;
 import frc.util.DistanceLookup;
 
 
@@ -44,7 +47,8 @@ public class TargetTracking extends SubsystemBase {
     DoublePublisher targetPublisher;
     DoublePublisher anglePublisher;
     BooleanPublisher targetLockPublisher;
-    
+    boolean targetLocked;
+    private RobotContainer m_robotContainer;
     // private CommandXboxController operatorController;
     public enum TargetingStates {
         StateIdle,
@@ -55,8 +59,9 @@ public class TargetTracking extends SubsystemBase {
     }
      
 
-    public TargetTracking(Drivetrain dt, PoseEstimation pe, CommandXboxController cxc, FieldCentric manualDrive) {
+    public TargetTracking(RobotContainer bot, Drivetrain dt, PoseEstimation pe, CommandXboxController cxc, FieldCentric manualDrive) {
         m_drivetrain = dt;
+        m_robotContainer = bot;
         m_PoseEstimation = pe;
         driverController = cxc;
         m_manualDrive = manualDrive;
@@ -129,6 +134,19 @@ public class TargetTracking extends SubsystemBase {
                 break;
             case StateAiming:
                 CommandScheduler.getInstance().schedule(alignToHub(m_drivetrain, m_PoseEstimation));
+                // var targetLocked = ;
+                if(targetLocked){
+
+                    m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedEnable);
+
+
+                }else{
+
+                    m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedOff);
+
+
+                }
+                
                 break;
             default:
                 break;
@@ -217,9 +235,11 @@ public class TargetTracking extends SubsystemBase {
         anglePublisher.set(currentAngleRadiansFinal);
         if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < AimConstants.kTargetAngleTolerance){
             targetLockPublisher.set( true);
+            targetLocked=true;
         }
         else{
             targetLockPublisher.set( false);
+            targetLocked= false;
         }
         double aimingRateLimiter = .2;
         return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.
