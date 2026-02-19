@@ -97,8 +97,8 @@ public class RobotContainer {
         m_driver.y().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
         m_driver.x().onTrue(drivetrain.resetGyro());
 
-        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateShooting)));
-        m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateOff)));
+        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateAccelerating)));
+        m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)));
 
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax)));
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));

@@ -105,27 +105,33 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        switch (m_ShooterRequestedState) {
+        switch (m_ShooterCurrentState) {
             case StateOff:
                 desiredVelocity = 0;
                 break;
             case StateAccelerating:
                 desiredVelocity = 100;
+                m_ShooterRequestedState = ShooterStates.StateShooting;
                 break;
             case StateDeccelerating:
                 desiredVelocity = 0;
+                m_ShooterRequestedState = ShooterStates.StateOff;
                 break;
             case StateShooting:
                 desiredVelocity = 100;
                 break;
         }
+        if(m_ShooterRequestedState == ShooterStates.StateAccelerating || m_ShooterRequestedState == ShooterStates.StateDeccelerating){
 
+            m_ShooterCurrentState = m_ShooterRequestedState;
+
+        }
         runControlLoop();
 
         // state.setString(m_RollerCurrentState.toString());
         // m_ShooterCurrentState.setString(m_ShooterRequestedState.toString());
     }
-
+    
     // public boolean isStalling(){
 
     // if(m_talon.getVelocity().getValueAsDouble() < 1.5 &&
@@ -151,7 +157,24 @@ public class Shooter extends SubsystemBase {
             m_talonLeft.setControl(request.withVelocity(desiredVelocity));
             m_talonRight.setControl(requestRight);  
         }
+        if(m_ShooterRequestedState == ShooterStates.StateShooting){
+            if(m_talonLeft.getVelocity().getValueAsDouble() - desiredVelocity < 20){ // tolerance
+                
+                m_ShooterCurrentState = ShooterStates.StateShooting;
 
+            }
+            else{
+                m_ShooterCurrentState = ShooterStates.StateAccelerating;
+
+            }
+
+        }
+        
+        if(m_ShooterRequestedState == ShooterStates.StateOff) m_ShooterCurrentState = m_ShooterRequestedState;
+
+
+
+        
     }
 
     // example of a "setter" method
