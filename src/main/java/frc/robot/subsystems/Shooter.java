@@ -79,7 +79,7 @@ public class Shooter extends SubsystemBase {
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
         talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 90;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 70;
         talonFXConfigs.CurrentLimits.StatorCurrentLimit = 150;
         talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
         if (kShooterLeftClockwisePositive)
@@ -169,7 +169,7 @@ public class Shooter extends SubsystemBase {
             }
 
         }
-        
+
         if(m_ShooterRequestedState == ShooterStates.StateOff) m_ShooterCurrentState = m_ShooterRequestedState;
 
 

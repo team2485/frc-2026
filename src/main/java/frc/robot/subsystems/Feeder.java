@@ -80,8 +80,8 @@ public class Feeder extends SubsystemBase {
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
         talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;
-        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 100;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 40;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;
         talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
         if (kFeederClockwisePositive)
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
