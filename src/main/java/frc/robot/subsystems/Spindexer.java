@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 // Imports go here
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Shooter.ShooterStates;
 
 import static frc.robot.Constants.SpindexerConstants.*;
 
@@ -83,8 +84,16 @@ public class Spindexer extends SubsystemBase {
           desiredVelocity = -25;
           break;
       case StateAutomatedEnable:
-        
-          desiredVelocity = 25;
+          if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting ){
+
+            desiredVelocity = 25;
+
+
+          }
+          else{
+            desiredVelocity =0 ;
+
+          }
 
           break;
       case StateAutomatedOff:
