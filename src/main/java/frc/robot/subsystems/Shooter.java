@@ -187,5 +187,13 @@ public class Shooter extends SubsystemBase {
         return m_ShooterCurrentState;
     }
 
+    public double getDesiredVelocity(){
+        return desiredVelocity;
+    }
+
+    public double getVelocity() {
+        return m_talonLeft.getVelocity().getValueAsDouble();
+    } 
+
     // misc methods go here, getters and setters should follow above format
 }

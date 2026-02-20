@@ -16,13 +16,14 @@ import frc.robot.subsystems.drive.Drivetrain;
 import frc.robot.subsystems.drive.PoseEstimation;
 import frc.robot.subsystems.drive.TargetTracking;
 import frc.util.DistanceLookup;
+import frc.robot.subsystems.Shooter;
 
 // Imports go here
 import static frc.robot.Constants.AnglerConstants.*;
 
 public class Angler extends SubsystemBase {
   // Misc variables for specific subsystem go here
-
+  public Shooter m_shooter = new Shooter();
   // Enum representing all of the states the subsystem can be in
   public enum AnglerStates {
     StateZero,
@@ -156,6 +157,10 @@ public class Angler extends SubsystemBase {
     desiredPosition *= 23; // gear ratio
 
     runControlLoop();
+
+    desiredPosition += ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/4000);
+
+    //.005 rot from 100 to 80
 
     // state.setString(m_RollerCurrentState.toString());
     // m_AnglerCurrentState.setString(m_AnglerRequestedState.toString());
