@@ -60,7 +60,7 @@ public class RobotContainer {
 
     public final TargetTracking tracker = new TargetTracking(this, drivetrain, m_poseEstimation, m_driver, drive);
     public final Angler m_angler = new Angler(drivetrain,tracker);
-    public final Spindexer m_spindexer = new Spindexer();
+    public final Spindexer m_spindexer = new Spindexer(this);
 
     public RobotContainer() {
         configureBindings();
@@ -111,8 +111,8 @@ public class RobotContainer {
 
         m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
 
-        m_operator.rightBumper().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
-        m_operator.rightBumper().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
+        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
+        m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
 
         m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));

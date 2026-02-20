@@ -28,7 +28,7 @@ public class Shooter extends SubsystemBase {
         StateShooting,
 
     }
-
+    public static final double kShooterTolernace = 20;//rps
     public static ShooterStates m_ShooterCurrentState;
     public static ShooterStates m_ShooterRequestedState;
     public static double accelerationConstant;
@@ -158,7 +158,7 @@ public class Shooter extends SubsystemBase {
             m_talonRight.setControl(requestRight);  
         }
         if(m_ShooterRequestedState == ShooterStates.StateShooting){
-            if(m_talonLeft.getVelocity().getValueAsDouble() - desiredVelocity < 20){ // tolerance
+            if(Math.abs(m_talonLeft.getVelocity().getValueAsDouble() - desiredVelocity) < kShooterTolernace){ // tolerance
                 
                 m_ShooterCurrentState = ShooterStates.StateShooting;
 
