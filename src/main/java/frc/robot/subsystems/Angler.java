@@ -16,7 +16,9 @@ import frc.robot.subsystems.drive.Drivetrain;
 import frc.robot.subsystems.drive.PoseEstimation;
 import frc.robot.subsystems.drive.TargetTracking;
 import frc.util.DistanceLookup;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Shooter.ShooterStates;
 
 // Imports go here
 import static frc.robot.Constants.AnglerConstants.*;
@@ -43,6 +45,7 @@ public class Angler extends SubsystemBase {
   public static AnglerStates m_AnglerRequestedState;
   public static Drivetrain m_drivetrain;
   public static TargetTracking m_TargetTracking;
+  public RobotContainer m_robotContainer;
   public static final DistanceLookup lookupTable = DistanceLookup.getSelf();
   private final TalonFX m_talon = new TalonFX(kAnglerPort, "Other");
   private final MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(0);
@@ -60,9 +63,10 @@ public class Angler extends SubsystemBase {
   // Unit default for TalonFX libraries is rotations
   private double desiredPosition = 0;
 
-  public Angler(Drivetrain drive, TargetTracking tt) {
+  public Angler(Drivetrain drive, TargetTracking tt, RobotContainer rc) {
     m_drivetrain = drive;
     m_TargetTracking = tt;
+    m_robotContainer = rc;
     // Misc setup goes here
     var talonFXConfigs = new TalonFXConfiguration();
     // These will be derived experimentally but in case you are wondering
@@ -186,7 +190,14 @@ public class Angler extends SubsystemBase {
       m_talon.setVoltage( 0); // Setting voltage to zero if we're at zero position for battery conservation....
 
     }
-    m_talon.setControl(request.withPosition(desiredPosition));
+    else if(m_AnglerCurrentState == AnglerStates.StateAuto && !(m_robotContainer.m_shooter.getCurrentState() == ShooterStates.StateAccelerating ||m_robotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) ){
+
+      m_talon.setVoltage( 0);
+
+    }else{
+      m_talon.setControl(request.withPosition(desiredPosition));
+
+    }
   }
 
   // example of a "setter" method

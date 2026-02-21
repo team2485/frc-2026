@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 // Imports go here
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.Shooter.ShooterStates;
 
 import static frc.robot.Constants.SpindexerConstants.*;
 
@@ -33,8 +35,9 @@ public class Spindexer extends SubsystemBase {
   public static SpindexerStates m_spindexerRequestedState;
 
   private final TalonFX m_talon = new TalonFX(23, "Other"); 
-
-  public Spindexer() {
+  public RobotContainer m_RobotContainer;
+  public Spindexer(RobotContainer c) {
+    m_RobotContainer=c;
     // Misc setup goes here
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -81,7 +84,17 @@ public class Spindexer extends SubsystemBase {
           desiredVelocity = -25;
           break;
       case StateAutomatedEnable:
-          desiredVelocity = 25;
+          if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting ){
+
+            desiredVelocity = 25;
+
+
+          }
+          else{
+            desiredVelocity =0 ;
+
+          }
+
           break;
       case StateAutomatedOff:
           desiredVelocity = 0;
