@@ -86,6 +86,8 @@ public class Spindexer extends SubsystemBase {
       case StateAutomatedOff:
           desiredVelocity = 0;
           break;
+      default:
+      break;
     }
   if(m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
     if(m_spindexerCurrentState == SpindexerStates.StateZero || m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
@@ -116,8 +118,22 @@ public class Spindexer extends SubsystemBase {
   
   // example of a "setter" method
   public void requestState(SpindexerStates desiredState) {
-    
+    if(desiredState == SpindexerStates.StateAutomatedEnable || desiredState == SpindexerStates.StateAutomatedOff){
+      if(m_spindexerCurrentState == SpindexerStates.StateZero || m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
+
+        m_spindexerRequestedState = desiredState;
+        
+
+      }
+
+
+  }else{
     m_spindexerRequestedState = desiredState;
+
+
+  }
+
+    // m_spindexerRequestedState = desiredState;
   }
  
   // example of a "getter" method

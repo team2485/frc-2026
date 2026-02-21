@@ -371,7 +371,7 @@ public class Constants {
         }
         public static final class AimConstants{
 
-                public static final double kTargetAngleTolerance = .02; // at 4 meters .02 rotations wil allow .5metres of tolerance
+                public static final double kTargetAngleTolerance = .1; // at 4 meters .02 rotations wil allow .5metres of tolerance
 
         }
         public static final class VisionConstants {

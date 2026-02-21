@@ -13,12 +13,14 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 
+import edu.wpi.first.math.geometry.Pose3d;
 // import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
+     private Pose3d Anubis = new Pose3d();
 
     private final RobotContainer m_robotContainer;
 

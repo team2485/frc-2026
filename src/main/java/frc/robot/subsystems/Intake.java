@@ -216,15 +216,15 @@ public class Intake extends SubsystemBase {
             m_talon_L.setVoltage(0);
         }
         if (desiredWinchVelocity != 0) {
-            // m_talon_winchR.setControl(velWinchRequestR.withVelocity(desiredWinchVelocity).withAcceleration(1));
-            // m_talon_winchL.setControl(velWinchRequest.withVelocity(desiredWinchVelocity).withAcceleration(1));
+            m_talon_winchR.setControl(velWinchRequestR.withVelocity(desiredWinchVelocity).withAcceleration(1));
+            m_talon_winchL.setControl(velWinchRequest.withVelocity(desiredWinchVelocity).withAcceleration(1));
         } else {
             if (extendedIntake) {
-                // m_talon_winchR.setControl(posWinchRequestR.withPosition(12));
-                // m_talon_winchL.setControl(posWinchRequestL.withPosition(12));
+                m_talon_winchR.setControl(posWinchRequestR.withPosition(12));
+                m_talon_winchL.setControl(posWinchRequestL.withPosition(12));
             } else if (m_IntakeCurrentState != IntakeStates.StateStartup) {
-                // m_talon_winchR.setControl(posWinchRequestR.withPosition(0));
-                // m_talon_winchL.setControl(posWinchRequestL.withPosition(0));
+                m_talon_winchR.setControl(posWinchRequestR.withPosition(0));
+                m_talon_winchL.setControl(posWinchRequestL.withPosition(0));
 
             }
         }

@@ -155,10 +155,10 @@ public class Angler extends SubsystemBase {
     }
     System.out.println("Hood: " + desiredPosition);
     desiredPosition *= 23; // gear ratio
+    desiredPosition += 3* ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173);
 
     runControlLoop();
 
-    desiredPosition += ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/4000);
 
     //.005 rot from 100 to 80
 

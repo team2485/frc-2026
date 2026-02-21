@@ -7,6 +7,7 @@ import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,6 +17,7 @@ import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -32,16 +34,17 @@ import frc.util.DistanceLookup;
 
 
 
+
 public class TargetTracking extends SubsystemBase {
     private Drivetrain m_drivetrain;
     private PoseEstimation m_PoseEstimation;
     private CommandXboxController driverController;
     private TargetingStates currentState = TargetingStates.StateDriverControlled;
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
-    private FieldCentric m_manualDrive;
-    private PIDController m_PidController= new PIDController(20,5,0.1); // TODO: Looks good right now but may need retuning later down the line :(
+    private FieldCentric m_manualDrive; // 24 7 2
+    private PIDController m_PidController= new PIDController(25,7,1.75); // TODO: Looks good right now but may need retuning later down the line :(
     private Pose2d aimPosition = new Pose2d();
-
+   StructPublisher aimPosePub = NetworkTableInstance.getDefault().getStructTopic("AimPose", Pose2d.struct).publish();
     private double currentRotation;
     private double targetRotation;
     DoublePublisher targetPublisher;
@@ -151,6 +154,7 @@ public class TargetTracking extends SubsystemBase {
             default:
                 break;
         }
+        aimPosePub.set(aimPosition);
         recalculateAimPosition();
         stateSwitchLogic();
     }
@@ -233,7 +237,10 @@ public class TargetTracking extends SubsystemBase {
         // final double targetAngleRadiansFinal = targetAngleRadians;
         targetPublisher.set(targetAngleRadiansFinal- currentAngleRadiansFinal); // Logs the error
         anglePublisher.set(currentAngleRadiansFinal);
-        if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < AimConstants.kTargetAngleTolerance){
+        var dist = m_drivetrain.getState().Pose.getTranslation()
+        .getDistance(aimPosition.getTranslation());
+        double tolernace = AimConstants.kTargetAngleTolerance / dist;
+        if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < tolernace){
             targetLockPublisher.set( true);
             targetLocked=true;
         }
@@ -241,7 +248,8 @@ public class TargetTracking extends SubsystemBase {
             targetLockPublisher.set( false);
             targetLocked= false;
         }
-        double aimingRateLimiter = .2;
+
+        double aimingRateLimiter = .15;
         return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.
                                 () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed * aimingRateLimiter) // Drive
                                                                                                                      // forward

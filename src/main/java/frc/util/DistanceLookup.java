@@ -11,16 +11,21 @@ public final class DistanceLookup { // Singleton class
         // intTable.put(0.0,0.05);
         // Key is distance in metres, value is hood angle
 
-        intTable.put(1.48,0.2-0.020);
-        intTable.put(2.5,0.4-0.020);
-        intTable.put(2.38, 0.395-0.020);
-        intTable.put(4.15, 0.6);
-        intTable.put(3.5, 0.5-0.020); // maybe
-        intTable.put(4.95, 0.8);
-
+        // intTable.put(1.48,0.3);
+        // // intTable.put(2.5,0.5);
+        // intTable.put(2.38, 0.55);
+        // intTable.put(4.15, 0.7);
+        // intTable.put(3.5, 0.6); // maybe
+        // intTable.put(4.95, 0.9);
+        // intTable.put(3.2, 0.57);
+        intTable.put(1.48,0.3);
+        intTable.put(2.90, .51);
+        intTable.put(4.95, 0.9);
         // Time Lookup TODO
         // Use a Slow-Mo video to find the time from shooting until hitting the target
-        
+        timeTable.put(2.13, 1.5);
+        timeTable.put(4.34, 1.4);
+        timeTable.put(1.59, 1.4);
         
 
     }
