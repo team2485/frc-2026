@@ -18,8 +18,15 @@ public final class DistanceLookup { // Singleton class
         // intTable.put(3.5, 0.6); // maybe
         // intTable.put(4.95, 0.9);
         // intTable.put(3.2, 0.57);
+        intTable.put(1.12, 0.2);
         intTable.put(1.48,0.3);
+        intTable.put(1.98, 0.35);
+        intTable.put(2.49, 0.4);
         intTable.put(2.90, .51);
+        intTable.put(3.55,0.57);
+        intTable.put(4.0, 0.63);
+        intTable.put(4.45, 7.47);
+        //intTable.put();
         intTable.put(4.95, 0.9);
         // Time Lookup TODO
         // Use a Slow-Mo video to find the time from shooting until hitting the target

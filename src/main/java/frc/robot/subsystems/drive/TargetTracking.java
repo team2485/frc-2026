@@ -50,6 +50,7 @@ public class TargetTracking extends SubsystemBase {
     DoublePublisher targetPublisher;
     DoublePublisher anglePublisher;
     BooleanPublisher targetLockPublisher;
+    CommandXboxController opController;
     boolean targetLocked;
     private RobotContainer m_robotContainer;
     // private CommandXboxController operatorController;
@@ -62,11 +63,12 @@ public class TargetTracking extends SubsystemBase {
     }
      
 
-    public TargetTracking(RobotContainer bot, Drivetrain dt, PoseEstimation pe, CommandXboxController cxc, FieldCentric manualDrive) {
+    public TargetTracking(RobotContainer bot, Drivetrain dt, PoseEstimation pe, CommandXboxController cxc,CommandXboxController cxc2,FieldCentric manualDrive) {
         m_drivetrain = dt;
         m_robotContainer = bot;
         m_PoseEstimation = pe;
         driverController = cxc;
+        opController = cxc2;
         m_manualDrive = manualDrive;
         m_PidController.setTolerance(0.001);
         // m_PidController = pid;
@@ -176,7 +178,8 @@ public class TargetTracking extends SubsystemBase {
         return dif.getAngle();
     }
     public Pose2d getHubPose() {
-        return new Pose2d(11.91, 4.0345, new Rotation2d(0)); // Red hub from blue origin TODO add team switching logics
+        // Pose2d bias = new Pose2d(opController.getLeftX(), opController.getLeftY(),Rotation2d.kZero);
+        return new Pose2d(11.91, 4.0345, new Rotation2d(0)).plus(new Transform2d(-1*opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
         // 4.626 from baseline
         // 4.035 from sideline
     }
@@ -239,7 +242,7 @@ public class TargetTracking extends SubsystemBase {
         anglePublisher.set(currentAngleRadiansFinal);
         var dist = m_drivetrain.getState().Pose.getTranslation()
         .getDistance(aimPosition.getTranslation());
-        double tolernace = AimConstants.kTargetAngleTolerance / dist;
+        double tolernace = AimConstants.kTargetAngleTolerance / (dist/1.5);
         if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < tolernace){
             targetLockPublisher.set( true);
             targetLocked=true;
@@ -249,7 +252,7 @@ public class TargetTracking extends SubsystemBase {
             targetLocked= false;
         }
 
-        double aimingRateLimiter = .15;
+        double aimingRateLimiter = .2;
         return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.
                                 () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed * aimingRateLimiter) // Drive
                                                                                                                      // forward

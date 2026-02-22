@@ -87,11 +87,11 @@ public class Intake extends SubsystemBase {
         // kI adds n volts per second when the positional error is 1 rotation
         // kD outputs n volts when the velocity error is 1 rotation per second
         var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kP = 5;
-        slot0Configs.kI = 1;
-        slot0Configs.kD = .2;
+        slot0Configs.kP = kPIntakeRoller;
+        slot0Configs.kI = kIIntakeRoller;
+        slot0Configs.kD = kDIntakeRoller;
         slot0Configs.kV = kVIntakeRoller;
-        slot0Configs.kA = 0.12;
+        slot0Configs.kA = kAIntakeRoller;
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 35;
@@ -114,11 +114,11 @@ public class Intake extends SubsystemBase {
         m_talon_R.getConfigurator().apply(talonFXConfigs);
         m_talon_L.getConfigurator().apply(talonFXConfigs);
 
-        slot0Configs.kP = .5;
+        slot0Configs.kP = kPIntakeWinch;
         slot0Configs.kI = kIIntakeWinch;
-        slot0Configs.kD = .1;
-        slot0Configs.kV = 1;
-        slot0Configs.kA = .3;
+        slot0Configs.kD = kDIntakeWinch;
+        slot0Configs.kV = kVIntakeWinch;
+        slot0Configs.kA = kAIntakeWinch;
 
         motionMagicConfigs.MotionMagicCruiseVelocity = 2.5;
         motionMagicConfigs.MotionMagicAcceleration = 1;
@@ -155,8 +155,7 @@ public class Intake extends SubsystemBase {
             time++;
         switch (m_IntakeCurrentState) {
             case StateStartup:
-                desiredWinchVelocity = -10;
-                // desiredWinchVelocity = -10;
+                desiredWinchVelocity = -1;
                 if (m_talon_winchR.getStatorCurrent().getValueAsDouble() > 48 && time > 40) {
                     desiredWinchVelocity = 0;
                     m_talon_winchR.setPosition(0);

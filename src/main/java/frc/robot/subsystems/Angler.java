@@ -127,17 +127,17 @@ public class Angler extends SubsystemBase {
         desiredPosition = 1; // This hits @ 4.648 metres
         break;
       case StateTest1: // This hits at 50 inches from centre (1.27M)
-        desiredPosition = .2;
+        desiredPosition = .63;
         break;
 
       case StateTest2:
-        desiredPosition = .3;
+        desiredPosition = .67;
         break;
       case StateTest3:
-        desiredPosition = .4;
+        desiredPosition = .5;
         break;
       case StateTest4:
-        desiredPosition = .6;
+        desiredPosition = .5;
         break;
       case StateOpening:
         if (desiredPosition < 6) {
@@ -190,14 +190,14 @@ public class Angler extends SubsystemBase {
       m_talon.setVoltage( 0); // Setting voltage to zero if we're at zero position for battery conservation....
 
     }
-    else if(m_AnglerCurrentState == AnglerStates.StateAuto && !(m_robotContainer.m_shooter.getCurrentState() == ShooterStates.StateAccelerating ||m_robotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) ){
+    // else if(m_AnglerCurrentState == AnglerStates.StateAuto && !(m_robotContainer.m_shooter.getCurrentState() == ShooterStates.StateAccelerating ||m_robotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) ){
 
-      m_talon.setVoltage( 0);
+    //   m_talon.setVoltage( 0);
 
-    }else{
+    // }else{
       m_talon.setControl(request.withPosition(desiredPosition));
 
-    }
+    // }
   }
 
   // example of a "setter" method
