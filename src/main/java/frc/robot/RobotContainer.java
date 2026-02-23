@@ -63,6 +63,7 @@ public class RobotContainer {
     public final TargetTracking tracker = new TargetTracking(this, drivetrain, m_poseEstimation, m_driver, m_operator, drive);
     public final Angler m_angler = new Angler(drivetrain,tracker,this);
     public final Spindexer m_spindexer = new Spindexer(this);
+    public final Climber m_climber = new Climber();
 
     public RobotContainer() {
         configureBindings();
@@ -105,8 +106,6 @@ public class RobotContainer {
         // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
         // m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
 
-
-
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax))); // Angler
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
         m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
@@ -121,11 +120,12 @@ public class RobotContainer {
         m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
         m_driver.leftBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
 
-
-
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero))); // These overide the auto spindexer control
+
+        m_operator.rightBumper().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
+        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
 
         // Reset the field-centric heading on X press.
         // m_driver.x().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));

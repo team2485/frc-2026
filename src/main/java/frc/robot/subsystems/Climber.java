@@ -20,24 +20,25 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import static frc.robot.Constants.ClimberConstants.*;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class Climber extends SubsystemBase {
 
     public enum ClimberStates {
         StateIdle,
-        StateMovingUp,
-        StateMovingDown,
-        StateUp
+        StateExtend,
+        StateClimb
     }
 
     public ClimberStates m_climberCurrentState;
     public ClimberStates m_climberRequestedState;
 
-    private final TalonFX m_talon = new TalonFX(kClimberPort);
+    private final TalonFX m_talon = new TalonFX(kClimberPort, "Other");
     private final MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(0);
     private double desiredPosition;
 
@@ -58,7 +59,7 @@ public class Climber extends SubsystemBase {
         slot0Configs.kP = kPClimber;
         slot0Configs.kI = kIClimber;
         slot0Configs.kD = kDClimber;
-
+        
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = kClimberVelocity;
         // vel/acc = time to reach constant velocity
@@ -67,6 +68,11 @@ public class Climber extends SubsystemBase {
         // motionMagicConfigs.MotionMagicJerk = kClimberJerk;
 
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 20;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 40;
+        motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         if (kClimberClockwisePositive)
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
         else
@@ -84,24 +90,27 @@ public class Climber extends SubsystemBase {
     public void periodic() {
         switch (m_climberRequestedState) {
             case StateIdle:
-                m_talon.stopMotor();
-            case StateMovingUp:
-                desiredPosition = 18;
-            case StateMovingDown:
-                desiredPosition = -18;
-            case StateUp:
-                m_talon.stopMotor();
+                // m_talon.stopMotor();
+                break;
+            case StateExtend:
+                desiredPosition = 2;
+                break;
+            case StateClimb:
+                desiredPosition = 1;
+                break;
         }
+        desiredPosition *= 18;
         runControlLoop();
 
-        if (getError() < kClimberErrorTolerance)
-            m_climberCurrentState = m_climberRequestedState;
-        else
-            m_climberCurrentState = ClimberStates.StateMovingUp;
+        // if (getError() < kClimberErrorTolerance)
+        //     m_climberCurrentState = m_climberRequestedState;
+        // else
+        //     m_climberCurrentState = ClimberStates.StateMovingUp;
     }
 
     public void runControlLoop() {
         m_talon.setControl(request.withPosition(desiredPosition));
+        m_climberCurrentState = m_climberRequestedState;
     }
 
     private double getPosition() {
@@ -123,3 +132,9 @@ public class Climber extends SubsystemBase {
     }
 
 }
+/*
+Make climber positional and
+Zero at pulled in position
+Let out slack
+Upon pressing button, go back one rotation
+*/
