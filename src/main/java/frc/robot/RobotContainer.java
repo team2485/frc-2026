@@ -100,6 +100,7 @@ public class RobotContainer {
         m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
         m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
         m_driver.x().onTrue(drivetrain.resetGyro());
+        
         // Shooting is now bound to one button
         m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateAccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)))); // Flywheels (shooter)
         m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
@@ -108,9 +109,9 @@ public class RobotContainer {
 
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax))); // Angler
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
-        m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
-        m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
-        m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
+        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
+        // m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
+        // m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
 
         m_operator.a().onTrue(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateAuto))));
         m_operator.y().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateAmplify)));
@@ -119,13 +120,16 @@ public class RobotContainer {
         m_driver.leftTrigger().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIntaking)));
         m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
         m_driver.leftBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
+        m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
 
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero))); // These overide the auto spindexer control
 
-        m_operator.rightBumper().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
-        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
+        m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
+        m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
+        m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+
 
         // Reset the field-centric heading on X press.
         // m_driver.x().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));

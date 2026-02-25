@@ -111,7 +111,7 @@ public class Constants {
         // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
         private static final Slot0Configs steerGains = new Slot0Configs() // PID
                         .withKP(40).withKI(0).withKD(0.2)
-                        .withKS(0).withKV(1.5).withKA(0)
+                        .withKS(0.15).withKV(1.5).withKA(0)
                         .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
         // When using closed-loop control, the drive motor uses the control
         // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
@@ -465,7 +465,7 @@ public class Constants {
 
         public static final class ShooterConstants {
 
-                public static final double kPShooter = 2.67;
+                public static final double kPShooter = 3;
                 public static final double kIShooter = 0.1;
                 public static final double kDShooter = 0;
                 public static final double kVShooter = 0.12; // 0.4
@@ -499,37 +499,37 @@ public class Constants {
         }
 
         public static final class IntakeConstants {
-                public static final boolean kIntakeClockwisePositive = false;
+                public static final boolean kIntakeClockwisePositive = true;
                 public static final boolean kWinchClockwisePositive = true;
 
-                public static final double kPIntakeRoller = 2;
+                public static final double kPIntakeRoller = 1;
                 public static final double kIIntakeRoller = 0;
                 public static final double kDIntakeRoller = 0;
                 public static final double kVIntakeRoller = 0.12;
                 public static final double kAIntakeRoller = 0.012;
 
-                public static final double kPIntakeWinch = 3;
-                public static final double kIIntakeWinch = 0.2;
+                public static final double kPIntakeWinch = 0.25;
+                public static final double kIIntakeWinch = 0.1;
                 public static final double kDIntakeWinch = 0;
-                public static final double kVIntakeWinch = 0.12;
-                public static final double kAIntakeWinch = 0.012;
+                public static final double kVIntakeWinch = 1.4;
+                public static final double kAIntakeWinch = 0.5;
         }
 
         public static final class ClimberConstants {
-                public static final int kClimberPort = 0;
+                public static final int kClimberPort = 30;
 
                 public static final double kSClimber = 0;
                 public static final double kVClimber = 0;
                 public static final double kAClimber = 0;
 
-                public static final double kPClimber = .5;
-                public static final double kIClimber = .01;
-                public static final double kDClimber = 0.01;
+                public static final double kPClimber = 0;
+                public static final double kIClimber = 0;
+                public static final double kDClimber = 0;
 
                 public static final double kClimberVelocity = 0;
                 public static final double kClimberAcceleration = 0;
 
-                public static final boolean kClimberClockwisePositive = true;
+                public static final boolean kClimberClockwisePositive = false;
 
                 public static final double kClimberErrorTolerance = 1;
         }

@@ -85,7 +85,7 @@ public class Angler extends SubsystemBase {
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicAcceleration = 50; // Target acceleration of 400 rps/s (0.25 seconds to max)
-    motionMagicConfigs.MotionMagicCruiseVelocity = 5;
+    motionMagicConfigs.MotionMagicCruiseVelocity = 10;
     motionMagicConfigs.MotionMagicJerk = 500;
 
     var motorOutputConfigs = talonFXConfigs.MotorOutput;

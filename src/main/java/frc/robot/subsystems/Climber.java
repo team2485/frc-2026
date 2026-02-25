@@ -70,8 +70,8 @@ public class Climber extends SubsystemBase {
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
         talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 20;
-        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 40;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 60;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;
         motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         if (kClimberClockwisePositive)
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
@@ -90,13 +90,16 @@ public class Climber extends SubsystemBase {
     public void periodic() {
         switch (m_climberRequestedState) {
             case StateIdle:
-                // m_talon.stopMotor();
+                m_talon.stopMotor();
+                m_talon.setVoltage(0);
                 break;
             case StateExtend:
-                desiredPosition = 2;
+                // desiredPosition = 2;
+                m_talon.setVoltage(4);
                 break;
             case StateClimb:
-                desiredPosition = 1;
+                // desiredPosition = 1;
+                m_talon.setVoltage(-4);
                 break;
         }
         desiredPosition *= 18;
@@ -109,7 +112,7 @@ public class Climber extends SubsystemBase {
     }
 
     public void runControlLoop() {
-        m_talon.setControl(request.withPosition(desiredPosition));
+        // m_talon.setControl(request.withPosition(desiredPosition));
         m_climberCurrentState = m_climberRequestedState;
     }
 

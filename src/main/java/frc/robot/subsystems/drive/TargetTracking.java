@@ -42,6 +42,7 @@ public class TargetTracking extends SubsystemBase {
     private TargetingStates currentState = TargetingStates.StateDriverControlled;
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
     private FieldCentric m_manualDrive; // 24 7 2
+    // new PIDController(25,7,1.75);
     private PIDController m_PidController= new PIDController(25,7,1.75); // TODO: Looks good right now but may need retuning later down the line :(
     private Pose2d aimPosition = new Pose2d();
    StructPublisher aimPosePub = NetworkTableInstance.getDefault().getStructTopic("AimPose", Pose2d.struct).publish();
@@ -242,7 +243,7 @@ public class TargetTracking extends SubsystemBase {
         anglePublisher.set(currentAngleRadiansFinal);
         var dist = m_drivetrain.getState().Pose.getTranslation()
         .getDistance(aimPosition.getTranslation());
-        double tolernace = AimConstants.kTargetAngleTolerance / (dist/1.5);
+        double tolernace = AimConstants.kTargetAngleTolerance / (dist/2.5);
         if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < tolernace){
             targetLockPublisher.set( true);
             targetLocked=true;
@@ -251,8 +252,16 @@ public class TargetTracking extends SubsystemBase {
             targetLockPublisher.set( false);
             targetLocked= false;
         }
-
-        double aimingRateLimiter = .2;
+        double aimingRateLimiter;
+        double stopTurning;
+        if(targetLocked){
+            stopTurning=0;
+            aimingRateLimiter=0;
+        }
+        else{
+            stopTurning=1;
+            aimingRateLimiter=.2;
+        }
         return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.
                                 () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed * aimingRateLimiter) // Drive
                                                                                                                      // forward
@@ -264,7 +273,7 @@ public class TargetTracking extends SubsystemBase {
                                                                                                           // with
                                                                                                           // negative X
                                                                                                           // (left)
-                                        .withRotationalRate( m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) 
+                                        .withRotationalRate( stopTurning*m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) 
                                                                                           
                         ); 
 

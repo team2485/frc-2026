@@ -61,9 +61,9 @@ public class Spindexer extends SubsystemBase {
     motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
 
     m_talon.getConfigurator().apply(talonFXConfigs);
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 40;// edit later
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 50;// edit later
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 20;// edit later
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;// edit later
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     m_spindexerCurrentState = SpindexerStates.StateZero;
@@ -78,7 +78,7 @@ public class Spindexer extends SubsystemBase {
           break;
       case StateFeed:
           // remember to change this
-          desiredVelocity = 25;
+          desiredVelocity = 35;
           break;
       case StateReverse:
           desiredVelocity = -25;
@@ -86,7 +86,7 @@ public class Spindexer extends SubsystemBase {
       case StateAutomatedEnable:
           if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting ){
 
-            desiredVelocity = 25;
+            desiredVelocity = 35;
 
 
           }
