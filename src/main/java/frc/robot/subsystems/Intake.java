@@ -191,7 +191,7 @@ public class Intake extends SubsystemBase {
                 }
                 break;
             case StateSlowRetract:
-                desiredWinchVelocity=-1;
+                desiredWinchVelocity=-3;
                 extendedIntake = false;
                 break;
             case StateRetracted:

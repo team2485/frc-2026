@@ -114,6 +114,8 @@ public class RobotContainer {
         // m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
 
         m_operator.a().onTrue(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateAuto))));
+        m_operator.a().onFalse(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateZero))));
+
         m_operator.y().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateAmplify)));
 
 
@@ -123,12 +125,14 @@ public class RobotContainer {
         m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
 
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
+        m_operator.leftBumper().onFalse(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
+
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero))); // These overide the auto spindexer control
 
-        m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
-        m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
-        m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
+        // m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
+        // m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
 
 
         // Reset the field-centric heading on X press.
