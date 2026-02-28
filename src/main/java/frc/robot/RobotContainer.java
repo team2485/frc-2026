@@ -64,7 +64,7 @@ public class RobotContainer {
     public final Angler m_angler = new Angler(drivetrain,tracker,this);
     public final Spindexer m_spindexer = new Spindexer(this);
     // public final Climber m_climber = new Climber();
-
+    // public final AutoStateMachine autoController = new AutoStateMachine(this);
     public RobotContainer() {
         configureBindings();
     }
