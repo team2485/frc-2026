@@ -63,7 +63,7 @@ public class RobotContainer {
     public final TargetTracking tracker = new TargetTracking(this, drivetrain, m_poseEstimation, m_driver, m_operator, drive);
     public final Angler m_angler = new Angler(drivetrain,tracker,this);
     public final Spindexer m_spindexer = new Spindexer(this);
-    public final Climber m_climber = new Climber();
+    // public final Climber m_climber = new Climber();
 
     public RobotContainer() {
         configureBindings();
@@ -109,9 +109,9 @@ public class RobotContainer {
 
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax))); // Angler
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
-        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
-        // m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
-        // m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
+        m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
+        m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
+        m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
 
         m_operator.a().onTrue(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateAuto))));
         m_operator.a().onFalse(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateZero))));
@@ -120,9 +120,9 @@ public class RobotContainer {
 
 
         m_driver.leftTrigger().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIntaking)));
-        m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
+        // m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
         m_driver.leftBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
-        m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
+        // m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
 
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
         m_operator.leftBumper().onFalse(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));

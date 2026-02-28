@@ -508,11 +508,11 @@ public class Constants {
                 public static final double kVIntakeRoller = 0.12;
                 public static final double kAIntakeRoller = 0.012;
 
-                public static final double kPIntakeWinch = 0.25;
-                public static final double kIIntakeWinch = 0.1;
+                public static final double kPIntakeWinch = 2;
+                public static final double kIIntakeWinch = 0;
                 public static final double kDIntakeWinch = 0;
-                public static final double kVIntakeWinch = 1.4;
-                public static final double kAIntakeWinch = 0.5;
+                public static final double kVIntakeWinch = .25;
+                public static final double kAIntakeWinch = 0.1;
         }
 
         public static final class ClimberConstants {
