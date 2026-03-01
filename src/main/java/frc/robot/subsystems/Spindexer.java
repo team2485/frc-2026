@@ -12,6 +12,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -127,6 +128,14 @@ public class Spindexer extends SubsystemBase {
   else{
       m_talon.setControl(request.withVelocity(desiredVelocity));
   }
+
+  if (m_talon.getDeviceTemp().getValueAsDouble() >= 60) {
+                System.out.println("SPINDEXER OVERHEAT!!");
+
+                m_talon.setControl(new NeutralOut());
+
+                return;
+            }
   }
   
   // example of a "setter" method

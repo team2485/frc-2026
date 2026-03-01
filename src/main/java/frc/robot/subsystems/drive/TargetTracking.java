@@ -168,10 +168,10 @@ public class TargetTracking extends SubsystemBase {
         ChassisSpeeds curVelo = ChassisSpeeds.fromRobotRelativeSpeeds(
                 m_drivetrain.getState().Speeds, 
                 m_drivetrain.getState().Pose.getRotation()); // find a field relative velocity of the chassis
-        Pose2d newAimPose = new Pose2d(getHubPose().getX() - curVelo.vxMetersPerSecond*t , // factor in time to hit
-                getHubPose().getY() - curVelo.vyMetersPerSecond*t ,
-                 Rotation2d.k180deg); // subtract it from the pose of the target to create opposing aim angle
-        aimPosition = newAimPose;
+        // Pose2d newAimPose = new Pose2d(getHubPose().getX() - curVelo.vxMetersPerSecond*t , // factor in time to hit
+        //         getHubPose().getY() - curVelo.vyMetersPerSecond*t ,
+        //          Rotation2d.k180deg); // subtract it from the pose of the target to create opposing aim angle
+        aimPosition = getHubPose();
     }
     public Rotation2d calculateTargetLockAngle(){
         Translation2d selfPose = m_drivetrain.getState().Pose.getTranslation();
@@ -253,13 +253,13 @@ public class TargetTracking extends SubsystemBase {
             targetLocked= false;
         }
         double aimingRateLimiter;
-        double stopTurning;
+        double stopTurning = 1;
         if(targetLocked){
-            stopTurning=0;
+            // stopTurning=0;
             aimingRateLimiter=0;
         }
         else{
-            stopTurning=1;
+            // stopTurning=1;
             aimingRateLimiter=.2;
         }
         return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.

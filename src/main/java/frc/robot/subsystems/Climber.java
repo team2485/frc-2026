@@ -23,6 +23,7 @@ import static frc.robot.Constants.ClimberConstants.*;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -90,19 +91,19 @@ public class Climber extends SubsystemBase {
     public void periodic() {
         switch (m_climberRequestedState) {
             case StateIdle:
-                m_talon.stopMotor();
                 m_talon.setVoltage(0);
+                m_talon.setControl(new NeutralOut());
                 break;
             case StateExtend:
                 // desiredPosition = 2;
-                m_talon.setVoltage(4);
+                m_talon.setVoltage(3);
                 break;
             case StateClimb:
                 // desiredPosition = 1;
-                m_talon.setVoltage(-4);
+                m_talon.setVoltage(-3);
                 break;
         }
-        desiredPosition *= 18;
+        desiredPosition *= 23; // gear ratio
         runControlLoop();
 
         // if (getError() < kClimberErrorTolerance)

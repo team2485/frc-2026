@@ -84,9 +84,9 @@ public class Angler extends SubsystemBase {
     slot0Configs.kA = kAAngler;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicAcceleration = 50; // Target acceleration of 400 rps/s (0.25 seconds to max)
-    motionMagicConfigs.MotionMagicCruiseVelocity = 10;
-    motionMagicConfigs.MotionMagicJerk = 500;
+    motionMagicConfigs.MotionMagicAcceleration = 75; // Target acceleration of 400 rps/s (0.25 seconds to max)
+    motionMagicConfigs.MotionMagicCruiseVelocity = 15;
+    motionMagicConfigs.MotionMagicJerk = 750;
 
     var motorOutputConfigs = talonFXConfigs.MotorOutput;
     talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
@@ -158,8 +158,8 @@ public class Angler extends SubsystemBase {
       desiredPosition += 0.03;
     }
     // System.out.println("Hood: " + desiredPosition);
-    desiredPosition *= 23; // gear ratio
-    desiredPosition += 3* ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173);
+    desiredPosition *= 23*(19/18); // gear ratio
+    desiredPosition += 3 * ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173); // what is this
 
     runControlLoop();
 

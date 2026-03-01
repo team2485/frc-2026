@@ -13,9 +13,11 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.DynamicMotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -57,21 +59,29 @@ import com.ctre.phoenix6.controls.Follower;
 public class Intake extends SubsystemBase {
     private IntakeStates m_IntakeRequestedState;
     private IntakeStates m_IntakeCurrentState;
-    private final TalonFX m_talon_R = new TalonFX(26, "Other");
-    private final TalonFX m_talon_L = new TalonFX(25, "Other");
+    private final TalonFX m_talon_Roll = new TalonFX(26, "Other");
+    // private final TalonFX m_talon_L = new TalonFX(25, "Other");
     private final TalonFX m_talon_winchR = new TalonFX(27, "Other");
     private final TalonFX m_talon_winchL = new TalonFX(24, "Other"); // change so that it's wired to Other canbus later
     private double desiredRollerVelocity = 0;
     private double desiredWinchVelocity = 0;
     private boolean extendedIntake = false;
     private final MotionMagicVelocityVoltage velRollerRequest = new MotionMagicVelocityVoltage(0).withSlot(0);
-    private final PositionVoltage posWinchRequestL = new PositionVoltage(0).withSlot(0);
-    private final PositionVoltage posWinchRequestR = new PositionVoltage(0).withSlot(0);
+    // private final PositionVoltage posWinchRequestL = new PositionVoltage(0).withSlot(0);
+    // private final PositionVoltage posWinchRequestR = new PositionVoltage(0).withSlot(0);
+    // private final PositionDutyCycle posWinchRequestL = new PositionDutyCycle(0).withSlot(0);
+    // private final PositionDutyCycle posWinchRequestR = new PositionDutyCycle(0).withSlot(0);
+    // private final MotionMagicVelocityVoltage posWinchRequestL = new MotionMagicVelocityVoltage(0).withSlot(0);
+    // private final MotionMagicVelocityVoltage posWinchRequestR = new MotionMagicVelocityVoltage(0).withSlot(0);
+    private final DynamicMotionMagicDutyCycle posWinchRequestL = new DynamicMotionMagicDutyCycle(0, 0, 0);
+    private final DynamicMotionMagicDutyCycle posWinchRequestR = new DynamicMotionMagicDutyCycle(0, 0, 0);
     private final MotionMagicVelocityVoltage velWinchRequest = new MotionMagicVelocityVoltage(0).withSlot(0);
     private final MotionMagicVelocityVoltage velWinchRequestR = new MotionMagicVelocityVoltage(0).withSlot(0);
-    private double desiredPosition= 0;
-    private final Follower RRollerFollower = new Follower(26, MotorAlignmentValue.Opposed);
-    // private final Follower RIntakePinion = new Follower(27, MotorAlignmentValue.Opposed);
+    private double desiredPosition = 0;
+    // private final Follower RRollerFollower = new Follower(26,
+    // MotorAlignmentValue.Opposed);
+    // private final Follower RIntakePinion = new Follower(27,
+    // MotorAlignmentValue.Opposed);
 
     public static GenericEntry velocityL;
     public static GenericEntry velocityR;
@@ -79,12 +89,14 @@ public class Intake extends SubsystemBase {
     public static GenericEntry voltageR;
 
     public enum IntakeStates {
-        StateStartup, // Immediately after enabling, pull in winch until current spike, zero it, then go to StateRetracted
+        StateStartup, // Immediately after enabling, pull in winch until current spike, zero it, then
+                      // go to StateRetracted
         StateRetracted, // Intake Retracted
         StateIntaking, // Extended and running
         StateOuttaking, // Extended and running backwards
         StateIdle, // Extended, but not running
         StateSlowRetract,
+        StateExtendedIdlingWheels
     }
 
     public Intake() {
@@ -109,15 +121,15 @@ public class Intake extends SubsystemBase {
         slot0Configs.kA = kAIntakeRoller;
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 35;
-        motionMagicConfigs.MotionMagicAcceleration = 25;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 50;
+        motionMagicConfigs.MotionMagicAcceleration = 35;
         // motionMagicConfigs.MotionMagicJerk = 500;
 
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
         talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = false;
-        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;
-        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 40;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 50;
         talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
         if (kIntakeClockwisePositive) {
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
@@ -125,18 +137,20 @@ public class Intake extends SubsystemBase {
             motorOutputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
         }
         motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
-        
-        m_talon_R.getConfigurator().apply(talonFXConfigs);
-        m_talon_L.getConfigurator().apply(talonFXConfigs);
 
+        m_talon_Roll.getConfigurator().apply(talonFXConfigs);
+        // m_talon_L.getConfigurator().apply(talonFXConfigs);
+
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;
         slot0Configs.kP = kPIntakeWinch;
         slot0Configs.kI = kIIntakeWinch;
         slot0Configs.kD = kDIntakeWinch;
         slot0Configs.kV = kVIntakeWinch;
         slot0Configs.kA = kAIntakeWinch;
         slot0Configs.kS = 1;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 20;
-        motionMagicConfigs.MotionMagicAcceleration = 10;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 40;
+        motionMagicConfigs.MotionMagicAcceleration = 30;
         // motionMagicConfigs.MotionMagicJerk = 500;
 
         if (kWinchClockwisePositive) {
@@ -156,8 +170,8 @@ public class Intake extends SubsystemBase {
         // motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
 
         m_talon_winchL.getConfigurator().apply(talonFXConfigs);
-                    m_talon_winchR.setPosition(0);
-                    m_talon_winchL.setPosition(0);
+        m_talon_winchR.setPosition(0);
+        m_talon_winchL.setPosition(0);
 
         m_IntakeCurrentState = IntakeStates.StateRetracted;
         m_IntakeRequestedState = IntakeStates.StateRetracted;
@@ -167,11 +181,12 @@ public class Intake extends SubsystemBase {
     boolean LReeled = false;
 
     // int time = 0;
+    boolean slow = false;
 
     @Override
     public void periodic() {
         // if (DriverStation.isEnabled())
-        //     time++;
+        // time++;
         velocityL.setDouble(m_talon_winchL.getClosedLoopError().getValueAsDouble());
         velocityR.setDouble(m_talon_winchR.getClosedLoopError().getValueAsDouble());
         voltageL.setDouble(m_talon_winchL.getMotorVoltage().getValueAsDouble());
@@ -180,15 +195,17 @@ public class Intake extends SubsystemBase {
         switch (m_IntakeCurrentState) {
             case StateStartup:
                 desiredWinchVelocity = -1;
-                // if (Math.abs(m_talon_winchR.getStatorCurrent().getValueAsDouble()) > 30 && time > 40) {
-                //     // desiredWinchVelocity = 0;
-                    m_talon_winchR.setPosition(0);
-                    RReeled = true;
+                // if (Math.abs(m_talon_winchR.getStatorCurrent().getValueAsDouble()) > 30 &&
+                // time > 40) {
+                // // desiredWinchVelocity = 0;
+                m_talon_winchR.setPosition(0);
+                RReeled = true;
                 // }
-                // if (Math.abs(m_talon_winchL.getStatorCurrent().getValueAsDouble()) > 20 && time > 40) {
-                    // desiredWinchVelocity = 0;
-                    m_talon_winchL.setPosition(0);
-                    LReeled = true;
+                // if (Math.abs(m_talon_winchL.getStatorCurrent().getValueAsDouble()) > 20 &&
+                // time > 40) {
+                // desiredWinchVelocity = 0;
+                m_talon_winchL.setPosition(0);
+                LReeled = true;
                 // }
                 if (RReeled && LReeled) {
                     m_IntakeCurrentState = IntakeStates.StateRetracted;
@@ -196,12 +213,21 @@ public class Intake extends SubsystemBase {
                     desiredWinchVelocity = 0;
                 }
                 break;
+            case StateExtendedIdlingWheels:
+                
+            
+                extendedIntake = true;
+                desiredRollerVelocity=0;
+                break;
             case StateSlowRetract:
-                desiredWinchVelocity=-3;
+                desiredWinchVelocity = 0;
+                desiredRollerVelocity = 0;
+                slow = true;
                 extendedIntake = false;
                 break;
             case StateRetracted:
                 extendedIntake = false;
+                slow = false;
                 desiredRollerVelocity = 0;
                 desiredWinchVelocity = 0;
 
@@ -209,12 +235,15 @@ public class Intake extends SubsystemBase {
 
             case StateIntaking:
                 extendedIntake = true;
-                desiredRollerVelocity = 35;
+                slow = false;
+                desiredWinchVelocity = 0;
+                desiredRollerVelocity = 70;
                 break;
 
             case StateOuttaking:
                 extendedIntake = true;
-                desiredRollerVelocity = -35;
+                desiredWinchVelocity = 0;
+                desiredRollerVelocity = -50;
                 break;
 
             case StateIdle:
@@ -226,62 +255,79 @@ public class Intake extends SubsystemBase {
         stateSwitchLogic();
         runControlLoop();
         // System.out.println("Intake State: " + m_IntakeCurrentState);
-        // System.out.println("RM: " + m_talon_winchR.getStatorCurrent().getValueAsDouble() + " LM: "
-                // + m_talon_winchL.getStatorCurrent().getValueAsDouble());
+        // System.out.println("RM: " +
+        // m_talon_winchR.getStatorCurrent().getValueAsDouble() + " LM: "
+        // + m_talon_winchL.getStatorCurrent().getValueAsDouble());
         // System.out.println("Time: " + time);
     }
+
     boolean lastExtended = false;
+
     public void runControlLoop() {
-        m_talon_R.setControl(velRollerRequest.withVelocity(desiredRollerVelocity));
-        m_talon_L.setControl(RRollerFollower);
-        // ^set the control of the left intake motor to that of the Follower opposing the direction of the right intake motor
-        if(desiredRollerVelocity == 0)
-        {
-            m_talon_R.setVoltage(0);
-            m_talon_L.setVoltage(0);
+        m_talon_Roll.setControl(velRollerRequest.withVelocity(desiredRollerVelocity));
+        // m_talon_L.setControl(RRollerFollower);
+        // ^set the control of the left intake motor to that of the Follower opposing
+        // the direction of the right intake motor
+        if (desiredRollerVelocity == 0) {
+            m_talon_Roll.setVoltage(0);
+            // m_talon_L.setVoltage(0);
         }
         // m_talon_winchL.setControl(new NeutralOut());
-        // if (desiredWinchVelocity != 0) {
-        //     // m_talon_winchR.setControl(velWinchRequestR.withVelocity(desiredWinchVelocity).withAcceleration(1));
-        //     // m_talon_winchL.setControl(velWinchRequest.withVelocity(desiredWinchVelocity).withAcceleration(1));
-        // } else {
-            if(m_talon_L.getProcessorTemp().getValueAsDouble() >= 60){
+        if (desiredWinchVelocity != 0) {
+            m_talon_winchR.setControl(velWinchRequestR.withVelocity(desiredWinchVelocity).withAcceleration(1));
+            m_talon_winchL.setControl(velWinchRequest.withVelocity(desiredWinchVelocity).withAcceleration(1));
+        } else {
+            // if(m_talon_L.getProcessorTemp().getValueAsDouble() >= 60){
 
-                System.out.println("LEFT MOTOR OVERHEAT!!");
-                m_talon_winchL.setControl(new NeutralOut());
+            // System.out.println("LEFT MOTOR OVERHEAT!!");
+            // m_talon_L.setControl(new NeutralOut());
+            // return;
+            // }
+            if (m_talon_Roll.getDeviceTemp().getValueAsDouble() >= 60) {
+                System.out.println("ROLLER MOTOR OVERHEAT!!");
+
+                m_talon_Roll.setControl(new NeutralOut());
+
                 return;
             }
-            if(m_talon_R.getProcessorTemp().getValueAsDouble() >= 60){
+            if (m_talon_winchR.getDeviceTemp().getValueAsDouble() >= 60) {
                 System.out.println("RIGHT MOTOR OVERHEAT!!");
 
-                m_talon_R.setControl(new NeutralOut());
+                m_talon_winchR.setControl(new NeutralOut());
+
+                return;
+            }
+            if (m_talon_winchL.getDeviceTemp().getValueAsDouble() >= 60) {
+                System.out.println("LEFT MOTOR OVERHEAT!!");
+
+                m_talon_winchL.setControl(new NeutralOut());
 
                 return;
             }
 
             if (extendedIntake) {
-            //     m_talon_winchL.setControl(posWinchRequestL.withPosition(desiredPosition));
-            //     m_talon_winchR.setControl(posWinchRequestR.withPosition(5));
-                desiredPosition=-15*3;
-
+                // m_talon_winchL.setControl(posWinchRequestL.withPosition(desiredPosition));
+                // m_talon_winchR.setControl(posWinchRequestR.withPosition(5));
+                desiredPosition = -18 * 3;
             } else if (m_IntakeCurrentState != IntakeStates.StateStartup) {
-                desiredPosition=.1;
-            //     m_talon_winchL.setControl(posWinchRequestL.withPosition(0.1));
-            //     m_talon_winchR.setControl(posWinchRequestR.withPosition(0.1));
-
+                desiredPosition = .1;
+                // m_talon_winchL.setControl(posWinchRequestL.withPosition(0.1));
+                // m_talon_winchR.setControl(posWinchRequestR.withPosition(0.1));
             }
             posWinchRequestL.Position = desiredPosition;
             posWinchRequestR.Position = desiredPosition;
-            if(extendedIntake != lastExtended){
-
-                m_talon_winchL.setControl(posWinchRequestL.withEnableFOC(false));
-                m_talon_winchR.setControl(posWinchRequestR.withEnableFOC(false));
-
+            if (extendedIntake != lastExtended) {
+                if (slow) {
+                    m_talon_winchL.setControl(posWinchRequestL.withVelocity(15).withAcceleration(10));
+                    m_talon_winchR.setControl(posWinchRequestR.withVelocity(15).withAcceleration(10));
+                } else {
+                    m_talon_winchL.setControl(posWinchRequestL.withVelocity(45).withAcceleration(30));
+                    m_talon_winchR.setControl(posWinchRequestR.withVelocity(45).withAcceleration(30));
+                }
             }
-   
 
             lastExtended = extendedIntake;
-        // }
+        }
     }
 
     public void stateSwitchLogic() {

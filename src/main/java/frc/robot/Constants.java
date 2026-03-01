@@ -470,7 +470,7 @@ public class Constants {
                 public static final boolean kIntakeClockwisePositive = true;
                 public static final boolean kWinchClockwisePositive = true;
 
-                public static final double kPIntakeRoller = 1;
+                public static final double kPIntakeRoller = 0;
                 public static final double kIIntakeRoller = 0;
                 public static final double kDIntakeRoller = 0;
                 public static final double kVIntakeRoller = 0.12;

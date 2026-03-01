@@ -4,10 +4,7 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.pathplanner.lib.config.PIDConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -26,16 +23,11 @@ import frc.robot.subsystems.Angler.AnglerStates;
 import frc.robot.subsystems.Feeder.FeederStates;
 import frc.robot.subsystems.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.ShooterStates;
-import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.Spindexer.SpindexerStates;
 import frc.robot.subsystems.drive.Drivetrain;
 import frc.robot.subsystems.drive.PoseEstimation;
 import frc.robot.subsystems.drive.TargetTracking;
 import frc.robot.subsystems.drive.TargetTracking.TargetingStates;
-import frc.robot.subsystems.Angler;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Feeder;
-import frc.robot.subsystems.Intake;
 
 public class RobotContainer {
 
@@ -63,7 +55,7 @@ public class RobotContainer {
     public final TargetTracking tracker = new TargetTracking(this, drivetrain, m_poseEstimation, m_driver, m_operator, drive);
     public final Angler m_angler = new Angler(drivetrain,tracker,this);
     public final Spindexer m_spindexer = new Spindexer(this);
-    // public final Climber m_climber = new Climber();
+    public final Climber m_climber = new Climber();
     // public final AutoStateMachine autoController = new AutoStateMachine(this);
     public RobotContainer() {
         configureBindings();
@@ -109,9 +101,9 @@ public class RobotContainer {
 
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax))); // Angler
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
-        m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
-        m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
-        m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
+        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
+        // m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
+        // m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
 
         m_operator.a().onTrue(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateAuto))));
         m_operator.a().onFalse(new InstantCommand((() -> m_angler.requestState(AnglerStates.StateZero))));
@@ -120,9 +112,11 @@ public class RobotContainer {
 
 
         m_driver.leftTrigger().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIntaking)));
+        m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateExtendedIdlingWheels)));
         // m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
         m_driver.leftBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
-        // m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
+        m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
+        m_driver.b().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateOuttaking)));
 
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
         m_operator.leftBumper().onFalse(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
@@ -130,9 +124,9 @@ public class RobotContainer {
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero))); // These overide the auto spindexer control
 
-        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
-        // m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
-        // m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+        m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
+        m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
+        m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
 
 
         // Reset the field-centric heading on X press.
