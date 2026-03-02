@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.WarlordsLib.WL_CommandXboxController;
+// import frc.WarlordsLib.WL_CommandXboxController;
 import frc.robot.Constants;
 
 import frc.robot.Constants.VisionConstants;
@@ -214,7 +214,4 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
         double deltaX = pos.getX() - getCurrentPose().getX();
         return Rotation2d.fromRadians(Math.atan2(deltaY, deltaX)).getDegrees();
     }
-
-
-
 }

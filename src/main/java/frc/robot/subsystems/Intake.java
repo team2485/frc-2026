@@ -96,7 +96,8 @@ public class Intake extends SubsystemBase {
         StateOuttaking, // Extended and running backwards
         StateIdle, // Extended, but not running
         StateSlowRetract,
-        StateExtendedIdlingWheels
+        StateExtendedIdlingWheels,
+        StateRetracting,
     }
 
     public Intake() {
@@ -121,7 +122,7 @@ public class Intake extends SubsystemBase {
         slot0Configs.kA = kAIntakeRoller;
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 50;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 80;
         motionMagicConfigs.MotionMagicAcceleration = 35;
         // motionMagicConfigs.MotionMagicJerk = 500;
 
@@ -149,7 +150,7 @@ public class Intake extends SubsystemBase {
         slot0Configs.kV = kVIntakeWinch;
         slot0Configs.kA = kAIntakeWinch;
         slot0Configs.kS = 1;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 40;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 50;
         motionMagicConfigs.MotionMagicAcceleration = 30;
         // motionMagicConfigs.MotionMagicJerk = 500;
 
@@ -214,8 +215,6 @@ public class Intake extends SubsystemBase {
                 }
                 break;
             case StateExtendedIdlingWheels:
-                
-            
                 extendedIntake = true;
                 desiredRollerVelocity=0;
                 break;
@@ -225,19 +224,23 @@ public class Intake extends SubsystemBase {
                 slow = true;
                 extendedIntake = false;
                 break;
+            case StateRetracting:
+                extendedIntake = false;
+                slow = false;
+                desiredRollerVelocity = 80;
+                desiredWinchVelocity = 0;
+                break;
             case StateRetracted:
                 extendedIntake = false;
                 slow = false;
                 desiredRollerVelocity = 0;
                 desiredWinchVelocity = 0;
-
                 break;
-
             case StateIntaking:
                 extendedIntake = true;
                 slow = false;
                 desiredWinchVelocity = 0;
-                desiredRollerVelocity = 70;
+                desiredRollerVelocity = 80;
                 break;
 
             case StateOuttaking:
@@ -264,13 +267,15 @@ public class Intake extends SubsystemBase {
     boolean lastExtended = false;
 
     public void runControlLoop() {
-        m_talon_Roll.setControl(velRollerRequest.withVelocity(desiredRollerVelocity));
         // m_talon_L.setControl(RRollerFollower);
         // ^set the control of the left intake motor to that of the Follower opposing
         // the direction of the right intake motor
         if (desiredRollerVelocity == 0) {
             m_talon_Roll.setVoltage(0);
             // m_talon_L.setVoltage(0);
+        }
+        else {
+            m_talon_Roll.setControl(velRollerRequest.withVelocity(desiredRollerVelocity));
         }
         // m_talon_winchL.setControl(new NeutralOut());
         if (desiredWinchVelocity != 0) {
@@ -321,8 +326,9 @@ public class Intake extends SubsystemBase {
                     m_talon_winchL.setControl(posWinchRequestL.withVelocity(15).withAcceleration(10));
                     m_talon_winchR.setControl(posWinchRequestR.withVelocity(15).withAcceleration(10));
                 } else {
-                    m_talon_winchL.setControl(posWinchRequestL.withVelocity(45).withAcceleration(30));
-                    m_talon_winchR.setControl(posWinchRequestR.withVelocity(45).withAcceleration(30));
+                    m_talon_winchL.setControl(posWinchRequestL.withVelocity(50).withAcceleration(40));
+                    m_talon_winchR.setControl(posWinchRequestR.withVelocity(50).withAcceleration(40));
+                    // m_talon_Roll.setControl(velRollerRequest.withVelocity(desiredRollerVelocity));
                 }
             }
 

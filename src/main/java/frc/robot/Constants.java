@@ -1,6 +1,5 @@
 package frc.robot;
 
-// TODO: Remove duplicates
 // import static frc.robot.Constants.Swerve.angleGearRatio;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;

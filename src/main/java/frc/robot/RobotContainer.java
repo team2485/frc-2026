@@ -114,7 +114,8 @@ public class RobotContainer {
         m_driver.leftTrigger().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIntaking)));
         m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateExtendedIdlingWheels)));
         // m_driver.leftTrigger().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateIdle)));
-        m_driver.leftBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
+        m_driver.leftBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracting)));
+        m_driver.leftBumper().onFalse(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted)));
         m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
         m_driver.b().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateOuttaking)));
 

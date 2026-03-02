@@ -12,7 +12,7 @@ public final class DistanceLookup { // Singleton class
         // Key is distance in metres, value is hood angle
 
         // intTable.put(1.48,0.3);
-        // // intTable.put(2.5,0.5);
+        // intTable.put(2.5,0.5); // maybe
         // intTable.put(2.38, 0.55);
         // intTable.put(4.15, 0.7);
         // intTable.put(3.5, 0.6); // maybe
@@ -29,17 +29,15 @@ public final class DistanceLookup { // Singleton class
         intTable.put(4.0, 0.65);
         intTable.put(4.45, .747);
         intTable.put(4.95, 0.9);
-        // Time Lookup TODO
+
+        // Time Lookup
         // Use a Slow-Mo video to find the time from shooting until hitting the target
         timeTable.put(2.13, 1.5);
         timeTable.put(4.34, 1.4);
         timeTable.put(1.59, 1.4);
-
     }
     public static DistanceLookup getSelf(){
-
         return inst;
-
     }
     public static double getValue(double ind){
         return intTable.get(ind);
@@ -47,5 +45,4 @@ public final class DistanceLookup { // Singleton class
     public static double getTime(double ind){
         return timeTable.get(ind);
     }
-    
 }

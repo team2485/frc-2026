@@ -154,6 +154,4 @@ public class Feeder extends SubsystemBase {
     public FeederStates getCurrentState() {
         return m_FeederCurrentState;
     }
-
-    // misc methods go here, getters and setters should follow above format
 }
