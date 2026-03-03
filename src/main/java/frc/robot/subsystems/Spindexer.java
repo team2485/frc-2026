@@ -62,9 +62,9 @@ public class Spindexer extends SubsystemBase {
     motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
 
     m_talon.getConfigurator().apply(talonFXConfigs);
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 50;// edit later
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;// edit later
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;// edit later
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;// edit later
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     m_spindexerCurrentState = SpindexerStates.StateZero;
@@ -92,13 +92,13 @@ public class Spindexer extends SubsystemBase {
 
           }
           else{
-            desiredVelocity =0 ;
+            // desiredVelocity =0 ;
 
           }
 
           break;
       case StateAutomatedOff:
-          desiredVelocity = 0;
+          // desiredVelocity = 0;
           break;
       default:
       break;
@@ -120,13 +120,32 @@ public class Spindexer extends SubsystemBase {
 
   runControlLoop();
   }   
-
+  int timer = 0;
   public void runControlLoop() {
+    timer ++;
   if(desiredVelocity == 0){
       m_talon.setVoltage(0);
   }
   else{
-      m_talon.setControl(request.withVelocity(desiredVelocity));
+    if(timer >300){
+      // m_talon.setControl(request.withVelocity(-desiredVelocity));
+      m_talon.set(-.2);
+    }
+    else if(timer > 250){
+
+      m_talon.set(0);
+
+    }
+    else{
+      // m_talon.setControl(request.withVelocity(desiredVelocity));
+      m_talon.set(.5);
+
+    }
+    
+    if(timer >350){
+     timer=0;
+
+    }
   }
 
   if (m_talon.getDeviceTemp().getValueAsDouble() >= 60) {

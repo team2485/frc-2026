@@ -5,7 +5,7 @@ public final class DistanceLookup { // Singleton class
     private static InterpolatingDoubleTreeMap intTable = new InterpolatingDoubleTreeMap();
     private static InterpolatingDoubleTreeMap timeTable = new InterpolatingDoubleTreeMap();
     private static final DistanceLookup inst = new DistanceLookup();
-
+    private static final double distancesOffset = -0.06; // This number can be used to easily change shot distance :)
     private DistanceLookup(){
         // intTable.put(4.468,1.0);
         // intTable.put(0.0,0.05);
@@ -19,14 +19,14 @@ public final class DistanceLookup { // Singleton class
         // intTable.put(4.95, 0.9);
         // intTable.put(3.2, 0.57);
 
-        intTable.put(1.12, 0.25);
-        intTable.put(1.48,0.35);
-        intTable.put(1.98, 0.42);
-        intTable.put(2.49, 0.45);
-        intTable.put(2.90, .54);
-        intTable.put(3.252, .59);
-        intTable.put(3.55,0.61);
-        intTable.put(4.0, 0.65);
+        intTable.put(1.12, 0.25+distancesOffset);
+        intTable.put(1.48,0.35+distancesOffset);
+        intTable.put(1.98, 0.42+distancesOffset);
+        intTable.put(2.49, 0.45+distancesOffset);
+        intTable.put(2.90, .54+distancesOffset);
+        intTable.put(3.252, .59+distancesOffset);
+        intTable.put(3.55,0.61+distancesOffset);
+        intTable.put(4.0, 0.65+distancesOffset);
         intTable.put(4.45, .747);
         intTable.put(4.95, 0.9);
 

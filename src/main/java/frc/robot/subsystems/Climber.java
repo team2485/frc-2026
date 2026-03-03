@@ -71,7 +71,7 @@ public class Climber extends SubsystemBase {
         talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 60;
-        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 100;
         motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         if (kClimberClockwisePositive)
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;

@@ -98,6 +98,7 @@ public class Intake extends SubsystemBase {
         StateSlowRetract,
         StateExtendedIdlingWheels,
         StateRetracting,
+        StateShooting
     }
 
     public Intake() {
@@ -242,7 +243,11 @@ public class Intake extends SubsystemBase {
                 desiredWinchVelocity = 0;
                 desiredRollerVelocity = 80;
                 break;
-
+            case StateShooting:
+                // extendedIntake = false;
+                slow=false; 
+                desiredRollerVelocity = 80;
+                break;
             case StateOuttaking:
                 extendedIntake = true;
                 desiredWinchVelocity = 0;

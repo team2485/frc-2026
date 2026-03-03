@@ -90,7 +90,7 @@ public class RobotContainer {
         // tracker.requestState(TargetingStates.StateDriverControlled));
 
         m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
-        m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
+        m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)).andThen(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateShooting))));
         m_driver.x().onTrue(drivetrain.resetGyro());
         
         // Shooting is now bound to one button
@@ -126,8 +126,12 @@ public class RobotContainer {
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero))); // These overide the auto spindexer control
 
         m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
+        m_operator.povLeft().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+       
         m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
-        m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+        m_operator.povRight().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+        
+        // m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
 
 
         // Reset the field-centric heading on X press.
