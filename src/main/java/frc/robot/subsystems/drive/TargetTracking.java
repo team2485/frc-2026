@@ -18,6 +18,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -90,7 +91,9 @@ public class TargetTracking extends SubsystemBase {
     // @Override
     public void periodic() {
         
-      
+        if(!DriverStation.isTeleopEnabled()){
+            return;
+        }
         switch (currentState) {
             case StateIdle:
                 break;

@@ -56,6 +56,7 @@ public class RobotContainer {
     public final Angler m_angler = new Angler(drivetrain,tracker,this);
     public final Spindexer m_spindexer = new Spindexer(this);
     public final Climber m_climber = new Climber();
+    public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
     // public final AutoStateMachine autoController = new AutoStateMachine(this);
     public RobotContainer() {
         configureBindings();
@@ -101,7 +102,7 @@ public class RobotContainer {
 
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax))); // Angler
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
-        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
+        m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateHub)));
         // m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
         // m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
 

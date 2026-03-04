@@ -127,13 +127,13 @@ public class Spindexer extends SubsystemBase {
       m_talon.setVoltage(0);
   }
   else{
-    if(timer >300){
+    if(timer >50 && timer <60){
       // m_talon.setControl(request.withVelocity(-desiredVelocity));
-      m_talon.set(-.2);
-    }
-    else if(timer > 250){
-
       m_talon.set(0);
+    }
+    else if(timer > 60){
+
+      m_talon.set(-0.5);
 
     }
     else{
@@ -142,7 +142,7 @@ public class Spindexer extends SubsystemBase {
 
     }
     
-    if(timer >350){
+    if(timer >70){
      timer=0;
 
     }

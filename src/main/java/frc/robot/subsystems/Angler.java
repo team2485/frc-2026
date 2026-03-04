@@ -33,7 +33,7 @@ public class Angler extends SubsystemBase {
     StateMax,
     StateOpening,
     StateClosing,
-    StateTest4,
+    StateHub,
     StateTest3,
     StateTest2,
     StateTest1,
@@ -136,8 +136,8 @@ public class Angler extends SubsystemBase {
       case StateTest3:
         desiredPosition = .5;
         break;
-      case StateTest4:
-        desiredPosition = .5;
+      case StateHub:
+        desiredPosition = .05;
         break;
       case StateOpening:
         if (desiredPosition < 6) {

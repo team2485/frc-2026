@@ -124,7 +124,7 @@ public class Intake extends SubsystemBase {
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 80;
-        motionMagicConfigs.MotionMagicAcceleration = 35;
+        motionMagicConfigs.MotionMagicAcceleration = 45;
         // motionMagicConfigs.MotionMagicJerk = 500;
 
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
