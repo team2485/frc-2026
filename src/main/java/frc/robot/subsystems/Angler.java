@@ -84,8 +84,8 @@ public class Angler extends SubsystemBase {
     slot0Configs.kA = kAAngler;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicAcceleration = 75; // Target acceleration of 400 rps/s (0.25 seconds to max)
-    motionMagicConfigs.MotionMagicCruiseVelocity = 15;
+    motionMagicConfigs.MotionMagicAcceleration = 90; // Target acceleration of 400 rps/s (0.25 seconds to max)
+    motionMagicConfigs.MotionMagicCruiseVelocity = 100;
     motionMagicConfigs.MotionMagicJerk = 750;
 
     var motorOutputConfigs = talonFXConfigs.MotorOutput;
@@ -121,7 +121,7 @@ public class Angler extends SubsystemBase {
         desiredPosition = lookupTable.getValue(dist);
         break;
       case StateMid:
-        desiredPosition = .2;
+        desiredPosition = .5;
         break;
       case StateMax:
         desiredPosition = 1; // This hits @ 4.648 metres

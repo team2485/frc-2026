@@ -245,8 +245,8 @@ public class Intake extends SubsystemBase {
                 break;
             case StateShooting:
                 // extendedIntake = false;
-                slow=false; 
-                desiredRollerVelocity = 80;
+                // slow=false; 
+                desiredRollerVelocity = 0;
                 break;
             case StateOuttaking:
                 extendedIntake = true;

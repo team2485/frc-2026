@@ -103,13 +103,21 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
         // tab.add("Field", field2d).withPosition(0, 0).withSize(6, 4);
         // tab.addString("Pose", this::getFormattedPose).withPosition(6, 2).withSize(2, 1);
     }
+    Pose2d latestVisPose = new Pose2d();
+    public Pose2d getVisionONLYPose(){
 
+        return latestVisPose;
+
+    }
     @Override
     public void periodic() {// DEPRECATED: USE Drivetrain.getState()!!!!!!
         poseEstimator.update(rotation.get(), modulePosition.get());
         // noVisionPoseEstimator.update(rotation.get(), modulePosition.get());
         var visionPose = photonEstimator.grabLatestEstimatedPose();
+latestVisPose=null;
         if (visionPose != null) {
+        latestVisPose=visionPose.estimatedPose.toPose2d();
+
             var pose2d = visionPose.estimatedPose.toPose2d();
             // m_drivetrain.getPigeon2().setYaw(pose2d.getRotation().getDegrees());
             m_drivetrain.addVisionMeasurement(pose2d, visionPose.timestampSeconds);

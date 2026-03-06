@@ -44,7 +44,7 @@ public class TargetTracking extends SubsystemBase {
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
     private FieldCentric m_manualDrive; // 24 7 2
     // new PIDController(25,7,1.75);
-    private PIDController m_PidController= new PIDController(25,7,1.75); // TODO: Looks good right now but may need retuning later down the line :(
+    private PIDController m_PidController= new PIDController(25,5,2); // TODO: Looks good right now but may need retuning later down the line :(
     private Pose2d aimPosition = new Pose2d();
    StructPublisher aimPosePub = NetworkTableInstance.getDefault().getStructTopic("AimPose", Pose2d.struct).publish();
     private double currentRotation;
@@ -53,7 +53,7 @@ public class TargetTracking extends SubsystemBase {
     DoublePublisher anglePublisher;
     BooleanPublisher targetLockPublisher;
     CommandXboxController opController;
-    boolean targetLocked;
+    public boolean targetLocked=false;
     private RobotContainer m_robotContainer;
     // private CommandXboxController operatorController;
     public enum TargetingStates {
@@ -90,12 +90,12 @@ public class TargetTracking extends SubsystemBase {
 
     // @Override
     public void periodic() {
-        
-        if(!DriverStation.isTeleopEnabled()){
-            return;
-        }
+        stateSwitchLogic();
+
         switch (currentState) {
             case StateIdle:
+                    aimPosePub.set(Pose2d.kZero);
+
                 break;
             // case StateResetHeading: replaced by a command since it works better with phoenixtuner's stuff
                             //     if (m_drivetrain.getCurrentCommand() != null) {
@@ -112,6 +112,10 @@ public class TargetTracking extends SubsystemBase {
                             //     // currentState = TargetingStates.StateDriverControlled;
                             //     break;
             case StateDriverControlled:
+                    aimPosePub.set(Pose2d.kZero);
+                    if(!DriverStation.isTeleopEnabled()){
+                        break;
+                    }
                 CommandScheduler.getInstance()
                         .schedule(m_drivetrain.applyRequest(
                                 () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed) // Drive
@@ -133,6 +137,8 @@ public class TargetTracking extends SubsystemBase {
                         ));
                 break;
             case StateDriveToAimTransition:
+                    aimPosePub.set(aimPosition);
+
                 if (m_drivetrain.getCurrentCommand() != null) {
 
                     m_drivetrain.getCurrentCommand().cancel();
@@ -142,6 +148,8 @@ public class TargetTracking extends SubsystemBase {
                 requestedState = TargetingStates.StateAiming;
                 break;
             case StateAiming:
+                    aimPosePub.set(aimPosition);
+
                 CommandScheduler.getInstance().schedule(alignToHub(m_drivetrain, m_PoseEstimation));
                 // var targetLocked = ;
                 if(targetLocked){
@@ -160,9 +168,9 @@ public class TargetTracking extends SubsystemBase {
             default:
                 break;
         }
-        aimPosePub.set(aimPosition);
+        
         recalculateAimPosition();
-        stateSwitchLogic();
+        
     }
 
     public void recalculateAimPosition(){

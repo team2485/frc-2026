@@ -334,7 +334,13 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     // for some operation in your program.
     // The topic names are actually "/datatable/x" and "/datatable/y".
     //newHeading = table2.getDoubleTopic("newHeading").publish();
+    public void fakeResetPose(Pose2d lol){
+        
+        
+        resetPose(lol);
 
+        return;
+    }
     public Command resetGyro() {
         return new InstantCommand( () -> this.setOperatorPerspectiveForward(this.getPigeon2().getRotation2d())); // .rotateBy(new Rotation2d(Math.PI/2.0))
         // return new InstantCommand( () -> System.out.println("reset please"));
