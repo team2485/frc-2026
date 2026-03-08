@@ -55,7 +55,7 @@ public class RobotContainer {
     public final TargetTracking tracker = new TargetTracking(this, drivetrain, m_poseEstimation, m_driver, m_operator, drive);
     public final Angler m_angler = new Angler(drivetrain,tracker,this);
     public final Spindexer m_spindexer = new Spindexer(this);
-    // public final Climber m_climber = new Climber();
+    public final Climber m_climber = new Climber();
     public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
     // public final AutoStateMachine autoController = new AutoStateMachine(this);
     public RobotContainer() {
@@ -100,9 +100,9 @@ public class RobotContainer {
         // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
         // m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
 
-        m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMid))); // Angler
+        m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1))); // Angler
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
-        m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateHub)));
+        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
         // m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
         // m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));
 
@@ -126,11 +126,11 @@ public class RobotContainer {
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero))); // These overide the auto spindexer control
 
-        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
-        // m_operator.povLeft().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+        m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
+        m_operator.povLeft().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
        
-        // m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
-        // m_operator.povRight().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
+        m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
+        m_operator.povRight().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
         
         // m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
 

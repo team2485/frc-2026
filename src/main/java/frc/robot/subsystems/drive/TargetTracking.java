@@ -19,6 +19,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -112,6 +114,9 @@ public class TargetTracking extends SubsystemBase {
                             //     // currentState = TargetingStates.StateDriverControlled;
                             //     break;
             case StateDriverControlled:
+                    driverController.setRumble(RumbleType.kBothRumble, 0);
+                    opController.setRumble(RumbleType.kBothRumble, 0);
+
                     aimPosePub.set(Pose2d.kZero);
                     if(!DriverStation.isTeleopEnabled()){
                         break;
@@ -148,19 +153,22 @@ public class TargetTracking extends SubsystemBase {
                 requestedState = TargetingStates.StateAiming;
                 break;
             case StateAiming:
-                    aimPosePub.set(aimPosition);
+                aimPosePub.set(aimPosition);
 
                 CommandScheduler.getInstance().schedule(alignToHub(m_drivetrain, m_PoseEstimation));
                 // var targetLocked = ;
                 if(targetLocked){
 
                     m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedEnable);
-
+                    driverController.setRumble(RumbleType.kBothRumble, 0);
+                    opController.setRumble(RumbleType.kBothRumble, 0);
+                    
 
                 }else{
 
                     m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedOff);
-
+                    driverController.setRumble(RumbleType.kBothRumble, 1);
+                    opController.setRumble(RumbleType.kBothRumble, 1);
 
                 }
                 
@@ -191,7 +199,18 @@ public class TargetTracking extends SubsystemBase {
     }
     public Pose2d getHubPose() {
         // Pose2d bias = new Pose2d(opController.getLeftX(), opController.getLeftY(),Rotation2d.kZero);
-        return new Pose2d(11.91, 4.0345, new Rotation2d(0)).plus(new Transform2d(-1*opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
+        
+        
+        if(DriverStation.getAlliance().get() == Alliance.Red){
+
+            return new Pose2d(11.91, 4.0345, new Rotation2d(0)).plus(new Transform2d(-1*opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
+
+
+        }
+        else{
+            return new Pose2d(4.6228, 4.0345, new Rotation2d(0)).plus(new Transform2d(opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
+
+        }
         // 4.626 from baseline
         // 4.035 from sideline
     }

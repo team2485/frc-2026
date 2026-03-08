@@ -130,8 +130,8 @@ public class Intake extends SubsystemBase {
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
         talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = false;
-        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 40;
-        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 50;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 60;
         talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
         if (kIntakeClockwisePositive) {
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;

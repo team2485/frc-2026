@@ -84,9 +84,9 @@ public class Angler extends SubsystemBase {
     slot0Configs.kA = kAAngler;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicAcceleration = 90; // Target acceleration of 400 rps/s (0.25 seconds to max)
-    motionMagicConfigs.MotionMagicCruiseVelocity = 100;
-    motionMagicConfigs.MotionMagicJerk = 750;
+    motionMagicConfigs.MotionMagicAcceleration = 175; // Target acceleration of 400 rps/s (0.25 seconds to max) //earlier int was at 90
+    motionMagicConfigs.MotionMagicCruiseVelocity = 150; // 100 earlier
+    motionMagicConfigs.MotionMagicJerk = 1250; //750 earlier
 
     var motorOutputConfigs = talonFXConfigs.MotorOutput;
     talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;

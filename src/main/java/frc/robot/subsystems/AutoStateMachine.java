@@ -196,8 +196,15 @@ public class AutoStateMachine extends SubsystemBase {
 
             }
             if(PathNumber ==0){
+                if(DriverStation.getAlliance().get() == Alliance.Blue){
 
-            m_RobotContainer.drivetrain.resetPose(PathToFollow.flipPath().getStartingHolonomicPose().get() );
+                    m_RobotContainer.drivetrain.resetPose(PathToFollow.getStartingHolonomicPose().get() );
+
+
+                }else{
+                    m_RobotContainer.drivetrain.resetPose(PathToFollow.flipPath().getStartingHolonomicPose().get() );
+
+                }
 
 
             }
@@ -227,7 +234,7 @@ public class AutoStateMachine extends SubsystemBase {
                 m_requestedState = AutoStates.StateIdleToFollowingPath;
                 
             }
-            if(m_RobotContainer.tracker.targetLocked == false && System.currentTimeMillis() - startShootingTime > 1500){
+            if(m_RobotContainer.tracker.targetLocked == false && System.currentTimeMillis() - startShootingTime > 10*1000){ // longest it will try to lock on for :)
 
                 m_requestedState = AutoStates.StateIdleToFollowingPath;
             }

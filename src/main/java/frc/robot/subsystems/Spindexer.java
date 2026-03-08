@@ -62,9 +62,9 @@ public class Spindexer extends SubsystemBase {
     motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
 
     m_talon.getConfigurator().apply(talonFXConfigs);
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;// edit later
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 100;// edit later
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;// edit later
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 80;// edit later
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     m_spindexerCurrentState = SpindexerStates.StateZero;
@@ -98,7 +98,7 @@ public class Spindexer extends SubsystemBase {
 
           break;
       case StateAutomatedOff:
-          // desiredVelocity = 0;
+          //desiredVelocity = 0;
           break;
       default:
       break;

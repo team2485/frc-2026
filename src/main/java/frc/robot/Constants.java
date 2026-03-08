@@ -132,7 +132,7 @@ public class Constants {
     // Theoretical free speed (m/s) at 12 V applied output;
     // This needs to be tuned to your individual robot
     public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(5.12);
-        public static double MaxSpeed = 1.0 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
+        public static double MaxSpeed = 0.6067 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired 67 strat
                                                                                              // top speed
         public static double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                         
