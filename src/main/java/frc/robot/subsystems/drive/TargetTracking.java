@@ -99,20 +99,20 @@ public class TargetTracking extends SubsystemBase {
                     aimPosePub.set(Pose2d.kZero);
 
                 break;
-            // case StateResetHeading: replaced by a command since it works better with phoenixtuner's stuff
-                            //     if (m_drivetrain.getCurrentCommand() != null) {
+            case StateResetHeading: //replaced by a command since it works better with phoenixtuner's stuff
+                    if (m_drivetrain.getCurrentCommand() != null) {
 
-                            //         m_drivetrain.getCurrentCommand().cancel();
-                            //     }   
-                            
-                            //     // m_drivetrain.runOnce(m_drivetrain::seedFieldCentric);
-                            //     // m_drivetrain.seedFieldCentric();
-                            //     m_drivetrain.resetGyro()
-                            //     // m_drivetrain.setOperatorPerspectiveForward(m_drivetrain.getPigeon2().getRotation2d().unaryMinus());
-                            //     // m_drivetrain.resetRotation();
-                            //     requestedState = TargetingStates.StateDriverControlled;
-                            //     // currentState = TargetingStates.StateDriverControlled;
-                            //     break;
+                        m_drivetrain.getCurrentCommand().cancel();
+                    }   
+                
+                    // m_drivetrain.runOnce(m_drivetrain::seedFieldCentric);
+                    // m_drivetrain.seedFieldCentric();
+                    CommandScheduler.getInstance().schedule(m_drivetrain.resetGyro());
+                    // m_drivetrain.setOperatorPerspectiveForward(m_drivetrain.getPigeon2().getRotation2d().unaryMinus());
+                    // m_drivetrain.resetRotation();
+                    requestedState = TargetingStates.StateDriverControlled;
+                    currentState = TargetingStates.StateDriverControlled;
+                    break;
             case StateDriverControlled:
                     driverController.setRumble(RumbleType.kBothRumble, 0);
                     opController.setRumble(RumbleType.kBothRumble, 0);

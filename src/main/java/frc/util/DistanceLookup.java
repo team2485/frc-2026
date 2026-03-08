@@ -1,11 +1,13 @@
 package frc.util;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 public final class DistanceLookup { // Singleton class
     
     private static InterpolatingDoubleTreeMap intTable = new InterpolatingDoubleTreeMap();
     private static InterpolatingDoubleTreeMap timeTable = new InterpolatingDoubleTreeMap();
     private static final DistanceLookup inst = new DistanceLookup();
-    private static final double distancesOffset = -0.08; // This number can be used to easily change shot distance :)
+    private static double distancesOffset = -0.08; // This number can be used to easily change shot distance :)
     private DistanceLookup(){
         // intTable.put(4.468,1.0);
         // intTable.put(0.0,0.05);
@@ -18,7 +20,9 @@ public final class DistanceLookup { // Singleton class
         // intTable.put(3.5, 0.6); // maybe
         // intTable.put(4.95, 0.9);
         // intTable.put(3.2, 0.57);
-
+        if (DriverStation.getAlliance().get() == Alliance.Red) {
+            // distancesOffset *= -1;
+        }
         intTable.put(1.12, 0.25+distancesOffset);
         intTable.put(1.48,0.35+distancesOffset);
         intTable.put(1.98, 0.42+distancesOffset);
