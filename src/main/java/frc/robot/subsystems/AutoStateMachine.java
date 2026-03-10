@@ -80,7 +80,7 @@ public class AutoStateMachine extends SubsystemBase {
          );
     } catch (Exception e) {
         // TODO: handle exception
-        System.err.println("AUTO ABORT DUE  TO IO ERROR!");
+        System.err.println("AUTO ABORT DUE TO IO ERROR!");
     }
 
     // m_Chooser.addOption("B Auto",autoPeriodicStates.MidScoreAutoV2);  // 
@@ -180,7 +180,7 @@ public class AutoStateMachine extends SubsystemBase {
         case StateIdleToFollowingPath:
             m_RobotContainer.tracker.requestState(TargetingStates.StateDriverControlled);
             m_RobotContainer.m_feeder.requestState(FeederStates.StateOff);
-            m_RobotContainer.m_angler.requestState(AnglerStates.StateZero);
+            // m_RobotContainer.m_angler.requestState(AnglerStates.StateOff);
             m_RobotContainer.m_shooter.requestState(ShooterStates.StateOff);
 
             // CommandScheduler.getInstance()
