@@ -26,12 +26,13 @@ import frc.robot.subsystems.drive.Drivetrain;
 public class Telemetry {
     private final double MaxSpeed;
 
+    private final Drivetrain m_drivetrain;
     /**
      * Construct a telemetry object, with the specified max speed of the robot
      * 
      * @param maxSpeed Maximum speed in meters per second
      */
-    public Telemetry(double maxSpeed) {
+    public Telemetry(double maxSpeed, Drivetrain drivetrain) {
         MaxSpeed = maxSpeed;
         SignalLogger.start();
 
@@ -39,6 +40,7 @@ public class Telemetry {
         for (int i = 0; i < 4; ++i) {
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
+        m_drivetrain = drivetrain;
     }
 
     /* What to publish over networktables for telemetry */
@@ -58,8 +60,6 @@ public class Telemetry {
     private final NetworkTable table = inst.getTable("Pose");
     private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
-
-    public final Drivetrain m_drivetrain = Constants.createDrivetrain();
 
     /* Mechanisms to represent the swerve module states */
     private final Mechanism2d[] m_moduleMechanisms = new Mechanism2d[] {

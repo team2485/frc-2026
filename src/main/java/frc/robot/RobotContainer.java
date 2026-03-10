@@ -39,21 +39,20 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    private final Telemetry logger = new Telemetry(Constants.MaxSpeed);
-
     private final CommandXboxController m_driver = new CommandXboxController(0);
     private final CommandXboxController m_operator = new CommandXboxController(1);
-    public final Drivetrain drivetrain = Constants.createDrivetrain();
-    public final PoseEstimation m_poseEstimation = new PoseEstimation(() -> drivetrain.getPigeon2().getRotation2d(),
-            () -> drivetrain.getState().ModulePositions,
-            () -> drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates), drivetrain);
+    public final Drivetrain m_drivetrain = Constants.createDrivetrain();
+    private final Telemetry logger = new Telemetry(Constants.MaxSpeed, m_drivetrain);
+    public final PoseEstimation m_poseEstimation = new PoseEstimation(() -> m_drivetrain.getPigeon2().getRotation2d(),
+            () -> m_drivetrain.getState().ModulePositions,
+            () -> m_drivetrain.getKinematics().toChassisSpeeds(m_drivetrain.getState().ModuleStates), m_drivetrain);
 //     public final PIDController m_PidController = 
     public final Shooter m_shooter = new Shooter();
     public final Feeder m_feeder = new Feeder();
     public final Intake m_intake = new Intake();
 
-    public final TargetTracking tracker = new TargetTracking(this, drivetrain, m_poseEstimation, m_driver, m_operator, drive);
-    public final Angler m_angler = new Angler(drivetrain,tracker,this);
+    public final TargetTracking tracker = new TargetTracking(this, m_drivetrain, m_poseEstimation, m_driver, m_operator, drive);
+    public final Angler m_angler = new Angler(m_drivetrain,tracker,this);
     public final Spindexer m_spindexer = new Spindexer(this);
     // public final Climber m_climber = new Climber();
     public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
@@ -65,9 +64,9 @@ public class RobotContainer {
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        // drivetrain.setDefaultCommand(
+        // m_drivetrain.setDefaultCommand(
         // // Drivetrain will execute this command periodically
-        // drivetrain.applyRequest(() ->
+        // m_drivetrain.applyRequest(() ->
         // drive.withVelocityX(-m_driver.getLeftY() * MaxSpeed) // Drive forward with
         // negative Y (forward)
         // .withVelocityY(-m_driver.getLeftX() * MaxSpeed) // Drive left with negative X
@@ -80,10 +79,10 @@ public class RobotContainer {
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
-        RobotModeTriggers.disabled().whileTrue(drivetrain.applyRequest(() -> idle).ignoringDisable(true));
+        RobotModeTriggers.disabled().whileTrue(m_drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-        // m_driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        // m_driver.b().whileTrue(drivetrain.applyRequest(() ->
+        // m_driver.a().whileTrue(m_drivetrain.applyRequest(() -> brake));
+        // m_driver.b().whileTrue(m_drivetrain.applyRequest(() ->
         // point.withModuleDirection(new Rotation2d(-m_driver.getLeftY(),
         // -m_driver.getLeftX()))
         // ));
@@ -92,7 +91,7 @@ public class RobotContainer {
 
         m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
         m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)).andThen(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateShooting))));
-        // m_driver.x().onTrue(drivetrain.resetGyro());
+        // m_driver.x().onTrue(m_drivetrain.resetGyro());
         m_driver.x().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateResetHeading)));
         // Shooting is now bound to one button
         m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateAccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)))); // Flywheels (shooter)
@@ -136,9 +135,9 @@ public class RobotContainer {
 
 
         // Reset the field-centric heading on X press.
-        // m_driver.x().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        // m_driver.x().onTrue(m_drivetrain.runOnce(m_drivetrain::seedFieldCentric));
 
-        drivetrain.registerTelemetry(logger::telemeterize);
+        m_drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
@@ -147,13 +146,13 @@ public class RobotContainer {
         return Commands.sequence(
                 // Reset our field centric heading to match the robot
                 // facing away from our alliance station wall (0 deg).
-                drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
+                m_drivetrain.runOnce(() -> m_drivetrain.seedFieldCentric(Rotation2d.kZero)),
                 // Then slowly drive forward (away from us) for 5 seconds.
-                drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
+                m_drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
                         .withVelocityY(0)
                         .withRotationalRate(0))
                         .withTimeout(5.0),
                 // Finally idle for the rest of auton
-                drivetrain.applyRequest(() -> idle));
+                m_drivetrain.applyRequest(() -> idle));
     }
 }

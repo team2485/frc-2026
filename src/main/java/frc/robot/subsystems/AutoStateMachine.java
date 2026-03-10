@@ -71,8 +71,8 @@ public class AutoStateMachine extends SubsystemBase {
     final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
     try {
         
-        AutoBuilder.configure(()->new Pose2d(m_rc.drivetrain.getState().Pose.getTranslation(),m_rc.drivetrain.getState().Pose.getRotation()), (pose) -> m_rc.drivetrain.fakeResetPose(pose.rotateBy(Rotation2d.fromDegrees(180))), ()->m_rc.drivetrain.getState().Speeds,
-         (speeds, feedforward) -> m_rc.drivetrain.setControl(m_pathApplyRobotSpeeds.withSpeeds(ChassisSpeeds.discretize(new ChassisSpeeds(speeds.vxMetersPerSecond,speeds.vyMetersPerSecond,speeds.omegaRadiansPerSecond), 0.02))),//.withWheelForceFeedforwardsX(feedforward.robotRelativeForcesXNewtons()).withWheelForceFeedforwardsY(feedforward.robotRelativeForcesYNewtons())),
+        AutoBuilder.configure(()->new Pose2d(m_rc.m_drivetrain.getState().Pose.getTranslation(),m_rc.m_drivetrain.getState().Pose.getRotation()), (pose) -> m_rc.m_drivetrain.fakeResetPose(pose.rotateBy(Rotation2d.fromDegrees(180))), ()->m_rc.m_drivetrain.getState().Speeds,
+         (speeds, feedforward) -> m_rc.m_drivetrain.setControl(m_pathApplyRobotSpeeds.withSpeeds(ChassisSpeeds.discretize(new ChassisSpeeds(speeds.vxMetersPerSecond,speeds.vyMetersPerSecond,speeds.omegaRadiansPerSecond), 0.02))),//.withWheelForceFeedforwardsX(feedforward.robotRelativeForcesXNewtons()).withWheelForceFeedforwardsY(feedforward.robotRelativeForcesYNewtons())),
          new PPHolonomicDriveController(new PIDConstants(.9,0,0), new PIDConstants(1,0.0,0)),
          RobotConfig.fromGUISettings(),
          ()->DriverStation.getAlliance().orElse(Alliance.Blue)== Alliance.Red,this
@@ -146,8 +146,8 @@ public class AutoStateMachine extends SubsystemBase {
         case StateInit:
             chooser_val = m_Chooser.getSelected();
             m_requestedState=AutoStates.StateIdleToFollowingPath;
-            // m_RobotContainer.drivetrain.getPigeon2().setYaw(m_RobotContainer.m_poseEstimation.getVisionONLYPose().getRotation().getDegrees());
-            // m_RobotContainer.drivetrain.resetGyro();
+            // m_RobotContainer.m_drivetrain.getPigeon2().setYaw(m_RobotContainer.m_poseEstimation.getVisionONLYPose().getRotation().getDegrees());
+            // m_RobotContainer.m_drivetrain.resetGyro();
             break;
     
         case StateFollowingPath:
@@ -184,7 +184,7 @@ public class AutoStateMachine extends SubsystemBase {
             m_RobotContainer.m_shooter.requestState(ShooterStates.StateOff);
 
             // CommandScheduler.getInstance()
-            //             .schedule(m_RobotContainer.drivetrain.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()));
+            //             .schedule(m_RobotContainer.m_drivetrain.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()));
             CommandScheduler.getInstance().cancelAll();
             if(!(autoMap.get(chooser_val).length -1 >= PathNumber)){
                 break;
@@ -198,11 +198,11 @@ public class AutoStateMachine extends SubsystemBase {
             if(PathNumber ==0){
                 if(DriverStation.getAlliance().get() == Alliance.Blue){
 
-                    m_RobotContainer.drivetrain.resetPose(PathToFollow.getStartingHolonomicPose().get() );
+                    m_RobotContainer.m_drivetrain.resetPose(PathToFollow.getStartingHolonomicPose().get() );
 
 
                 }else{
-                    m_RobotContainer.drivetrain.resetPose(PathToFollow.flipPath().getStartingHolonomicPose().get() );
+                    m_RobotContainer.m_drivetrain.resetPose(PathToFollow.flipPath().getStartingHolonomicPose().get() );
 
                 }
 
