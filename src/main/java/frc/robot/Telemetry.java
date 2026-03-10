@@ -111,7 +111,12 @@ public class Telemetry {
 
         var modules = m_drivetrain.getModules();
         for(int i = 0; i < 4; i++) {
-            module[i].getSteerMotor();
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerCurrent", modules[i].getSteerMotor().getStatorCurrent().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveCurrent", modules[i].getDriveMotor().getStatorCurrent().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerVoltage", modules[i].getSteerMotor().getMotorVoltage().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveVoltage", modules[i].getDriveMotor().getMotorVoltage().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerVelocity", modules[i].getSteerMotor().getVelocity().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveVelocity", modules[i].getDriveMotor().getVelocity().getValueAsDouble());
         }
 
         /* Telemeterize the pose to a Field2d */
