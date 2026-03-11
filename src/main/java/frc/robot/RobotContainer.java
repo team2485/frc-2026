@@ -14,11 +14,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Climber.ClimberStates;
-import frc.robot.Constants;
 import frc.robot.subsystems.Angler.AnglerStates;
 import frc.robot.subsystems.Feeder.FeederStates;
 import frc.robot.subsystems.Intake.IntakeStates;
@@ -36,8 +34,8 @@ public class RobotContainer {
             .withDeadband(Constants.MaxSpeed * 0.1).withRotationalDeadband(Constants.MaxAngularRate * 0.1) // Add a 10%
                                                                                                            // deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    // private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private final CommandXboxController m_driver = new CommandXboxController(0);
     private final CommandXboxController m_operator = new CommandXboxController(1);

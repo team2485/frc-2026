@@ -1,22 +1,7 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathConstraints;
-
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import static frc.robot.Constants.ClimberConstants.*;
 
@@ -27,6 +12,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+@Deprecated
 public class Climber extends SubsystemBase {
 
     public enum ClimberStates {
@@ -41,9 +27,11 @@ public class Climber extends SubsystemBase {
     private final TalonFX m_talon = new TalonFX(kClimberPort, "Other");
     private final MotionMagicVoltage request = new MotionMagicVoltage(0).withSlot(0);
     private double desiredPosition;
+    private double desiredVoltage;
 
     public Climber() {
         desiredPosition = 0;
+        desiredVoltage = 0;
 
         var talonFXConfigs = new TalonFXConfiguration();
         // These will be derived experimentally but in case you are wondering
@@ -88,18 +76,18 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
-        switch (m_climberRequestedState) {
+        switch (m_climberCurrentState) {
             case StateIdle:
-                m_talon.setVoltage(0);
+                desiredVoltage = 0;
                 m_talon.setControl(new NeutralOut());
                 break;
             case StateExtend:
                 // desiredPosition = 2;
-                m_talon.setVoltage(3);
+                desiredVoltage = 3;
                 break;
             case StateClimb:
                 // desiredPosition = 1;
-                m_talon.setVoltage(-3);
+                desiredVoltage = -3;
                 break;
         }
         desiredPosition *= 23; // gear ratio
@@ -113,6 +101,7 @@ public class Climber extends SubsystemBase {
 
     public void runControlLoop() {
         // m_talon.setControl(request.withPosition(desiredPosition));
+        m_talon.setVoltage(desiredVoltage);
         m_climberCurrentState = m_climberRequestedState;
     }
 
