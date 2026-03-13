@@ -451,12 +451,12 @@ public class Constants {
 
         }
 
-        public static final class SpindexerConstants {
-                public static final boolean kSpindexerClockwisePositive = false;
+        public static final class WindexerConstants {
+                public static final boolean kWindexerClockwisePositive = false;
 
-                public static final double kPSpindexer = 1;
-                public static final double kISpindexer = 0.0;
-                public static final double kDSpindexer = 0.0;
+                public static final double kPWindexer = 1;
+                public static final double kIWindexer = 0.0;
+                public static final double kDWindexer = 0.0;
         }
 
         public static final class IntakeConstants {

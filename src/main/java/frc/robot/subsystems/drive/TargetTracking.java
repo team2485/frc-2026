@@ -32,7 +32,7 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.AimConstants;
 import frc.robot.Constants.AimConstants.*;
-import frc.robot.subsystems.Spindexer.SpindexerStates;
+import frc.robot.subsystems.Windexer.WindexerStates;
 import frc.util.DistanceLookup;
 
 
@@ -166,14 +166,14 @@ public class TargetTracking extends SubsystemBase {
                 // var targetLocked = ;
                 if(targetLocked){
 
-                    m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedEnable);
+                    m_robotContainer.m_windexer.requestState(WindexerStates.StateAutomatedEnable);
                     driverController.setRumble(RumbleType.kBothRumble, 0);
                     opController.setRumble(RumbleType.kBothRumble, 0);
                     
 
                 }else{
 
-                    m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedOff);
+                    m_robotContainer.m_windexer.requestState(WindexerStates.StateAutomatedOff);
                     driverController.setRumble(RumbleType.kBothRumble, 1);
                     opController.setRumble(RumbleType.kBothRumble, 1);
 
