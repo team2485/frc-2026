@@ -74,7 +74,7 @@ public class Constants {
         public static final double k775FreeSpeedRotationsPerSecond = 18730.0 / 60.0;
 
         public static final COTSFalconSwerveConstants chosenModule = COTSFalconSwerveConstants
-                        .SDSMK5n(COTSFalconSwerveConstants.driveGearRatios.SDSMK5n_L2);
+                        .SDSMK5n(COTSFalconSwerveConstants.driveGearRatios.SDSMK5n_L1);
 
         // The steer motor uses any SwerveModule.SteerRequestType control request with
         // the
@@ -131,8 +131,8 @@ public class Constants {
 
     // Theoretical free speed (m/s) at 12 V applied output;
     // This needs to be tuned to your individual robot
-    public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(5.12);
-        public static double MaxSpeed = 0.6067 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired 67 strat
+    public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(4.54);
+        public static double MaxSpeed = .76767 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired 67 strat
                                                                                              // top speed
         public static double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                         
@@ -140,7 +140,7 @@ public class Constants {
     // This may need to be tuned to your individual robot
     private static final double kCoupleRatio = 3.857142857142857;
 
-    private static final double kDriveGearRatio = 6.026785714285714;
+    private static final double kDriveGearRatio = 7.026785714285714;
     private static final double kSteerGearRatio = 26.09090909090909;
     private static final Distance kWheelRadius = Inches.of(2);
 
@@ -451,12 +451,12 @@ public class Constants {
 
         }
 
-        public static final class SpindexerConstants {
-                public static final boolean kSpindexerClockwisePositive = false;
+        public static final class WindexerConstants {
+                public static final boolean kWindexerClockwisePositive = false;
 
-                public static final double kPSpindexer = 1;
-                public static final double kISpindexer = 0.0;
-                public static final double kDSpindexer = 0.0;
+                public static final double kPWindexer = 1;
+                public static final double kIWindexer = 0.0;
+                public static final double kDWindexer = 0.0;
         }
 
         public static final class IntakeConstants {

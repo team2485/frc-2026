@@ -289,26 +289,26 @@ public class Intake extends SubsystemBase {
         } else {
             // if(m_talon_L.getProcessorTemp().getValueAsDouble() >= 60){
 
-            // System.out.println("LEFT MOTOR OVERHEAT!!");
+            // System.err.println("LEFT MOTOR OVERHEAT!!");
             // m_talon_L.setControl(new NeutralOut());
             // return;
             // }
             if (m_talon_Roll.getDeviceTemp().getValueAsDouble() >= 60) {
-                System.out.println("ROLLER MOTOR OVERHEAT!!");
+                System.err.println("ROLLER MOTOR OVERHEAT!!");
 
                 m_talon_Roll.setControl(new NeutralOut());
 
                 return;
             }
             if (m_talon_winchR.getDeviceTemp().getValueAsDouble() >= 60) {
-                System.out.println("RIGHT MOTOR OVERHEAT!!");
+                System.err.println("RIGHT MOTOR OVERHEAT!!");
 
                 m_talon_winchR.setControl(new NeutralOut());
 
                 return;
             }
             if (m_talon_winchL.getDeviceTemp().getValueAsDouble() >= 60) {
-                System.out.println("LEFT MOTOR OVERHEAT!!");
+                System.err.println("LEFT MOTOR OVERHEAT!!");
 
                 m_talon_winchL.setControl(new NeutralOut());
 
@@ -318,7 +318,7 @@ public class Intake extends SubsystemBase {
             if (extendedIntake) {
                 // m_talon_winchL.setControl(posWinchRequestL.withPosition(desiredPosition));
                 // m_talon_winchR.setControl(posWinchRequestR.withPosition(5));
-                desiredPosition = -18 * 3;
+                desiredPosition = (-18 * 3)*24/23;
             } else if (m_IntakeCurrentState != IntakeStates.StateStartup) {
                 desiredPosition = .1;
                 // m_talon_winchL.setControl(posWinchRequestL.withPosition(0.1));

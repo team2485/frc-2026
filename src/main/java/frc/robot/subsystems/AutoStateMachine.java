@@ -61,12 +61,15 @@ public class AutoStateMachine extends SubsystemBase {
 
   public AutoStateMachine (RobotContainer m_rc){
     Shuffleboard.getTab("Autos").add(m_Chooser);
-    m_Chooser.addOption("Bottom Side Shooting", "BSideShooting");
-    m_Chooser.addOption("Top Side Shooting", "TSideShooting");
-    m_Chooser.addOption("Test", "Straight");
-    m_Chooser.setDefaultOption("BSideShoot", "BSideSimple");
-    m_Chooser.addOption("Test2", "MoveAndShoot");
-    m_Chooser.addOption("TSideShoot", "TopSideSimple");
+    // m_Chooser.addOption("Outpost Side Shooting", "BSideShooting"); // outpost
+    // m_Chooser.addOption("Depot Shooting", "TSideShooting"); // depot
+    // m_Chooser.addOption("Test", "Straight");
+    m_Chooser.setDefaultOption("OutpostSideShoot", "BSideSimple");
+    m_Chooser.addOption("DepotSideShoot", "TopSideSimple");
+    m_Chooser.addOption("Mid Auto", "TSideMid");
+    m_Chooser.addOption("Topside Shoot to Mid", "TSideShootToMid");
+
+    // m_Chooser.addOption("Test2", "MoveAndShoot");
 
     final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
     try {
@@ -93,10 +96,21 @@ public class AutoStateMachine extends SubsystemBase {
     
     
     }) );
+    new EventTrigger("HoodDown").onTrue(new InstantCommand( () -> {
+        
+        
+        m_rc.m_angler.requestState(AnglerStates.StateZero);
+    
+    
+    }) );
     new EventTrigger("Shoot").onTrue(new InstantCommand( () -> startShooting()) );
     new EventTrigger("Wait").onTrue(new InstantCommand( () -> waitTime()) );
 
     try {
+        autoMap.put("TSideMid", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TSideTrenchShoot"), 
+            PathPlannerPath.fromPathFile("TSideShootMid"), 
+
+            });
         autoMap.put("BSideShooting", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("BTrenchToMid"), 
             PathPlannerPath.fromPathFile("BMidToShooting"), 
             PathPlannerPath.fromPathFile("BShootingToDepot")
@@ -123,6 +137,7 @@ public class AutoStateMachine extends SubsystemBase {
             PathPlannerPath.fromPathFile("TSideIntakeToShoot")
 
     });
+    autoMap.put("TSideShootToMid", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TSideShootMid"), PathPlannerPath.fromPathFile("TSideMidToZone"), PathPlannerPath.fromPathFile("TSideZoneToMid"), PathPlannerPath.fromPathFile("TSideZoneToDepot")});
         
         
     } catch (Exception e) {
@@ -136,7 +151,7 @@ public class AutoStateMachine extends SubsystemBase {
   double startShootingTime = -1;
   double waitStartTime = -1;
   @Override
-  public void periodic (){
+  public void periodic(){
     if(!DriverStation.isAutonomousEnabled()){
         m_currentState = AutoStates.StateInit;
         m_requestedState = AutoStates.StateInit;
@@ -153,8 +168,18 @@ public class AutoStateMachine extends SubsystemBase {
         case StateFollowingPath:
             if (FollowPathCommand.isFinished()){
                 if(m_requestedState == AutoStates.IdleToShooting || m_requestedState == AutoStates.StateWait){
-        
-                    PathNumber++;
+                    
+                    if(m_Chooser.getSelected().equals("TSideShootToMid")) {
+                        if((int)(DriverStation.getMatchTime()) < 2) {
+                            PathNumber += 2;
+                        }
+                        else {
+                            PathNumber++;
+                        }
+                    }
+                    else {
+                        PathNumber++;
+                    }
                     m_currentState = m_requestedState;                
                 }
                 else{
@@ -238,6 +263,9 @@ public class AutoStateMachine extends SubsystemBase {
 
                 m_requestedState = AutoStates.StateIdleToFollowingPath;
             }
+            break;
+        case FollowingToShooting:
+            // ??
             break;
         
     }

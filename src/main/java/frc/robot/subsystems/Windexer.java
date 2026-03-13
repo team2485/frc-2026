@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Shooter.ShooterStates;
 
-import static frc.robot.Constants.SpindexerConstants.*;
+import static frc.robot.Constants.WindexerConstants.*;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -17,11 +17,11 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
 import edu.wpi.first.math.controller.PIDController;
 
-public class Spindexer extends SubsystemBase {
+public class Windexer extends SubsystemBase {
   // Misc variables for specific subsystem go here
 
   // Enum representing all of the states the subsystem can be in
-  public enum SpindexerStates {
+  public enum WindexerStates {
     StateZero,
     StateFeed,
     StateReverse,
@@ -32,12 +32,12 @@ public class Spindexer extends SubsystemBase {
   private double desiredVelocity = 0;
    private final MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0).withSlot(0);
 
-  public static SpindexerStates m_spindexerCurrentState;
-  public static SpindexerStates m_spindexerRequestedState;
+  public static WindexerStates m_windexerCurrentState;
+  public static WindexerStates m_windexerRequestedState;
 
   private final TalonFX m_talon = new TalonFX(23, "Other"); 
   public RobotContainer m_RobotContainer;
-  public Spindexer(RobotContainer c) {
+  public Windexer(RobotContainer c) {
     m_RobotContainer=c;
     // Misc setup goes here
 
@@ -47,16 +47,16 @@ public class Spindexer extends SubsystemBase {
     // kI adds n volts per second when the positional error is 1 rotation
     // kD outputs n volts when the velocity error is 1 rotation per second
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kP = kPSpindexer;
-    slot0Configs.kI = kISpindexer;
-    slot0Configs.kD = kDSpindexer;
+    slot0Configs.kP = kPWindexer;
+    slot0Configs.kI = kIWindexer;
+    slot0Configs.kD = kDWindexer;
 
     var motorOutputConfigs = talonFXConfigs.MotorOutput;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicAcceleration = 50; // Target acceleration of 400 rps/s (0.25 seconds to max)
     motionMagicConfigs.MotionMagicJerk = 500;
-    if (kSpindexerClockwisePositive) 
+    if (kWindexerClockwisePositive) 
       motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
     else motorOutputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
     motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
@@ -67,13 +67,13 @@ public class Spindexer extends SubsystemBase {
     talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 80;// edit later
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    m_spindexerCurrentState = SpindexerStates.StateZero;
-    m_spindexerRequestedState = SpindexerStates.StateZero;
+    m_windexerCurrentState = WindexerStates.StateZero;
+    m_windexerRequestedState = WindexerStates.StateZero;
   }
 
   @Override
   public void periodic() {
-    switch (m_spindexerRequestedState) {
+    switch (m_windexerRequestedState) {
       case StateZero:
           desiredVelocity = 0;
           break;
@@ -103,53 +103,27 @@ public class Spindexer extends SubsystemBase {
       default:
       break;
     }
-  if(m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
-    if(m_spindexerCurrentState == SpindexerStates.StateZero || m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
+  if(m_windexerRequestedState == WindexerStates.StateAutomatedEnable || m_windexerRequestedState == WindexerStates.StateAutomatedOff){
+    if(m_windexerCurrentState == WindexerStates.StateZero || m_windexerRequestedState == WindexerStates.StateAutomatedEnable || m_windexerRequestedState == WindexerStates.StateAutomatedOff){
 
-      m_spindexerCurrentState = m_spindexerRequestedState;
+      m_windexerCurrentState = m_windexerRequestedState;
       
 
     }
 
 
   }else{
-    m_spindexerCurrentState = m_spindexerRequestedState;
+    m_windexerCurrentState = m_windexerRequestedState;
 
 
   }
 
   runControlLoop();
   }   
-  int timer = 0;
   public void runControlLoop() {
-    timer ++;
-  if(desiredVelocity == 0){
-      m_talon.setVoltage(0);
-  }
-  else{
-    if(timer >50 && timer <60){
-      // m_talon.setControl(request.withVelocity(-desiredVelocity));
-      m_talon.set(0);
-    }
-    else if(timer > 60){
-
-      m_talon.set(-0.5);
-
-    }
-    else{
-      // m_talon.setControl(request.withVelocity(desiredVelocity));
-      m_talon.set(.5);
-
-    }
-    
-    if(timer >70){
-     timer=0;
-
-    }
-  }
 
   if (m_talon.getDeviceTemp().getValueAsDouble() >= 60) {
-                System.out.println("SPINDEXER OVERHEAT!!");
+                System.err.println("SPINDEXER OVERHEAT!!");
 
                 m_talon.setControl(new NeutralOut());
 
@@ -158,28 +132,28 @@ public class Spindexer extends SubsystemBase {
   }
   
   // example of a "setter" method
-  public void requestState(SpindexerStates desiredState) {
-    if(desiredState == SpindexerStates.StateAutomatedEnable || desiredState == SpindexerStates.StateAutomatedOff){
-      if(m_spindexerCurrentState == SpindexerStates.StateZero || m_spindexerRequestedState == SpindexerStates.StateAutomatedEnable || m_spindexerRequestedState == SpindexerStates.StateAutomatedOff){
+  public void requestState(WindexerStates desiredState) {
+    if(desiredState == WindexerStates.StateAutomatedEnable || desiredState == WindexerStates.StateAutomatedOff){
+      if(m_windexerCurrentState == WindexerStates.StateZero || m_windexerRequestedState == WindexerStates.StateAutomatedEnable || m_windexerRequestedState == WindexerStates.StateAutomatedOff){
 
-        m_spindexerRequestedState = desiredState;
+        m_windexerRequestedState = desiredState;
         
 
       }
 
 
   }else{
-    m_spindexerRequestedState = desiredState;
+    m_windexerRequestedState = desiredState;
 
 
   }
 
-    // m_spindexerRequestedState = desiredState;
+    // m_windexerRequestedState = desiredState;
   }
  
   // example of a "getter" method
-  public SpindexerStates getCurrentState() { 
-    return m_spindexerCurrentState; 
+  public WindexerStates getCurrentState() { 
+    return m_windexerCurrentState; 
   }
 
 }

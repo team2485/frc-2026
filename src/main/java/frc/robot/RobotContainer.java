@@ -16,12 +16,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.Climber.ClimberStates;
+import frc.robot.Constants;
 import frc.robot.subsystems.Angler.AnglerStates;
 import frc.robot.subsystems.Feeder.FeederStates;
 import frc.robot.subsystems.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.ShooterStates;
-import frc.robot.subsystems.Spindexer.SpindexerStates;
+import frc.robot.subsystems.Windexer.WindexerStates;
 import frc.robot.subsystems.drive.Drivetrain;
 import frc.robot.subsystems.drive.PoseEstimation;
 import frc.robot.subsystems.drive.TargetTracking;
@@ -51,8 +51,7 @@ public class RobotContainer {
 
     public final TargetTracking tracker = new TargetTracking(this, m_drivetrain, m_poseEstimation, m_driver, m_operator, drive);
     public final Angler m_angler = new Angler(m_drivetrain,tracker,this);
-    public final Spindexer m_spindexer = new Spindexer(this);
-    // public final Climber m_climber = new Climber();
+    public final Windexer m_windexer = new Windexer(this);
     public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
     // public final AutoStateMachine autoController = new AutoStateMachine(this);
     public RobotContainer() {
@@ -117,21 +116,13 @@ public class RobotContainer {
         m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
         m_driver.b().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateOuttaking)));
 
-        m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
-        m_operator.leftBumper().onFalse(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateFeed)));
+        m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFeed)));
+        m_operator.leftBumper().onFalse(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFeed)));
 
-        //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateReverse)));
-        m_operator.x().onTrue(new InstantCommand(() -> m_spindexer.requestState(SpindexerStates.StateZero))); // These overide the auto spindexer control
+        //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateReverse)));
+        m_operator.x().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero))); // These overide the auto windexer control
 
-        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateExtend)));
-        // m_operator.povLeft().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
-       
-        // m_operator.povRight().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateClimb)));
-        // m_operator.povRight().onFalse(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
-        
-        // m_operator.b().onTrue(new InstantCommand(() -> m_climber.requestState(ClimberStates.StateIdle)));
-
-
+  
         // Reset the field-centric heading on X press.
         // m_driver.x().onTrue(m_drivetrain.runOnce(m_drivetrain::seedFieldCentric));
 

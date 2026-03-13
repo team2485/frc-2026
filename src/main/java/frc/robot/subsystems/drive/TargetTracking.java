@@ -32,7 +32,7 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.AimConstants;
 import frc.robot.Constants.AimConstants.*;
-import frc.robot.subsystems.Spindexer.SpindexerStates;
+import frc.robot.subsystems.Windexer.WindexerStates;
 import frc.util.DistanceLookup;
 
 
@@ -104,7 +104,14 @@ public class TargetTracking extends SubsystemBase {
 
                         m_drivetrain.getCurrentCommand().cancel();
                     }   
-                
+                    // if (DriverStation.getAlliance() == DriverStation.Alliance.Red)
+                    // {
+                    //     m_drivetrain.setOperatorPerspectiveForward(m_drivetrain.getPigeon2().getRotation2d().unaryMinus());
+                    // }
+                    // if ()
+                    // {
+                    //     CommandScheduler.getInstance().schedule(m_drivetrain.resetGyro());
+                    // }
                     // m_drivetrain.runOnce(m_drivetrain::seedFieldCentric);
                     // m_drivetrain.seedFieldCentric();
                     CommandScheduler.getInstance().schedule(m_drivetrain.resetGyro());
@@ -135,7 +142,7 @@ public class TargetTracking extends SubsystemBase {
                                                                                                           // (left)
                                         .withRotationalRate(-driverController.getRightX() * Constants.MaxAngularRate) // Drive
                                                                                                                       // counterclockwise
-                                                                                                                      // with
+                                                                                                                    // with
                                                                                                                       // negative
                                                                                                                       // X
                                                                                                                       // (left)
@@ -159,14 +166,14 @@ public class TargetTracking extends SubsystemBase {
                 // var targetLocked = ;
                 if(targetLocked){
 
-                    m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedEnable);
+                    m_robotContainer.m_windexer.requestState(WindexerStates.StateAutomatedEnable);
                     driverController.setRumble(RumbleType.kBothRumble, 0);
                     opController.setRumble(RumbleType.kBothRumble, 0);
                     
 
                 }else{
 
-                    m_robotContainer.m_spindexer.requestState(SpindexerStates.StateAutomatedOff);
+                    m_robotContainer.m_windexer.requestState(WindexerStates.StateAutomatedOff);
                     driverController.setRumble(RumbleType.kBothRumble, 1);
                     opController.setRumble(RumbleType.kBothRumble, 1);
 

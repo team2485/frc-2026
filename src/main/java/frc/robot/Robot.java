@@ -75,7 +75,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousExit() {}
-
+// nathan shelburn pls oil up
     @Override
     public void teleopInit() {
         if (m_autonomousCommand != null) {
@@ -103,3 +103,4 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationPeriodic() {}
 }
+//this code sux
