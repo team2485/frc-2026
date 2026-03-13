@@ -1,5 +1,7 @@
 package frc.robot;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
@@ -19,16 +21,18 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.robot.subsystems.drive.Drivetrain;
 
 public class Telemetry {
     private final double MaxSpeed;
 
+    private final Drivetrain m_drivetrain;
     /**
      * Construct a telemetry object, with the specified max speed of the robot
      * 
      * @param maxSpeed Maximum speed in meters per second
      */
-    public Telemetry(double maxSpeed) {
+    public Telemetry(double maxSpeed, Drivetrain drivetrain) {
         MaxSpeed = maxSpeed;
         SignalLogger.start();
 
@@ -36,6 +40,7 @@ public class Telemetry {
         for (int i = 0; i < 4; ++i) {
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
+        m_drivetrain = drivetrain;
     }
 
     /* What to publish over networktables for telemetry */
@@ -103,6 +108,16 @@ public class Telemetry {
         SignalLogger.writeStructArray("DriveState/ModuleTargets", SwerveModuleState.struct, state.ModuleTargets);
         SignalLogger.writeStructArray("DriveState/ModulePositions", SwerveModulePosition.struct, state.ModulePositions);
         SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
+
+        var modules = m_drivetrain.getModules();
+        for(int i = 0; i < 4; i++) {
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerCurrent", modules[i].getSteerMotor().getStatorCurrent().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveCurrent", modules[i].getDriveMotor().getStatorCurrent().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerVoltage", modules[i].getSteerMotor().getMotorVoltage().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveVoltage", modules[i].getDriveMotor().getMotorVoltage().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerVelocity", modules[i].getSteerMotor().getVelocity().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveVelocity", modules[i].getDriveMotor().getVelocity().getValueAsDouble());
+        }
 
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");

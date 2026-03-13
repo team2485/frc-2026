@@ -20,15 +20,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
-    private Pose3d Anubis = new Pose3d();
+    // private Pose3d Anubis = new Pose3d();
 
     private final RobotContainer m_robotContainer;
 
     
     /* log and replay timestamp and joystick data */
-    private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
-        .withTimestampReplay()
-        .withJoystickReplay();
+    // private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay().withTimestampReplay().withJoystickReplay(); // Phoenixtuner logging
 
     public Robot() {
         m_robotContainer = new RobotContainer();
@@ -36,7 +34,7 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("2485 2026 Sim", "Overclocked" ); // Set a metadata value
 
         if (isReal()) {
-            // Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs/67/poop/67")
+            Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs")); // Log to RoboRIO
             Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
         } else {
              setUseTiming(false); // Run as fast as possible
