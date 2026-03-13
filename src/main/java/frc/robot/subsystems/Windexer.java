@@ -123,7 +123,7 @@ public class Windexer extends SubsystemBase {
   public void runControlLoop() {
 
   if (m_talon.getDeviceTemp().getValueAsDouble() >= 60) {
-                System.out.println("SPINDEXER OVERHEAT!!");
+                System.err.println("SPINDEXER OVERHEAT!!");
 
                 m_talon.setControl(new NeutralOut());
 

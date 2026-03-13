@@ -67,6 +67,7 @@ public class AutoStateMachine extends SubsystemBase {
     m_Chooser.setDefaultOption("OutpostSideShoot", "BSideSimple");
     m_Chooser.addOption("DepotSideShoot", "TopSideSimple");
     m_Chooser.addOption("Mid Auto", "TSideMid");
+    m_Chooser.addOption("Topside Shoot to Mid", "TSideShootToMid");
 
     // m_Chooser.addOption("Test2", "MoveAndShoot");
 
@@ -136,6 +137,7 @@ public class AutoStateMachine extends SubsystemBase {
             PathPlannerPath.fromPathFile("TSideIntakeToShoot")
 
     });
+    autoMap.put("TSideShootToMid", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TSideShootMid"), PathPlannerPath.fromPathFile("TSideMidToZone"), PathPlannerPath.fromPathFile("TSideZoneToMid"), PathPlannerPath.fromPathFile("TSideZoneToDepot")});
         
         
     } catch (Exception e) {
@@ -149,7 +151,7 @@ public class AutoStateMachine extends SubsystemBase {
   double startShootingTime = -1;
   double waitStartTime = -1;
   @Override
-  public void periodic (){
+  public void periodic(){
     if(!DriverStation.isAutonomousEnabled()){
         m_currentState = AutoStates.StateInit;
         m_requestedState = AutoStates.StateInit;
@@ -166,8 +168,18 @@ public class AutoStateMachine extends SubsystemBase {
         case StateFollowingPath:
             if (FollowPathCommand.isFinished()){
                 if(m_requestedState == AutoStates.IdleToShooting || m_requestedState == AutoStates.StateWait){
-        
-                    PathNumber++;
+                    
+                    if(m_Chooser.getSelected().equals("TSideShootToMid")) {
+                        if((int)(DriverStation.getMatchTime()) < 2) {
+                            PathNumber += 2;
+                        }
+                        else {
+                            PathNumber++;
+                        }
+                    }
+                    else {
+                        PathNumber++;
+                    }
                     m_currentState = m_requestedState;                
                 }
                 else{
@@ -251,6 +263,9 @@ public class AutoStateMachine extends SubsystemBase {
 
                 m_requestedState = AutoStates.StateIdleToFollowingPath;
             }
+            break;
+        case FollowingToShooting:
+            // ??
             break;
         
     }
