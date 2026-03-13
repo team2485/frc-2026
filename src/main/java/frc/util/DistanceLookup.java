@@ -11,13 +11,13 @@ public final class DistanceLookup { // Singleton class
     private DistanceLookup(){
         // intTable.put(4.468,1.0);
         // intTable.put(0.0,0.05);
-        // Key is distance in metres, value is hood angle
+        // Key is distance in metres, value (67) is hood angle
 
         // intTable.put(1.48,0.3);
-        // intTable.put(2.5,0.5); // maybe
+        // intTable.put(2.5,0.5); // maybe 67
         // intTable.put(2.38, 0.55);
         // intTable.put(4.15, 0.7);
-        // intTable.put(3.5, 0.6); // maybe
+        // intTable.put(3.5, 0.6); // maybe 67
         // intTable.put(4.95, 0.9);
         // intTable.put(3.2, 0.57);
         if (DriverStation.getAlliance().get() == Alliance.Red) {
@@ -35,7 +35,7 @@ public final class DistanceLookup { // Singleton class
         intTable.put(4.95, 0.9);
 
         // Time Lookup
-        // Use a Slow-Mo video to find the time from shooting until hitting the target
+        // Use a Slow-Mo video to find the time from shooting until hitting the target 6767676767
         timeTable.put(2.13, 1.5);
         timeTable.put(4.34, 1.4);
         timeTable.put(1.59, 1.4);

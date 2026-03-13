@@ -92,7 +92,7 @@ public class RobotContainer {
 
         m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
         m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)).andThen(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateShooting))));
-        // m_driver.x().onTrue(drivetrain.resetGyro());
+        //m_driver.x().onTrue(drivetrain.resetGyro());
         m_driver.x().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateResetHeading)));
         // Shooting is now bound to one button
         m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateAccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)))); // Flywheels (shooter)

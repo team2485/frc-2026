@@ -36,7 +36,7 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("2485 2026 Sim", "Overclocked" ); // Set a metadata value
 
         if (isReal()) {
-            // Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+            // Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs/67/poop/67")
             Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
         } else {
              setUseTiming(false); // Run as fast as possible
@@ -77,7 +77,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousExit() {}
-
+// nathan shelburn pls oil up
     @Override
     public void teleopInit() {
         if (m_autonomousCommand != null) {
@@ -105,3 +105,4 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationPeriodic() {}
 }
+//this code sux

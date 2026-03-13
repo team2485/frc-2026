@@ -61,12 +61,14 @@ public class AutoStateMachine extends SubsystemBase {
 
   public AutoStateMachine (RobotContainer m_rc){
     Shuffleboard.getTab("Autos").add(m_Chooser);
-    m_Chooser.addOption("Bottom Side Shooting", "BSideShooting");
-    m_Chooser.addOption("Top Side Shooting", "TSideShooting");
-    m_Chooser.addOption("Test", "Straight");
-    m_Chooser.setDefaultOption("BSideShoot", "BSideSimple");
-    m_Chooser.addOption("Test2", "MoveAndShoot");
-    m_Chooser.addOption("TSideShoot", "TopSideSimple");
+    // m_Chooser.addOption("Outpost Side Shooting", "BSideShooting"); // outpost
+    // m_Chooser.addOption("Depot Shooting", "TSideShooting"); // depot
+    // m_Chooser.addOption("Test", "Straight");
+    m_Chooser.setDefaultOption("OutpostSideShoot", "BSideSimple");
+    m_Chooser.addOption("DepotSideShoot", "TopSideSimple");
+    m_Chooser.addOption("Mid Auto", "TSideMid");
+
+    // m_Chooser.addOption("Test2", "MoveAndShoot");
 
     final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
     try {
@@ -93,10 +95,21 @@ public class AutoStateMachine extends SubsystemBase {
     
     
     }) );
+    new EventTrigger("HoodDown").onTrue(new InstantCommand( () -> {
+        
+        
+        m_rc.m_angler.requestState(AnglerStates.StateZero);
+    
+    
+    }) );
     new EventTrigger("Shoot").onTrue(new InstantCommand( () -> startShooting()) );
     new EventTrigger("Wait").onTrue(new InstantCommand( () -> waitTime()) );
 
     try {
+        autoMap.put("TSideMid", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TSideTrenchShoot"), 
+            PathPlannerPath.fromPathFile("TSideShootMid"), 
+
+            });
         autoMap.put("BSideShooting", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("BTrenchToMid"), 
             PathPlannerPath.fromPathFile("BMidToShooting"), 
             PathPlannerPath.fromPathFile("BShootingToDepot")

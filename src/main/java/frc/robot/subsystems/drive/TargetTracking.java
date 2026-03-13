@@ -104,7 +104,14 @@ public class TargetTracking extends SubsystemBase {
 
                         m_drivetrain.getCurrentCommand().cancel();
                     }   
-                
+                    // if (DriverStation.getAlliance() == DriverStation.Alliance.Red)
+                    // {
+                    //     m_drivetrain.setOperatorPerspectiveForward(m_drivetrain.getPigeon2().getRotation2d().unaryMinus());
+                    // }
+                    // if ()
+                    // {
+                    //     CommandScheduler.getInstance().schedule(m_drivetrain.resetGyro());
+                    // }
                     // m_drivetrain.runOnce(m_drivetrain::seedFieldCentric);
                     // m_drivetrain.seedFieldCentric();
                     CommandScheduler.getInstance().schedule(m_drivetrain.resetGyro());
@@ -135,7 +142,7 @@ public class TargetTracking extends SubsystemBase {
                                                                                                           // (left)
                                         .withRotationalRate(-driverController.getRightX() * Constants.MaxAngularRate) // Drive
                                                                                                                       // counterclockwise
-                                                                                                                      // with
+                                                                                                                    // with
                                                                                                                       // negative
                                                                                                                       // X
                                                                                                                       // (left)
