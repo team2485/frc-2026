@@ -23,16 +23,30 @@ public final class DistanceLookup { // Singleton class
         if (DriverStation.getAlliance().get() == Alliance.Red) {
             // distancesOffset *= -1;
         }
-        intTable.put(1.12, 0.25+distancesOffset);
-        intTable.put(1.48,0.35+distancesOffset);
-        intTable.put(1.98, 0.42+distancesOffset);
-        intTable.put(2.49, 0.45+distancesOffset);
-        intTable.put(2.90, .54+distancesOffset);
-        intTable.put(3.252, .59+distancesOffset);
-        intTable.put(3.55,0.61+distancesOffset);
-        intTable.put(4.0, 0.65+distancesOffset);
-        intTable.put(4.45, .747);
-        intTable.put(4.95, 0.9);
+        // intTable.put(1.12, 2*0.25+distancesOffset);
+        // intTable.put(1.48,2*0.35+distancesOffset);
+        // intTable.put(1.98, 2*0.42+distancesOffset);
+        // intTable.put(2.49, 2*0.45+distancesOffset);
+        // intTable.put(2.90, 2*.54+distancesOffset);
+        // intTable.put(3.252, 2*.59+distancesOffset);
+        // intTable.put(3.55,2*0.61+distancesOffset);
+        // intTable.put(4.0, 2*0.65+distancesOffset);
+        // intTable.put(4.45, 2*.747);
+        // intTable.put(4.95, 2*0.9);
+        intTable.put(1.029, .2);
+        intTable.put(1.96, 0.477);
+        intTable.put(2.743, .63);
+        intTable.put(3.3, .75);
+        // intTable.put(2.743, .63);.0
+        intTable.put(4.62, 1.1);
+        intTable.put(5.0, 1.1);
+        intTable.put(3.74, .903);
+
+
+        
+        // intTable.put(2.743, .63);
+
+        // intTable.put(2.743, .63);
 
         // Time Lookup
         // Use a Slow-Mo video to find the time from shooting until hitting the target 6767676767

@@ -7,6 +7,12 @@
         {
           "type": "path",
           "data": {
+            "pathName": "TSideTrenchShoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "TSideShootMid"
           }
         },

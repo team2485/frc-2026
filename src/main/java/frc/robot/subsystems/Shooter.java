@@ -14,6 +14,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+import frc.robot.RobotContainer;
+
 import static frc.robot.Constants.ShooterConstants.*;
 
 public class Shooter extends SubsystemBase {
@@ -39,6 +42,7 @@ public class Shooter extends SubsystemBase {
     private double desiredVelocity = 0;
     private final Follower requestRight = (new Follower(22, MotorAlignmentValue.Opposed));
     private final MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0).withSlot(0);
+    public RobotContainer m_rc;
     // private GenericEntry stateLog =
     // Shuffleboard.getTab("Roller").addString("Roller State", "blah").;
     // public static GenericEntry state = Shuffleboard.getTab("Roller").add("State
@@ -52,9 +56,9 @@ public class Shooter extends SubsystemBase {
 
     // Unit default for TalonFX libraries is rotations
 
-    public Shooter() {
+    public Shooter(RobotContainer rc) {
         // Misc setup goes here
-        
+        m_rc=rc;
         var talonFXConfigs = new TalonFXConfiguration();
         // These will be derived experimentally but in case you are wondering
         // How these terms are defined from the TalonFX docs
@@ -65,9 +69,9 @@ public class Shooter extends SubsystemBase {
         // kD outputs n volts when the velocity error is 1 rotation per second
         var slot0Configs = talonFXConfigs.Slot0;
         
-        slot0Configs.kP = kPShooter;
-        slot0Configs.kI = kIShooter;
-        slot0Configs.kD = kDShooter;
+        slot0Configs.kP = 0;
+        slot0Configs.kI = 0;
+        slot0Configs.kD = 0;
         slot0Configs.kV = kVShooter;
         slot0Configs.kA = kAShooter;
 
@@ -110,7 +114,21 @@ public class Shooter extends SubsystemBase {
                 desiredVelocity = 0;
                 break;
             case StateAccelerating:
-                desiredVelocity = 100;
+                double dist = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                if(dist > 4){
+                    desiredVelocity = 80;
+                    
+                }
+                else if(dist >3){
+
+                    desiredVelocity = 65;
+
+
+                
+                }else{
+                    desiredVelocity = 50;
+
+                }
                 m_ShooterRequestedState = ShooterStates.StateShooting;
                 break;
             case StateDeccelerating:
@@ -118,7 +136,21 @@ public class Shooter extends SubsystemBase {
                 m_ShooterRequestedState = ShooterStates.StateOff;
                 break;
             case StateShooting:
-                desiredVelocity = 100;
+                double dist2 = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                if(dist2 > 4){
+                    desiredVelocity = 85;
+                    
+                }
+                else if(dist2 >3){
+
+                    desiredVelocity = 65;
+
+
+                
+                }else{
+                    desiredVelocity = 50;
+
+                }
                 break;
         }
         if(m_ShooterRequestedState == ShooterStates.StateAccelerating || m_ShooterRequestedState == ShooterStates.StateDeccelerating){
@@ -147,7 +179,13 @@ public class Shooter extends SubsystemBase {
     public void runControlLoop() {
         // currentLog.setDouble(m_talon.getSupplyCurrent().getValueAsDouble());
         // veloLog.setDouble(m_talon.getVelocity().getValueAsDouble());
+        if(m_talonLeft.getDeviceTemp().getValueAsDouble() > 50){
 
+            m_talonLeft.set(0);
+            m_talonRight.set(0);
+            return;
+
+        }
         if(desiredVelocity == 0){
             m_talonLeft.setVoltage(0);
             m_talonRight.setVoltage(0);

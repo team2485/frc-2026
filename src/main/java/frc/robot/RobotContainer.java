@@ -45,12 +45,12 @@ public class RobotContainer {
             () -> m_drivetrain.getState().ModulePositions,
             () -> m_drivetrain.getKinematics().toChassisSpeeds(m_drivetrain.getState().ModuleStates), m_drivetrain);
 //     public final PIDController m_PidController = 
-    public final Shooter m_shooter = new Shooter();
+    public final Shooter m_shooter = new Shooter(this);
     public final Feeder m_feeder = new Feeder();
     public final Intake m_intake = new Intake();
 
     public final TargetTracking tracker = new TargetTracking(this, m_drivetrain, m_poseEstimation, m_driver, m_operator, drive);
-    public final Angler m_angler = new Angler(m_drivetrain,tracker,this);
+    public final Angler m_angler = new Angler(m_drivetrain,tracker,this,m_shooter);
     public final Windexer m_windexer = new Windexer(this);
     public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
     // public final AutoStateMachine autoController = new AutoStateMachine(this);

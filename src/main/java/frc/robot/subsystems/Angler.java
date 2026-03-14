@@ -25,7 +25,6 @@ import static frc.robot.Constants.AnglerConstants.*;
 
 public class Angler extends SubsystemBase {
   // Misc variables for specific subsystem go here
-  public Shooter m_shooter = new Shooter();
   // Enum representing all of the states the subsystem can be in
   public enum AnglerStates {
     StateZero,
@@ -62,8 +61,10 @@ public class Angler extends SubsystemBase {
 
   // Unit default for TalonFX libraries is rotations
   private double desiredPosition = 0;
+  public Shooter m_shooter ;//= new Shooter();
 
-  public Angler(Drivetrain drive, TargetTracking tt, RobotContainer rc) {
+  public Angler(Drivetrain drive, TargetTracking tt, RobotContainer rc,Shooter shooter) {
+    m_shooter=shooter;
     m_drivetrain = drive;
     m_TargetTracking = tt;
     m_robotContainer = rc;
@@ -106,7 +107,7 @@ public class Angler extends SubsystemBase {
 
     m_talon.setPosition(0);
   }
-
+  double rangeBoost = 0;
   boolean increased = false;
 
   @Override
@@ -118,9 +119,9 @@ public class Angler extends SubsystemBase {
       case StateAuto:
         // m_drivetrain.getState().Pose.getTranslation()
         double dist = m_TargetTracking.getAimPose().getTranslation().getDistance(m_drivetrain.getState().Pose.getTranslation());
-        desiredPosition = lookupTable.getValue(dist);
+        desiredPosition = lookupTable.getValue(dist ) +rangeBoost;
         break;
-      case StateMid:
+       case StateMid:
         desiredPosition = .5;
         break;
       case StateMax:
@@ -150,14 +151,15 @@ public class Angler extends SubsystemBase {
         }
         break;
       case StateAmplify:
-        increased = !increased;
+        // increased = !increased;
+        rangeBoost+=.01;
         m_AnglerRequestedState = AnglerStates.StateAuto;
         break;
     }
     if (increased) {
-      desiredPosition += 0.03;
+      // desiredPosition += 0.03;
     }
-    // System.out.println("Hood: " + desiredPosition);
+    System.out.println("Hood: " + desiredPosition);
     desiredPosition *= 23; // gear ratio
     desiredPosition += 3 * ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173); // what is this
 

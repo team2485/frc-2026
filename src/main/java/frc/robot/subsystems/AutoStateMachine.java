@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.TreeMap;
 
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.utility.WheelForceCalculator.Feedforwards;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -34,6 +35,7 @@ import frc.robot.subsystems.Angler.AnglerStates;
 import frc.robot.subsystems.Feeder.FeederStates;
 import frc.robot.subsystems.Intake.IntakeStates;
 import frc.robot.subsystems.Shooter.ShooterStates;
+import frc.robot.subsystems.Windexer.WindexerStates;
 import frc.robot.subsystems.drive.TargetTracking.TargetingStates;
 
 public class AutoStateMachine extends SubsystemBase {
@@ -137,7 +139,7 @@ public class AutoStateMachine extends SubsystemBase {
             PathPlannerPath.fromPathFile("TSideIntakeToShoot")
 
     });
-    autoMap.put("TSideShootToMid", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TSideShootMid"), PathPlannerPath.fromPathFile("TSideMidToZone"), PathPlannerPath.fromPathFile("TSideZoneToMid"), PathPlannerPath.fromPathFile("TSideZoneToDepot")});
+    autoMap.put("TSideShootToMid", new PathPlannerPath[]{  PathPlannerPath.fromPathFile("TSideTrenchShoot"),PathPlannerPath.fromPathFile("TSideShootMid"), PathPlannerPath.fromPathFile("TSideMidToZone"), PathPlannerPath.fromPathFile("TSideZoneToMid"), PathPlannerPath.fromPathFile("TSideZoneToDepot")});
         
         
     } catch (Exception e) {
@@ -171,7 +173,7 @@ public class AutoStateMachine extends SubsystemBase {
                     
                     if(m_Chooser.getSelected().equals("TSideShootToMid")) {
                         if((int)(DriverStation.getMatchTime()) < 2) {
-                            PathNumber += 2;
+                            PathNumber += 1;
                         }
                         else {
                             PathNumber++;
@@ -244,11 +246,14 @@ public class AutoStateMachine extends SubsystemBase {
             if(FollowPathCommand != null){
                 FollowPathCommand.cancel();
             }
-            m_RobotContainer.tracker.requestState(TargetingStates.StateDriveToAimTransition);
+            // m_RobotContainer.m_drivetrain.applyRequest();
+            // m_RobotContainer.tracker.requestState(TargetingStates.StateDriveToAimTransition);
             m_RobotContainer.m_feeder.requestState(FeederStates.StateFeeding);
             m_RobotContainer.m_angler.requestState(AnglerStates.StateAuto);
             m_RobotContainer.m_shooter.requestState(ShooterStates.StateShooting);
             m_RobotContainer.m_intake.requestState(IntakeStates.StateRetracted);
+            m_RobotContainer.m_windexer.requestState(WindexerStates.StateFeed);
+
             startShootingTime = System.currentTimeMillis();
             m_requestedState = AutoStates.StateShooting;
             break;

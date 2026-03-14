@@ -121,14 +121,14 @@ public class Windexer extends SubsystemBase {
   runControlLoop();
   }   
   public void runControlLoop() {
+      m_talon.set(desiredVelocity/100);
+      if (m_talon.getDeviceTemp().getValueAsDouble() >= 60) {
+            System.err.println("SPINDEXER OVERHEAT!!");
 
-  if (m_talon.getDeviceTemp().getValueAsDouble() >= 60) {
-                System.err.println("SPINDEXER OVERHEAT!!");
+            m_talon.setControl(new NeutralOut());
 
-                m_talon.setControl(new NeutralOut());
-
-                return;
-            }
+            return;
+        }
   }
   
   // example of a "setter" method
