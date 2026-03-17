@@ -110,7 +110,8 @@ public class AutoStateMachine extends SubsystemBase {
 
     try {
         autoMap.put("TSideMid", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TSideTrenchShoot"), 
-            PathPlannerPath.fromPathFile("TSideShootMid"), 
+            PathPlannerPath.fromPathFile("TSideShootMid"),  PathPlannerPath.fromPathFile("TSideMidToZone"),
+            PathPlannerPath.fromPathFile("TSideZoneToMid"), 
 
             });
         autoMap.put("BSideShooting", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("BTrenchToMid"), 
@@ -259,7 +260,7 @@ public class AutoStateMachine extends SubsystemBase {
             break;
         case StateShooting:
             System.out.println("SHOOTING IN AUTO");
-            if(System.currentTimeMillis() - startShootingTime > ((ballCountEstimate*300)+500)){ // times out the shooting
+            if(System.currentTimeMillis() - startShootingTime > ((ballCountEstimate*100)+500)){ // times out the shooting
 
                 m_requestedState = AutoStates.StateIdleToFollowingPath;
                 

@@ -61,11 +61,11 @@ public class Windexer extends SubsystemBase {
     else motorOutputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
     motorOutputConfigs.NeutralMode = NeutralModeValue.Coast;
 
-    m_talon.getConfigurator().apply(talonFXConfigs);
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 100;// edit later
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 50;// edit later
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 80;// edit later
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;// edit later
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
+    m_talon.getConfigurator().apply(talonFXConfigs);
 
     m_windexerCurrentState = WindexerStates.StateZero;
     m_windexerRequestedState = WindexerStates.StateZero;
@@ -79,26 +79,44 @@ public class Windexer extends SubsystemBase {
           break;
       case StateFeed:
           // remember to change this
-          desiredVelocity = 35;
+            if(m_talon.getStatorCurrent().getValueAsDouble()> 30 && Math.abs(m_talon.getVelocity().getValueAsDouble()) < 5){
+
+              desiredVelocity = -55;
+
+
+            }
+            else{
+              desiredVelocity = 55;
+
+            }
+
           break;
       case StateReverse:
           desiredVelocity = -25;
           break;
       case StateAutomatedEnable:
           if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting ){
+            if(m_talon.getStatorCurrent().getValueAsDouble()> 30 && Math.abs(m_talon.getVelocity().getValueAsDouble()) < 5){
 
-            desiredVelocity = 35;
+              desiredVelocity = -55;
+
+
+            }
+            else{
+              desiredVelocity = 55;
+
+            }
 
 
           }
           else{
-            // desiredVelocity =0 ;
+            desiredVelocity =0 ;
 
           }
 
           break;
       case StateAutomatedOff:
-          //desiredVelocity = 0;
+          desiredVelocity = 0;
           break;
       default:
       break;

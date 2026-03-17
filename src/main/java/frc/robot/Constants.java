@@ -452,7 +452,7 @@ public class Constants {
         }
 
         public static final class WindexerConstants {
-                public static final boolean kWindexerClockwisePositive = false;
+                public static final boolean kWindexerClockwisePositive = true;
 
                 public static final double kPWindexer = 1;
                 public static final double kIWindexer = 0.0;
@@ -469,11 +469,11 @@ public class Constants {
                 public static final double kVIntakeRoller = 0.12;
                 public static final double kAIntakeRoller = 0.012;
 
-                public static final double kPIntakeWinch = 2;
+                public static final double kPIntakeWinch = 0.2;
                 public static final double kIIntakeWinch = 0;
                 public static final double kDIntakeWinch = 0;
-                public static final double kVIntakeWinch = .25;
-                public static final double kAIntakeWinch = 0.1;
+                public static final double kVIntakeWinch = .03; //change it to lower value (.23)
+                public static final double kAIntakeWinch = .0025; //maybe lower this a bit too
         }
 
         public static final class ClimberConstants {
