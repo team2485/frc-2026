@@ -29,6 +29,7 @@ public class Shooter extends SubsystemBase {
         StateAccelerating,
         StateDeccelerating,
         StateShooting,
+        StatePass
 
     }
     public static final double kShooterTolernace = 20;//rps
@@ -116,12 +117,12 @@ public class Shooter extends SubsystemBase {
             case StateAccelerating:
                 double dist = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
                 if(dist > 4){
-                    desiredVelocity = 80;
+                    desiredVelocity = 70;
                     
                 }
                 else if(dist >3){
 
-                    desiredVelocity = 65;
+                    desiredVelocity = 57;
 
 
                 
@@ -135,15 +136,32 @@ public class Shooter extends SubsystemBase {
                 desiredVelocity = 0;
                 m_ShooterRequestedState = ShooterStates.StateOff;
                 break;
+            case StatePass:
+                 double distPass = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                if(distPass > 4){
+                    desiredVelocity = 96.7;
+                    
+                }
+                else if(distPass >3){
+
+                    desiredVelocity = 76;
+
+
+                
+                }else{
+                    desiredVelocity = 67;
+
+                }
+                break;
             case StateShooting:
                 double dist2 = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
                 if(dist2 > 4){
-                    desiredVelocity = 85;
+                    desiredVelocity = 70;
                     
                 }
                 else if(dist2 >3){
 
-                    desiredVelocity = 65;
+                    desiredVelocity = 57;
 
 
                 

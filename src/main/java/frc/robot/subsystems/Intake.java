@@ -59,6 +59,7 @@ import com.ctre.phoenix6.controls.Follower;
 public class Intake extends SubsystemBase {
     private IntakeStates m_IntakeRequestedState;
     private IntakeStates m_IntakeCurrentState;
+    private IntakeBackAndForthSubstates m_IntakeCurrentJiggleState;
     private final TalonFX m_talon_Roll = new TalonFX(26, "Other");
     // private final TalonFX m_talon_L = new TalonFX(25, "Other");
     private final TalonFX m_talon_winchR = new TalonFX(27, "Other");
@@ -98,7 +99,14 @@ public class Intake extends SubsystemBase {
         StateSlowRetract,
         StateExtendedIdlingWheels,
         StateRetracting,
-        StateShooting
+        StateShooting,
+    }
+
+    public enum IntakeBackAndForthSubstates {
+        StateGoingOut,
+        StateGoingIn,
+        StateOut,
+        StateIn
     }
 
     public Intake() {
@@ -177,6 +185,7 @@ public class Intake extends SubsystemBase {
 
         m_IntakeCurrentState = IntakeStates.StateRetracted;
         m_IntakeRequestedState = IntakeStates.StateRetracted;
+        m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateIn;
     }
 
     boolean RReeled = false;
@@ -184,6 +193,7 @@ public class Intake extends SubsystemBase {
 
     // int time = 0;
     boolean slow = false;
+    
 
     @Override
     public void periodic() {
@@ -219,6 +229,37 @@ public class Intake extends SubsystemBase {
                 extendedIntake = true;
                 desiredRollerVelocity=0;
                 break;
+            case StateShooting:
+                switch(m_IntakeCurrentJiggleState) {
+                    case StateGoingIn:
+                             System.out.println("Going INN!!!" + m_talon_winchL.getPosition().getValueAsDouble());
+
+                        if(m_talon_winchL.getPosition().getValueAsDouble() >= -0.2 && m_talon_winchR.getPosition().getValueAsDouble() >= -0.2) {
+                            m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateIn;
+                        }
+                    break;
+                    case StateGoingOut:
+                            System.out.println("Going OUT!!!" + m_talon_winchL.getPosition().getValueAsDouble());
+
+                        if(m_talon_winchL.getPosition().getValueAsDouble() <= (-25) && m_talon_winchR.getPosition().getValueAsDouble() <= (-25 - 0.1)) {
+                            m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateOut;
+                        }
+                    break;
+                    case StateIn:
+                        m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateGoingOut;
+                        desiredPosition = -30;
+                        extendedIntake = !extendedIntake;
+                         System.out.println("INNN!!!" + m_talon_winchL.getPosition().getValueAsDouble());
+                    break;
+                    case StateOut:
+                       desiredPosition = -.5;
+                                               extendedIntake = !extendedIntake;
+
+                        m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateGoingIn;
+                         System.out.println("OUT!!!" + m_talon_winchL.getPosition().getValueAsDouble());
+                    break;
+                }
+                break;
             case StateSlowRetract:
                 desiredWinchVelocity = 0;
                 desiredRollerVelocity = 0;
@@ -242,11 +283,6 @@ public class Intake extends SubsystemBase {
                 slow = false;
                 desiredWinchVelocity = 0;
                 desiredRollerVelocity = 80;
-                break;
-            case StateShooting:
-                // extendedIntake = false;
-                // slow=false; 
-                desiredRollerVelocity = 0;
                 break;
             case StateOuttaking:
                 extendedIntake = true;
@@ -315,18 +351,19 @@ public class Intake extends SubsystemBase {
                 return;
             }
 
-            if (extendedIntake) {
+            if (extendedIntake && m_IntakeCurrentState != IntakeStates.StateShooting ) {
                 // m_talon_winchL.setControl(posWinchRequestL.withPosition(desiredPosition));
                 // m_talon_winchR.setControl(posWinchRequestR.withPosition(5));
                 desiredPosition = (-18 * 3);
-            } else if (m_IntakeCurrentState != IntakeStates.StateStartup) {
+            } else if (m_IntakeCurrentState != IntakeStates.StateStartup && m_IntakeCurrentState != IntakeStates.StateShooting ) {
                 desiredPosition = .1;
                 // m_talon_winchL.setControl(posWinchRequestL.withPosition(0.1));
                 // m_talon_winchR.setControl(posWinchRequestR.withPosition(0.1));
             }
+            System.out.println(desiredPosition);
             posWinchRequestL.Position = desiredPosition;
             posWinchRequestR.Position = desiredPosition;
-            if (extendedIntake != lastExtended) {
+            // if (extendedIntake != lastExtended){// && m_IntakeCurrentState != IntakeStates.StateShooting) {
                 if(Math.abs(Math.abs(m_talon_winchL.getPosition().getValueAsDouble()) - Math.abs(m_talon_winchR.getPosition().getValueAsDouble())) > 12 ){
                     m_talon_winchL.set(0);
                     m_talon_winchR.set(0);
@@ -337,11 +374,11 @@ public class Intake extends SubsystemBase {
                     m_talon_winchL.setControl(posWinchRequestL.withVelocity(15).withAcceleration(20).withPosition(desiredPosition));
                     m_talon_winchR.setControl(posWinchRequestR.withVelocity(15).withAcceleration(20).withPosition(desiredPosition));
                 } else {
-                    m_talon_winchL.setControl(posWinchRequestL.withVelocity(55).withAcceleration(80).withPosition(desiredPosition));
-                    m_talon_winchR.setControl(posWinchRequestR.withVelocity(55).withAcceleration(80).withPosition(desiredPosition));
+                    m_talon_winchL.setControl(posWinchRequestL.withVelocity(65).withAcceleration(115).withPosition(desiredPosition));
+                    m_talon_winchR.setControl(posWinchRequestR.withVelocity(65).withAcceleration(115).withPosition(desiredPosition));
                     // m_talon_Roll.setControl(velRollerRequest.withVelocity(desiredRollerVelocity));
                 }
-            }
+            // }
 
             lastExtended = extendedIntake;
         }

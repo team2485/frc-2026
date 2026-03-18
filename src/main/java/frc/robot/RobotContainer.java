@@ -86,8 +86,11 @@ public class RobotContainer {
         // m_driver.y().onTrue(() ->
         // tracker.requestState(TargetingStates.StateDriverControlled));
 
-        m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
-        m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)).andThen(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateShooting))));
+        m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)).andThen(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted))));
+        m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)).andThen(new InstantCommand(() -> System.out.print("hi"))));
+        m_driver.povDown().onTrue((new InstantCommand(() -> m_intake.requestState(IntakeStates.StateShooting))));
+
+        m_driver.a().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StatePass)));
         // m_driver.x().onTrue(m_drivetrain.resetGyro());
         m_driver.x().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateResetHeading)));
         // Shooting is now bound to one button
@@ -117,7 +120,7 @@ public class RobotContainer {
         m_driver.b().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateOuttaking)));
 
         m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFeed)));
-        m_operator.leftBumper().onFalse(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFeed)));
+        m_operator.leftBumper().onFalse(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero)));
 
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero))); // These overide the auto windexer control
