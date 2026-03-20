@@ -246,7 +246,16 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
         return;
     }
     public Command resetGyro() {
-        return new InstantCommand( () -> this.setOperatorPerspectiveForward(this.getPigeon2().getRotation2d())); // .rotateBy(new Rotation2d(Math.PI/2.0))
+        if(DriverStation.getAlliance().get() == Alliance.Red){
+
+
+        return new InstantCommand( () -> this.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180))).andThen(new InstantCommand( () -> seedFieldCentric()) ); // .rotateBy(new Rotation2d(Math.PI/2.0))
+
+        }
+        else{
+        return new InstantCommand( () -> this.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0))).andThen(new InstantCommand( () -> seedFieldCentric()) ); // .rotateBy(new Rotation2d(Math.PI/2.0))
+
+        }
         // return new InstantCommand( () -> System.out.println("reset please"));
     }
 }
