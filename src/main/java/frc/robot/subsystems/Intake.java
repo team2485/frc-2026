@@ -233,32 +233,34 @@ public class Intake extends SubsystemBase {
                 switch(m_IntakeCurrentJiggleState) {
                     case StateGoingIn:
                              System.out.println("Going INN!!!" + m_talon_winchL.getPosition().getValueAsDouble());
+                       desiredPosition = -.1;
 
-                        if(m_talon_winchL.getPosition().getValueAsDouble() >= -0.2 && m_talon_winchR.getPosition().getValueAsDouble() >= -0.2) {
+                        if(m_talon_winchL.getPosition().getValueAsDouble() >= -0.4 && m_talon_winchR.getPosition().getValueAsDouble() >= -0.4) {
                             m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateIn;
                         }
                     break;
                     case StateGoingOut:
                             System.out.println("Going OUT!!!" + m_talon_winchL.getPosition().getValueAsDouble());
 
-                        if(m_talon_winchL.getPosition().getValueAsDouble() <= (-25) && m_talon_winchR.getPosition().getValueAsDouble() <= (-25 - 0.1)) {
+                        if(m_talon_winchL.getPosition().getValueAsDouble() <= (-29) && m_talon_winchR.getPosition().getValueAsDouble() <= (-29 - 0.1)) {
                             m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateOut;
                         }
                     break;
                     case StateIn:
                         m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateGoingOut;
-                        desiredPosition = -30;
+                        desiredPosition = -35;
                         extendedIntake = !extendedIntake;
                          System.out.println("INNN!!!" + m_talon_winchL.getPosition().getValueAsDouble());
                     break;
                     case StateOut:
-                       desiredPosition = -.5;
+                       desiredPosition = -.1;
                                                extendedIntake = !extendedIntake;
 
                         m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateGoingIn;
                          System.out.println("OUT!!!" + m_talon_winchL.getPosition().getValueAsDouble());
                     break;
                 }
+                System.out.println(m_IntakeCurrentJiggleState);
                 break;
             case StateSlowRetract:
                 desiredWinchVelocity = 0;
