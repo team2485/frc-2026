@@ -86,11 +86,10 @@ public class RobotContainer {
         // m_driver.y().onTrue(() ->
         // tracker.requestState(TargetingStates.StateDriverControlled));
 
-        m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)).andThen(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateRetracted))));
-        m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)).andThen(new InstantCommand(() -> System.out.print("hi"))));
+        m_driver.rightTrigger().onFalse(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriverControlled)));
+        m_driver.rightTrigger().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateDriveToAimTransition)));
         m_driver.povDown().onTrue((new InstantCommand(() -> m_intake.requestState(IntakeStates.StateShooting))));
 
-        m_driver.a().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StatePass)));
         // m_driver.x().onTrue(m_drivetrain.resetGyro());
         m_driver.x().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateResetHeading)));
         // Shooting is now bound to one button
@@ -98,6 +97,7 @@ public class RobotContainer {
         m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
         // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
         // m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
+        m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StatePass)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding))));
 
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1))); // Angler
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));

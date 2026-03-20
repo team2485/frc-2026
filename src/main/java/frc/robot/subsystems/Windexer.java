@@ -81,12 +81,12 @@ public class Windexer extends SubsystemBase {
           // remember to change this
             if(m_talon.getStatorCurrent().getValueAsDouble()> 30 && Math.abs(m_talon.getVelocity().getValueAsDouble()) < 5){
 
-              desiredVelocity = -55;
+              desiredVelocity = -67;
 
 
             }
             else{
-              desiredVelocity = 55;
+              desiredVelocity = 67;
 
             }
 
@@ -98,15 +98,14 @@ public class Windexer extends SubsystemBase {
           if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting ){
             if(m_talon.getStatorCurrent().getValueAsDouble()> 30 && Math.abs(m_talon.getVelocity().getValueAsDouble()) < 5){
 
-              desiredVelocity = -55;
+              desiredVelocity = -67;
 
 
             }
             else{
-              desiredVelocity = 55;
+              desiredVelocity = 67;
 
             }
-
 
           }
           else{
