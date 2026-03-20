@@ -66,8 +66,8 @@ public class AutoStateMachine extends SubsystemBase {
     // m_Chooser.addOption("Outpost Side Shooting", "BSideShooting"); // outpost
     // m_Chooser.addOption("Depot Shooting", "TSideShooting"); // depot
     // m_Chooser.addOption("Test", "Straight");
-    m_Chooser.setDefaultOption("OutpostSideShoot", "BSideSimple");
-    m_Chooser.addOption("DepotSideShoot", "TopSideSimple");
+    m_Chooser.setDefaultOption("Outpost Side Shoot", "BSideSimple");
+    m_Chooser.addOption("Depot Side Shoot", "TopSideSimple");
     m_Chooser.addOption("Mid Auto", "TSideMid");
     m_Chooser.addOption("Topside Shoot to Mid", "TSideShootToMid");
 
@@ -91,58 +91,55 @@ public class AutoStateMachine extends SubsystemBase {
     // m_Chooser.addOption("B Auto",autoPeriodicStates.MidScoreAutoV2);  // 
     m_RobotContainer = m_rc;
     new EventTrigger("DeployIntake").onTrue(new InstantCommand( () -> {
-        
-        
         m_rc.m_intake.requestState(IntakeStates.StateIntaking);
         ballCountEstimate += 24;
-    
-    
     }) );
     new EventTrigger("HoodDown").onTrue(new InstantCommand( () -> {
-        
-        
         m_rc.m_angler.requestState(AnglerStates.StateZero);
-    
-    
     }) );
     new EventTrigger("Shoot").onTrue(new InstantCommand( () -> startShooting()) );
     new EventTrigger("Wait").onTrue(new InstantCommand( () -> waitTime()) );
 
     try {
-        autoMap.put("TSideMid", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TSideTrenchShoot"), 
-            PathPlannerPath.fromPathFile("TSideShootMid"),  PathPlannerPath.fromPathFile("TSideMidToZone"),
+        autoMap.put("TSideMid", new PathPlannerPath[]{ 
+            PathPlannerPath.fromPathFile("TSideTrenchShoot"), 
+            PathPlannerPath.fromPathFile("TSideShootMid"),
+            PathPlannerPath.fromPathFile("TSideMidToZone"),
             PathPlannerPath.fromPathFile("TSideZoneToMid"), 
-
             });
-        autoMap.put("BSideShooting", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("BTrenchToMid"), 
+        autoMap.put("BSideShooting", new PathPlannerPath[]{ 
+            PathPlannerPath.fromPathFile("BTrenchToMid"), 
             PathPlannerPath.fromPathFile("BMidToShooting"), 
             PathPlannerPath.fromPathFile("BShootingToDepot")
             });
-        autoMap.put("MoveAndShoot", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("MoveAndShoot"), 
+        autoMap.put("MoveAndShoot", new PathPlannerPath[]{ 
+            PathPlannerPath.fromPathFile("MoveAndShoot"), 
             PathPlannerPath.fromPathFile("ShootAndMoveback")
             });
-        autoMap.put("BSideSimple", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("BSideTrenchShoot"), 
+        autoMap.put("BSideSimple", new PathPlannerPath[]{ 
+            PathPlannerPath.fromPathFile("BSideTrenchShoot"), 
             PathPlannerPath.fromPathFile("BSideTrenchToDepot"),
             PathPlannerPath.fromPathFile("BSideDepotShoot")
-
             });
        // autoMap.get()
        autoMap.put("TSideShooting", new PathPlannerPath[]{ PathPlannerPath.fromPathFile("TTrenchToMid"), 
             PathPlannerPath.fromPathFile("TMidToShooting"), 
             PathPlannerPath.fromPathFile("TShootingToDepot"),
             PathPlannerPath.fromPathFile("TSideIntakeToShoot")
-
             });
         // TSideTrenchShoot TSideTrenchShootToIntake
         autoMap.put("Straight", new PathPlannerPath[] { PathPlannerPath.fromPathFile("Straight")});
-        autoMap.put("TopSideSimple", new PathPlannerPath[] { PathPlannerPath.fromPathFile("TSideTrenchShoot"),
-     PathPlannerPath.fromPathFile("TSideTrenchShootToIntake"),
+        autoMap.put("TopSideSimple", new PathPlannerPath[] { 
+            PathPlannerPath.fromPathFile("TSideTrenchShoot"),
+            PathPlannerPath.fromPathFile("TSideTrenchShootToIntake"),
             PathPlannerPath.fromPathFile("TSideIntakeToShoot")
-
     });
-    autoMap.put("TSideShootToMid", new PathPlannerPath[]{  PathPlannerPath.fromPathFile("TSideTrenchShoot"),PathPlannerPath.fromPathFile("TSideShootMid"), PathPlannerPath.fromPathFile("TSideMidToZone"), PathPlannerPath.fromPathFile("TSideZoneToMid"), PathPlannerPath.fromPathFile("TSideZoneToDepot")});
-        
-        
+    autoMap.put("TSideShootToMid", new PathPlannerPath[]{
+        PathPlannerPath.fromPathFile("TSideTrenchShoot"),
+        PathPlannerPath.fromPathFile("TSideShootMid"),
+        PathPlannerPath.fromPathFile("TSideMidToZone"),
+        PathPlannerPath.fromPathFile("TSideZoneToMid"),
+        PathPlannerPath.fromPathFile("TSideZoneToDepot")});
     } catch (Exception e) {
         // TODO: handle exception
         System.err.print("chud auto fail!");
@@ -277,9 +274,10 @@ public class AutoStateMachine extends SubsystemBase {
     }
     if(m_currentState != AutoStates.StateFollowingPath ){
 
-        m_currentState = m_requestedState;// temp
-
-
+        m_currentState = m_requestedState; // temp
+    }
+    if(PathNumber == 1) {
+        m_requestedState = AutoStates.IdleToShooting;
     }
     System.out.println("Current state : " + m_currentState.toString());
     System.out.println("Req state : " + m_requestedState.toString());

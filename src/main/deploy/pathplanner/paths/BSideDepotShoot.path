@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0942230130486363,
-        "y": 1.0816014234875444
+        "x": 1.903168190014238,
+        "y": 1.5811272798939782
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +20,8 @@
         "y": 1.490450771055754
       },
       "prevControl": {
-        "x": 1.696132858837486,
-        "y": 0.8126215895610913
+        "x": 1.641720464294214,
+        "y": 0.9265831553603405
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,18 @@
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 4.62,
+        "y": 4.01
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.2971830985915493,
+      "maxWaypointRelativePos": 1.0,
+      "name": "Point Towards Zone"
+    }
+  ],
   "eventMarkers": [
     {
       "name": "Shoot",
@@ -49,7 +60,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 28.539985187959932
+    "rotation": 55.53008969869136
   },
   "reversed": false,
   "folder": "GoodPaths",
