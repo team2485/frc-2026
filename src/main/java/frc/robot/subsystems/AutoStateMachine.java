@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -84,7 +83,6 @@ public class AutoStateMachine extends SubsystemBase {
          
          );
     } catch (Exception e) {
-        // TODO: handle exception
         System.err.println("AUTO ABORT DUE TO IO ERROR!");
     }
 
@@ -105,7 +103,7 @@ public class AutoStateMachine extends SubsystemBase {
             PathPlannerPath.fromPathFile("TSideTrenchShoot"), 
             PathPlannerPath.fromPathFile("TSideShootMid"),
             PathPlannerPath.fromPathFile("TSideMidToZone"),
-            PathPlannerPath.fromPathFile("TSideZoneToMid"), 
+            PathPlannerPath.fromPathFile("TSideZoneToMid"),
             });
         autoMap.put("BSideShooting", new PathPlannerPath[]{ 
             PathPlannerPath.fromPathFile("BTrenchToMid"), 
@@ -141,7 +139,6 @@ public class AutoStateMachine extends SubsystemBase {
         PathPlannerPath.fromPathFile("TSideZoneToMid"),
         PathPlannerPath.fromPathFile("TSideZoneToDepot")});
     } catch (Exception e) {
-        // TODO: handle exception
         System.err.print("chud auto fail!");
     }
 
@@ -161,8 +158,6 @@ public class AutoStateMachine extends SubsystemBase {
         case StateInit:
             chooser_val = m_Chooser.getSelected();
             m_requestedState=AutoStates.StateIdleToFollowingPath;
-            // m_RobotContainer.m_drivetrain.getPigeon2().setYaw(m_RobotContainer.m_poseEstimation.getVisionONLYPose().getRotation().getDegrees());
-            // m_RobotContainer.m_drivetrain.resetGyro();
             break;
     
         case StateFollowingPath:
@@ -180,7 +175,7 @@ public class AutoStateMachine extends SubsystemBase {
                     else {
                         PathNumber++;
                     }
-                    m_currentState = m_requestedState;                
+                    m_currentState = m_requestedState;          
                 }
                 else{
                     PathNumber++;
@@ -208,19 +203,16 @@ public class AutoStateMachine extends SubsystemBase {
             // m_RobotContainer.m_angler.requestState(AnglerStates.StateOff);
             m_RobotContainer.m_shooter.requestState(ShooterStates.StateOff);
 
-            // CommandScheduler.getInstance()
-            //             .schedule(m_RobotContainer.m_drivetrain.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()));
+            // CommandScheduler.getInstance().schedule(m_RobotContainer.m_drivetrain.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()));
             CommandScheduler.getInstance().cancelAll();
             if(!(autoMap.get(chooser_val).length -1 >= PathNumber)){
                 break;
             }
             PathToFollow = autoMap.get(chooser_val)[PathNumber];
             if(PathToFollow == null){
-
                 break;
-
             }
-            if(PathNumber ==0){
+            if(PathNumber == 0){
                 if(DriverStation.getAlliance().get() == Alliance.Blue){
 
                     m_RobotContainer.m_drivetrain.resetPose(PathToFollow.getStartingHolonomicPose().get() );
@@ -287,7 +279,7 @@ public class AutoStateMachine extends SubsystemBase {
   public void startShooting(){
     System.out.println("wants to shoot ");
     m_requestedState = AutoStates.IdleToShooting;
-   
+    
     // m_requestedState = AutoStates.IdleToShooting;
 
   }
