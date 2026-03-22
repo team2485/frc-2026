@@ -34,7 +34,7 @@ public class RobotContainer {
             .withDeadband(Constants.MaxSpeed * 0.1).withRotationalDeadband(Constants.MaxAngularRate * 0.1) // Add a 10%
                                                                                                            // deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-    // private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private final CommandXboxController m_driver = new CommandXboxController(0);
@@ -78,7 +78,7 @@ public class RobotContainer {
         final var idle = new SwerveRequest.Idle();
         RobotModeTriggers.disabled().whileTrue(m_drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-        // m_driver.a().whileTrue(m_drivetrain.applyRequest(() -> brake));
+        m_driver.a().whileTrue(m_drivetrain.applyRequest(() -> brake));
         // m_driver.b().whileTrue(m_drivetrain.applyRequest(() ->
         // point.withModuleDirection(new Rotation2d(-m_driver.getLeftY(),
         // -m_driver.getLeftX()))

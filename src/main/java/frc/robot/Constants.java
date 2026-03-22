@@ -112,7 +112,7 @@ public class Constants {
 
     // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
-    private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration().withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(110).withStatorCurrentLimitEnable(true));
+    private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration().withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(75).withStatorCurrentLimitEnable(true));
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
         .withCurrentLimits(
             new CurrentLimitsConfigs()
@@ -132,12 +132,12 @@ public class Constants {
     // Theoretical free speed (m/s) at 12 V applied output;
     // This needs to be tuned to your individual robot
     public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(4.54);
-        public static double MaxSpeed = .76767 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired 67 strat
+        public static double MaxSpeed = .9 * .6525 * Constants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired 67 strat
                                                                                              // top speed
         public static double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                         
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
-    // This may need to be tuned to your individual robot
+    // This may need to be tuned to your individual robot 67
     private static final double kCoupleRatio = 3.857142857142857;
 
     private static final double kDriveGearRatio = 7.026785714285714;
