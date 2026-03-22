@@ -20,8 +20,8 @@
         "y": 6.655
       },
       "prevControl": {
-        "x": 3.0414211150652433,
-        "y": 7.257514827995255
+        "x": 3.09453637660485,
+        "y": 7.302011412268189
       },
       "nextControl": null,
       "isLocked": false,
@@ -67,7 +67,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -56.61148642388856
+    "rotation": -48.32651057163876
   },
   "reversed": false,
   "folder": "GoodPaths",
