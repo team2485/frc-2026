@@ -138,16 +138,18 @@ public class AutoStateMachine extends SubsystemBase {
             });
             // TSideTrenchShoot TSideTrenchShootToIntake
             autoMap.put("Straight", new PathPlannerPath[] { PathPlannerPath.fromPathFile("Straight") });
+
             autoMap.put("TopSideSimple", new PathPlannerPath[] {
                     PathPlannerPath.fromPathFile("TSideTrenchShoot"),
                     PathPlannerPath.fromPathFile("TSideTrenchShootToIntake"),
-                    PathPlannerPath.fromPathFile("TSideIntakeToShoot")
+                    PathPlannerPath.fromPathFile("TSideIntakeToShoot"),
+                    PathPlannerPath.fromPathFile("TSideShootToTrench")
             });
             autoMap.put("TSideShootToMid", new PathPlannerPath[] {
                     PathPlannerPath.fromPathFile("TSideTrenchShoot"),
                     PathPlannerPath.fromPathFile("TSideShootMid"),
                     PathPlannerPath.fromPathFile("TSideMidToZone"),
-                    PathPlannerPath.fromPathFile("TSideZoneToMid"),
+                    PathPlannerPath.fromPathFile("TSideZoneToMid"),             
                     PathPlannerPath.fromPathFile("TSideZoneToDepot") });
         } catch (Exception e) {
             System.err.print("chud auto fail!");
@@ -255,18 +257,21 @@ public class AutoStateMachine extends SubsystemBase {
                 }
                 // m_RobotContainer.m_drivetrain.applyRequest();
                 // m_RobotContainer.tracker.requestState(TargetingStates.StateDriveToAimTransition);
-                m_RobotContainer.m_feeder.requestState(FeederStates.StateFeeding);
+                
                 m_RobotContainer.m_angler.requestState(AnglerStates.StateAuto);
                 m_RobotContainer.m_shooter.requestState(ShooterStates.StateShooting);
                 m_RobotContainer.m_intake.requestState(IntakeStates.StateRetracted);
-                m_RobotContainer.m_windexer.requestState(WindexerStates.StateFeed);
-
                 startShootingTime = System.currentTimeMillis();
                 m_requestedState = AutoStates.StateShooting;
                 m_currentState = m_requestedState;
                 break;
             case StateShooting:
                 System.out.println("SHOOTING IN AUTO");
+                if(System.currentTimeMillis() - startShootingTime > 250){
+                    m_RobotContainer.m_windexer.requestState(WindexerStates.StateFeed);
+                    m_RobotContainer.m_feeder.requestState(FeederStates.StateFeeding);  
+                    
+                }
                 if (System.currentTimeMillis() - startShootingTime > ((ballCountEstimate * 100) + 500)) { // times out
                                                                                                           // the
                                                                                                           // shooting

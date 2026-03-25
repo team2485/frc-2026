@@ -3,49 +3,43 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.6094543297746151,
-        "y": 5.815646500593119
+        "x": 2.385,
+        "y": 5.816
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.6094543297746169,
-        "y": 5.815646500593119
+        "x": 2.758131241084165,
+        "y": 6.745649072753209
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.3847212336892056,
-        "y": 5.815646500593119
+        "x": 6.678544935805993,
+        "y": 6.253980028530671
       },
       "prevControl": {
-        "x": 1.3847212336892056,
-        "y": 5.815646500593119
+        "x": 5.384679029957206,
+        "y": 8.789957203994291
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
-  "constraintZones": [],
-  "pointTowardsZones": [
+  "rotationTargets": [
     {
-      "fieldPosition": {
-        "x": 4.6,
-        "y": 4.0
-      },
-      "rotationOffset": 0.0,
-      "minWaypointRelativePos": 0.25,
-      "maxWaypointRelativePos": 1.0,
-      "name": "Point Towards Zone"
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -90.0
     }
   ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Shoot",
-      "waypointRelativePos": 0.8304042179261789,
+      "name": "DeployIntake",
+      "waypointRelativePos": 0.8644514767932339,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -60,13 +54,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -40.98863775197535
+    "rotation": -176.34777721922595
   },
   "reversed": false,
   "folder": "GoodPaths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -40.989
   },
   "useDefaultConstraints": true
 }

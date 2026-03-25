@@ -36,7 +36,7 @@ public final class DistanceLookup { // Singleton class
         intTable.put(1.029, .2+distancesOffset);
         intTable.put(1.96, 0.477+distancesOffset);
         intTable.put(2.743, .63+distancesOffset);
-        intTable.put(3.3, .75+distancesOffset);
+        intTable.put(3.3, .75+distancesOffset); //3.548238999842034
         // intTable.put(2.743, .63);.0
         intTable.put(4.62, 1.1+distancesOffset);
         intTable.put(5.0, 1.1+distancesOffset);

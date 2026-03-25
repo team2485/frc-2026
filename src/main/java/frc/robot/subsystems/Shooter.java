@@ -122,7 +122,7 @@ public class Shooter extends SubsystemBase {
                 }
                 else if(dist >3){
 
-                    desiredVelocity = 57;
+                    desiredVelocity = 63;
 
 
                 
@@ -161,7 +161,7 @@ public class Shooter extends SubsystemBase {
                 }
                 else if(dist2 >3){
 
-                    desiredVelocity = 57;
+                    desiredVelocity = 63;
 
 
                 
