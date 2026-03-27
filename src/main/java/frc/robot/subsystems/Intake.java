@@ -362,7 +362,7 @@ public class Intake extends SubsystemBase {
                 // m_talon_winchL.setControl(posWinchRequestL.withPosition(0.1));
                 // m_talon_winchR.setControl(posWinchRequestR.withPosition(0.1));
             }
-            System.out.println(desiredPosition);
+            // System.out.println(desiredPosition);
             posWinchRequestL.Position = desiredPosition;
             posWinchRequestR.Position = desiredPosition;
             // if (extendedIntake != lastExtended){// && m_IntakeCurrentState != IntakeStates.StateShooting) {
