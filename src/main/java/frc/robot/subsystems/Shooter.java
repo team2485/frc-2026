@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -39,9 +40,16 @@ public class Shooter extends SubsystemBase {
     // You may need more than one motor
     private final TalonFX m_talonLeft = new TalonFX(kShooterPortLeft, "Other");
     private final TalonFX m_talonRight = new TalonFX(kShooterPortRight, "Other");
+    private final TalonFX m_talonRightBot = new TalonFX(29, "Other");
+
+    private final TalonFX m_talonLeftBot = new TalonFX(23, "Other");
+
 
     private double desiredVelocity = 0;
-    private final Follower requestRight = (new Follower(22, MotorAlignmentValue.Opposed));
+    private final Follower requestRight = (new Follower(kShooterPortLeft, MotorAlignmentValue.Opposed));
+    private final Follower requestRightBot = (new Follower(kShooterPortLeft, MotorAlignmentValue.Opposed));
+
+    private final Follower requestLeftBot = (new Follower(kShooterPortLeft, MotorAlignmentValue.Aligned));
     private final MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0).withSlot(0);
     public RobotContainer m_rc;
     // private GenericEntry stateLog =
@@ -84,8 +92,8 @@ public class Shooter extends SubsystemBase {
         var motorOutputConfigs = talonFXConfigs.MotorOutput;
         talonFXConfigs.CurrentLimits.SupplyCurrentLowerTime = 0;
         talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 80;
-        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 160;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 70;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;
         talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
         if (kShooterLeftClockwisePositive)
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
@@ -127,7 +135,7 @@ public class Shooter extends SubsystemBase {
 
                 
                 }else{
-                    desiredVelocity = 50;
+                    desiredVelocity = 56;
 
                 }
                 m_ShooterRequestedState = ShooterStates.StateShooting;
@@ -156,7 +164,7 @@ public class Shooter extends SubsystemBase {
             case StateShooting:
                 double dist2 = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
                 if(dist2 > 4){
-                    desiredVelocity = 70;
+                    desiredVelocity = 70; // desired velocity tables
                     
                 }
                 else if(dist2 >3){
@@ -166,7 +174,7 @@ public class Shooter extends SubsystemBase {
 
                 
                 }else{
-                    desiredVelocity = 50;
+                    desiredVelocity = 56;
 
                 }
                 break;
@@ -197,21 +205,29 @@ public class Shooter extends SubsystemBase {
     public void runControlLoop() {
         // currentLog.setDouble(m_talon.getSupplyCurrent().getValueAsDouble());
         // veloLog.setDouble(m_talon.getVelocity().getValueAsDouble());
+        System.out.println("velocity " + desiredVelocity);
         if(m_talonLeft.getDeviceTemp().getValueAsDouble() > 50){
 
-            m_talonLeft.set(0);
-            m_talonRight.set(0);
+       m_talonLeft.setControl(new NeutralOut());
+            m_talonRight.setControl(new NeutralOut());
+            m_talonRightBot.setControl(new NeutralOut());
+            m_talonLeftBot.setControl(new NeutralOut());
             return;
 
         }
         if(desiredVelocity == 0){
-            m_talonLeft.setVoltage(0);
-            m_talonRight.setVoltage(0);
+            m_talonLeft.setControl(new NeutralOut());
+            m_talonRight.setControl(new NeutralOut());
+            m_talonRightBot.setControl(new NeutralOut());
+            m_talonLeftBot.setControl(new NeutralOut());
 
 
         }else{
             m_talonLeft.setControl(request.withVelocity(desiredVelocity));
             m_talonRight.setControl(requestRight);  
+            m_talonRightBot.setControl(requestRightBot);
+            m_talonLeftBot.setControl(requestLeftBot);
+
         }
         if(m_ShooterRequestedState == ShooterStates.StateShooting){
             if(Math.abs(m_talonLeft.getVelocity().getValueAsDouble() - desiredVelocity) < kShooterTolernace){ // tolerance

@@ -419,21 +419,21 @@ public class Constants {
                 public static final double kVAngler = 0.14;
                 public static final double kAAngler = 0.012;
 
-                public static final int kAnglerPort = 21;
+                public static final int kAnglerPort = 30;
                 public static final boolean kAnglerClockwisePositive = true;
 
         }
 
         public static final class ShooterConstants {
 
-                public static final double kPShooter = 2.9;
-                public static final double kIShooter = 0.1;
-                public static final double kDShooter = 0.07;
-                public static final double kVShooter = 0.12; // 0.4
+                public static final double kPShooter = 0;
+                public static final double kIShooter = 0;
+                public static final double kDShooter = 0;
+                public static final double kVShooter = 0.16; // 0.4
                 public static final double kAShooter = 0.012; // 0.012
 
-                public static final int kShooterPortLeft = 22;
-                public static final int kShooterPortRight = 29;
+                public static final int kShooterPortLeft = 28;
+                public static final int kShooterPortRight = 22;
                 public static final boolean kShooterLeftClockwisePositive = false;
                 public static final boolean kShooterRightClockwisePositive = false;
 
@@ -446,7 +446,7 @@ public class Constants {
                 public static final double kVFeeder = 0.20;
                 public static final double kAFeeder = 0.012;
 
-                public static final int kFeederPort = 28;
+                public static final int kFeederPort = 25;
                 public static final boolean kFeederClockwisePositive = true;
 
         }

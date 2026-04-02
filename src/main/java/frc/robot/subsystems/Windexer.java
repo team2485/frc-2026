@@ -35,7 +35,7 @@ public class Windexer extends SubsystemBase {
   public static WindexerStates m_windexerCurrentState;
   public static WindexerStates m_windexerRequestedState;
 
-  private final TalonFX m_talon = new TalonFX(23, "Other"); 
+  private final TalonFX m_talon = new TalonFX(31, "Other"); 
   public RobotContainer m_RobotContainer;
   public Windexer(RobotContainer c) {
     m_RobotContainer=c;

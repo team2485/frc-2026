@@ -93,7 +93,7 @@ public class RobotContainer {
         // m_driver.x().onTrue(m_drivetrain.resetGyro());
         m_driver.x().onTrue(new InstantCommand(() -> tracker.requestState(TargetingStates.StateResetHeading)));
         // Shooting is now bound to one button
-        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateAccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)))); // Flywheels (shooter)
+        m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateAccelerating))); // Flywheels (shooter)
         m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
         // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
         // m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
@@ -119,8 +119,8 @@ public class RobotContainer {
         m_driver.rightBumper().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateSlowRetract)));
         m_driver.b().onTrue(new InstantCommand(() -> m_intake.requestState(IntakeStates.StateOuttaking)));
 
-        m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFeed)));
-        m_operator.leftBumper().onFalse(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero)));
+        m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFeed)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding))));
+        m_operator.leftBumper().onFalse(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
 
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero))); // These overide the auto windexer control

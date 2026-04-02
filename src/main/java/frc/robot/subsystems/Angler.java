@@ -125,10 +125,10 @@ public class Angler extends SubsystemBase {
         desiredPosition = .5;
         break;
       case StateMax:
-        desiredPosition = 1; // This hits @ 4.648 metres
+        desiredPosition = 7.0/9.0; // This hits @ 4.648 metres
         break;
       case StateTest1: // This hits at 50 inches from centre (1.27M)
-        desiredPosition = .63;
+        desiredPosition = .3;
         break;
 
       case StateTest2:
@@ -160,8 +160,8 @@ public class Angler extends SubsystemBase {
       // desiredPosition += 0.03;
     }
     // System.out.println("Hood: " + desiredPosition);
-    desiredPosition *= 23; // gear ratio
-    desiredPosition += 3 * ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173); // what is this
+    desiredPosition *= 9; // gear ratio
+    // desiredPosition += 3 * ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173); // what is this
 
     runControlLoop();
 
