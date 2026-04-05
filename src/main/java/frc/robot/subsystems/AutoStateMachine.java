@@ -70,6 +70,8 @@ public class AutoStateMachine extends SubsystemBase {
         m_Chooser.addOption("Mid Auto", "TSideMid");
         m_Chooser.addOption("Topside Shoot to Mid", "TSideShootToMid");
         m_Chooser.addOption("Brisket", "Brisket");
+        m_Chooser.addOption("We are in DEEP Brisket", "BrisketDeep");
+
 
         // m_Chooser.addOption("Test2", "MoveAndShoot");
 
@@ -155,7 +157,16 @@ public class AutoStateMachine extends SubsystemBase {
                     PathPlannerPath.fromPathFile("TSideZoneToDepot") });
             autoMap.put("Brisket", new PathPlannerPath[] {
                     PathPlannerPath.fromPathFile("Brisket-Mid"),
-                    PathPlannerPath.fromPathFile("Brisket-Shoot") });
+                    PathPlannerPath.fromPathFile("Brisket-Shoot"),
+                    PathPlannerPath.fromPathFile("Brisket-Mid2"), /* Mid3 replacing mid2 */
+                    PathPlannerPath.fromPathFile("Brisket-ShootMid2")
+                 });
+            autoMap.put("BrisketDeep", new PathPlannerPath[] {
+                    PathPlannerPath.fromPathFile("Brisket-Mid"),
+                    PathPlannerPath.fromPathFile("Brisket-Shoot"),
+                    PathPlannerPath.fromPathFile("Brisket-Mid3"), /* Mid3 replacing mid2 */
+                    PathPlannerPath.fromPathFile("Brisket-ShootMid2")
+                 });
         } catch (Exception e) {
             System.err.println("chud auto fail!");
         }
@@ -261,12 +272,12 @@ public class AutoStateMachine extends SubsystemBase {
                     FollowPathCommand.cancel();
                 }
                 // m_RobotContainer.m_drivetrain.applyRequest();
-                // m_RobotContainer.tracker.requestState(TargetingStates.StateDriveToAimTransition);
+                m_RobotContainer.tracker.requestState(TargetingStates.StateDriveToAimTransition);
 
                 m_RobotContainer.m_angler.requestState(AnglerStates.StateAuto);
                 m_RobotContainer.m_shooter.requestState(ShooterStates.StateShooting);
                 if (!m_Chooser.getSelected().equals("Brisket"))
-                    m_RobotContainer.m_intake.requestState(IntakeStates.StateRetracted);
+                    m_RobotContainer.m_intake.requestState(IntakeStates.StateShooting);
                 startShootingTime = System.currentTimeMillis();
                 m_requestedState = AutoStates.StateShooting;
                 m_currentState = m_requestedState;
@@ -278,10 +289,10 @@ public class AutoStateMachine extends SubsystemBase {
                     m_RobotContainer.m_feeder.requestState(FeederStates.StateFeeding);
                     if (m_Chooser.getSelected().equals("Brisket")
                             && System.currentTimeMillis() - startShootingTime > 950) {
-                                m_RobotContainer.m_intake.requestState(IntakeStates.StateRetracted);
+                                m_RobotContainer.m_intake.requestState(IntakeStates.StateShooting);
                     }
                 }
-                if (System.currentTimeMillis() - startShootingTime > ((ballCountEstimate * 100) + 500)) { // times out
+                if (System.currentTimeMillis() - startShootingTime > ((ballCountEstimate * 40))) { // times out
                                                                                                           // the
                                                                                                           // shooting
 

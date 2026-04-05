@@ -78,9 +78,9 @@ public class Shooter extends SubsystemBase {
         // kD outputs n volts when the velocity error is 1 rotation per second
         var slot0Configs = talonFXConfigs.Slot0;
         
-        slot0Configs.kP = 0;
-        slot0Configs.kI = 0;
-        slot0Configs.kD = 0;
+        slot0Configs.kP = kPShooter;
+        slot0Configs.kI = kIShooter;
+        slot0Configs.kD = kDShooter;
         slot0Configs.kV = kVShooter;
         slot0Configs.kA = kAShooter;
 
@@ -124,18 +124,23 @@ public class Shooter extends SubsystemBase {
                 break;
             case StateAccelerating:
                 double dist = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
-                if(dist > 4){
+                if(dist>4){
+
+                    desiredVelocity = 90;
+                    
+                }
+                else if(dist > 3.5){
                     desiredVelocity = 70;
                     
                 }
                 else if(dist >3){
 
-                    desiredVelocity = 63;
+                    desiredVelocity = 67;
 
 
                 
                 }else{
-                    desiredVelocity = 56;
+                    desiredVelocity = 64;
 
                 }
                 m_ShooterRequestedState = ShooterStates.StateShooting;
@@ -146,7 +151,7 @@ public class Shooter extends SubsystemBase {
                 break;
             case StatePass:
                  double distPass = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
-                if(distPass > 4){
+                if(distPass > 3.5){
                     desiredVelocity = 96.7;
                     
                 }
@@ -163,18 +168,22 @@ public class Shooter extends SubsystemBase {
                 break;
             case StateShooting:
                 double dist2 = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
-                if(dist2 > 4){
+                if(dist2>4){
+                    desiredVelocity = 90;
+
+                }
+                else if(dist2 > 3.5){
                     desiredVelocity = 70; // desired velocity tables
                     
                 }
                 else if(dist2 >3){
 
-                    desiredVelocity = 63;
+                    desiredVelocity = 67;
 
 
                 
                 }else{
-                    desiredVelocity = 56;
+                    desiredVelocity = 64;
 
                 }
                 break;

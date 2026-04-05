@@ -72,8 +72,8 @@ public class Feeder extends SubsystemBase {
 
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicAcceleration = 50; // Target acceleration of 400 rps/s (0.25 seconds to max)
-        motionMagicConfigs.MotionMagicJerk = 500;
+        motionMagicConfigs.MotionMagicAcceleration = 100; // Target acceleration of 400 rps/s (0.25 seconds to max)
+        // motionMagicConfigs.MotionMagicJerk = 500;
 
 
 
@@ -107,7 +107,7 @@ public class Feeder extends SubsystemBase {
                 desiredVelocity = 0;
                 break;
             case StateFeeding:
-                desiredVelocity = 40;
+                desiredVelocity = 70;
                 break;
         }
 

@@ -55,10 +55,12 @@ public class RobotContainer {
     public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
     // public final AutoStateMachine autoController = new AutoStateMachine(this);
     public RobotContainer() {
+        m_drivetrain.setRc(this);
         configureBindings();
     }
 
     private void configureBindings() {
+
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         // m_drivetrain.setDefaultCommand(

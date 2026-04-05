@@ -426,11 +426,11 @@ public class Constants {
 
         public static final class ShooterConstants {
 
-                public static final double kPShooter = 0;
-                public static final double kIShooter = 0;
+                public static final double kPShooter = 0.4;
+                public static final double kIShooter = 0.15;
                 public static final double kDShooter = 0;
-                public static final double kVShooter = 0.16; // 0.4
-                public static final double kAShooter = 0.012; // 0.012
+                public static final double kVShooter = 0.15;
+                public static final double kAShooter = 0.012;
 
                 public static final int kShooterPortLeft = 28;
                 public static final int kShooterPortRight = 22;
@@ -444,7 +444,7 @@ public class Constants {
                 public static final double kIFeeder = 0.02;
                 public static final double kDFeeder = 0.0;
                 public static final double kVFeeder = 0.20;
-                public static final double kAFeeder = 0.012;
+                public static final double kAFeeder = 0.015;
 
                 public static final int kFeederPort = 25;
                 public static final boolean kFeederClockwisePositive = true;

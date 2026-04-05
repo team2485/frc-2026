@@ -128,7 +128,7 @@ public class Angler extends SubsystemBase {
         desiredPosition = 7.0/9.0; // This hits @ 4.648 metres
         break;
       case StateTest1: // This hits at 50 inches from centre (1.27M)
-        desiredPosition = .3;
+        desiredPosition = .37;
         break;
 
       case StateTest2:

@@ -21,8 +21,9 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-
+import frc.robot.RobotContainer;
 import frc.robot.Constants.*;
+import frc.robot.subsystems.drive.TargetTracking.TargetingStates;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -42,7 +43,12 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.kZero;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
+    private RobotContainer rc;
+    public void setRc(RobotContainer mrc){
 
+        rc=mrc;
+
+    }
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
@@ -240,7 +246,11 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     //newHeading = table2.getDoubleTopic("newHeading").publish();
     public void fakeResetPose(Pose2d lol){
         
-        
+        if(rc.tracker.getState() == TargetingStates.StateAiming ||rc.tracker.getState() == TargetingStates.StateDriveToAimTransition ){
+
+            return;
+
+        }
         resetPose(lol);
 
         return;
