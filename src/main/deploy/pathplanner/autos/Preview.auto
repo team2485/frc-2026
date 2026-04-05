@@ -7,25 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "TSideTrenchShoot"
+            "pathName": "Brisket-Mid"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "TSideShootMid"
+            "pathName": "Brisket-Shoot"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "TSideMidToZone"
+            "pathName": "Brisket-Mid2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "TSideZoneToMid"
+            "pathName": "Brisket-ShootMid2"
           }
         }
       ]

@@ -24,7 +24,7 @@
         "y": 5.889132743362832
       },
       "nextControl": {
-        "x": 1.4400942246764181,
+        "x": 1.440094224676415,
         "y": 5.994520023021418
       },
       "isLocked": false,
@@ -82,7 +82,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "GoodPaths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -30.434999999999995

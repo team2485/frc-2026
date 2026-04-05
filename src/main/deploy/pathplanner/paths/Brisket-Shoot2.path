@@ -52,7 +52,7 @@
     "rotation": -32.77487732426424
   },
   "reversed": false,
-  "folder": null,
+  "folder": "GoodPaths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

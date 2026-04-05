@@ -45,7 +45,7 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
     private final SwerveDrivePoseEstimator poseEstimator;
     // private final SwerveDrivePoseEstimator noVisionPoseEstimator;
     private final Field2d field2d = new Field2d();
-    private final Vision photonEstimator = new Vision("TestCam"); // TODO
+    private final Vision photonEstimator = new Vision("FrontCam");
     private final Notifier photonNotifier = new Notifier(photonEstimator);
     // private final WL_CommandXboxController m_driver;
     // private final WL_CommandXboxController m_operator;

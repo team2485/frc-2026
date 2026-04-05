@@ -131,7 +131,7 @@ public class Intake extends SubsystemBase {
         slot0Configs.kA = kAIntakeRoller;
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 80;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 100;
         motionMagicConfigs.MotionMagicAcceleration = 45;
         // motionMagicConfigs.MotionMagicJerk = 500;
 
@@ -271,7 +271,7 @@ public class Intake extends SubsystemBase {
             case StateRetracting:
                 extendedIntake = false;
                 slow = false;
-                desiredRollerVelocity = 80;
+                desiredRollerVelocity = 100;
                 desiredWinchVelocity = 0;
                 break;
             case StateRetracted:
@@ -284,7 +284,7 @@ public class Intake extends SubsystemBase {
                 extendedIntake = true;
                 slow = false;
                 desiredWinchVelocity = 0;
-                desiredRollerVelocity = 80;
+                desiredRollerVelocity = 100;
                 break;
             case StateOuttaking:
                 extendedIntake = true;

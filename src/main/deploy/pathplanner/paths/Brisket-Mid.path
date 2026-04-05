@@ -20,12 +20,12 @@
         "y": 7.135923303834808
       },
       "prevControl": {
-        "x": 7.794515083015597,
-        "y": 7.720332959057238
+        "x": 8.595589743589745,
+        "y": 7.7269551282051285
       },
       "nextControl": {
-        "x": 9.454898612120754,
-        "y": 6.477088993022022
+        "x": 8.540934204778443,
+        "y": 6.157384692391675
       },
       "isLocked": false,
       "linkedName": null
@@ -87,7 +87,7 @@
     "rotation": 59.5972782697758
   },
   "reversed": false,
-  "folder": null,
+  "folder": "GoodPaths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

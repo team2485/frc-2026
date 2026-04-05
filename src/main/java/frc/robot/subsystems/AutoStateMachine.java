@@ -159,7 +159,8 @@ public class AutoStateMachine extends SubsystemBase {
                     PathPlannerPath.fromPathFile("Brisket-Mid"),
                     PathPlannerPath.fromPathFile("Brisket-Shoot"),
                     PathPlannerPath.fromPathFile("Brisket-Mid2"), /* Mid3 replacing mid2 */
-                    PathPlannerPath.fromPathFile("Brisket-ShootMid2")
+                    PathPlannerPath.fromPathFile("Brisket-ShootMid2"),
+                    PathPlannerPath.fromPathFile("Brisket-Mid2")
                  });
             autoMap.put("BrisketDeep", new PathPlannerPath[] {
                     PathPlannerPath.fromPathFile("Brisket-Mid"),
@@ -173,7 +174,7 @@ public class AutoStateMachine extends SubsystemBase {
 
     }
 
-    int ballCountEstimate = 40; // was 8, changed for brisket auto
+    int ballCountEstimate = 8;
     boolean shootingRequested = false;
     double startShootingTime = -1;
     double waitStartTime = -1;
@@ -288,11 +289,11 @@ public class AutoStateMachine extends SubsystemBase {
                     m_RobotContainer.m_windexer.requestState(WindexerStates.StateFeed);
                     m_RobotContainer.m_feeder.requestState(FeederStates.StateFeeding);
                     if (m_Chooser.getSelected().equals("Brisket")
-                            && System.currentTimeMillis() - startShootingTime > 950) {
+                            && System.currentTimeMillis() - startShootingTime > 0) {
                                 m_RobotContainer.m_intake.requestState(IntakeStates.StateShooting);
                     }
                 }
-                if (System.currentTimeMillis() - startShootingTime > ((ballCountEstimate * 40))) { // times out
+                if (System.currentTimeMillis() - startShootingTime > ((1600))) { // times out
                                                                                                           // the
                                                                                                           // shooting
 
