@@ -71,6 +71,7 @@ public class AutoStateMachine extends SubsystemBase {
         m_Chooser.addOption("Topside Shoot to Mid", "TSideShootToMid");
         m_Chooser.addOption("Brisket", "Brisket");
         m_Chooser.addOption("We are in DEEP Brisket", "BrisketDeep");
+        m_Chooser.addOption("Inverted Brisket", "BrisketInverted");
 
 
         // m_Chooser.addOption("Test2", "MoveAndShoot");
@@ -167,6 +168,12 @@ public class AutoStateMachine extends SubsystemBase {
                     PathPlannerPath.fromPathFile("Brisket-Shoot"),
                     PathPlannerPath.fromPathFile("Brisket-Mid3"), /* Mid3 replacing mid2 */
                     PathPlannerPath.fromPathFile("Brisket-ShootMid2")
+                 });
+            autoMap.put("BrisketInverted", new PathPlannerPath[] {
+                    PathPlannerPath.fromPathFile("Brisket-Mid").mirrorPath(),
+                    PathPlannerPath.fromPathFile("Brisket-Shoot").mirrorPath(),
+                    PathPlannerPath.fromPathFile("Brisket-Mid3").mirrorPath(), /* Mid3 replacing mid2 */
+                    PathPlannerPath.fromPathFile("Brisket-ShootMid2").mirrorPath()
                  });
         } catch (Exception e) {
             System.err.println("chud auto fail!");

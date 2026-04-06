@@ -46,7 +46,11 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
     // private final SwerveDrivePoseEstimator noVisionPoseEstimator;
     private final Field2d field2d = new Field2d();
     private final Vision photonEstimator = new Vision("FrontCam");
+    private final Vision photonEstimatorSide = new Vision("SideCam");
+
     private final Notifier photonNotifier = new Notifier(photonEstimator);
+    private final Notifier photonNotifierSide = new Notifier(photonEstimatorSide);
+
     // private final WL_CommandXboxController m_driver;
     // private final WL_CommandXboxController m_operator;
 
@@ -92,7 +96,8 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
 
         photonNotifier.setName("PhotonRunnable");
         photonNotifier.startPeriodic(0.02);
-
+        photonNotifierSide.setName("PhotonRunnable");
+        photonNotifierSide.startPeriodic(0.02);
         // yawCalculator = new ShotCalculator();
         // pitchCalculator = new ShotCalculator();
 
@@ -114,16 +119,27 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
         poseEstimator.update(rotation.get(), modulePosition.get());
         // noVisionPoseEstimator.update(rotation.get(), modulePosition.get());
         var visionPose = photonEstimator.grabLatestEstimatedPose();
-latestVisPose=null;
+        latestVisPose=null;
         if (visionPose != null) {
         latestVisPose=visionPose.estimatedPose.toPose2d();
 
             var pose2d = visionPose.estimatedPose.toPose2d();
             // m_drivetrain.getPigeon2().setYaw(pose2d.getRotation().getDegrees());
             m_drivetrain.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
+            
             // poseEstimator.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
         }
+        var sidePose = photonEstimatorSide.grabLatestEstimatedPose();
+        if(sidePose != null) {
 
+            var pose2d = sidePose.estimatedPose.toPose2d();
+            m_drivetrain.addVisionMeasurement(pose2d, sidePose.timestampSeconds);
+            System.out.println("Side Pose: " + pose2d);
+            
+        }
+        else {
+            System.out.println("uh oh");
+        }
         // var dashboardPose = poseEstimator.getEstimatedPosition();
         // if (originPosition == OriginPosition.kRedAllianceWallRightSide) {
         // dashboardPose = flipAlliance(dashboardPose);
@@ -133,12 +149,6 @@ latestVisPose=null;
         angleToTags = getCurrentPose().getRotation().getDegrees();
         visionTest.setDouble(speeds.get().vyMetersPerSecond);
         // xSped.setDouble((isOnRed ? -1 : 1));
-
-        // if (getNoteDetected()) m_operator.setRumble(RumbleType.kLeftRumble, 1);
-        // else m_operator.setRumble(RumbleType.kLeftRumble, 0);
-
-        // if (getNoteDetected()) m_driver.setRumble(RumbleType.kLeftRumble, 1);
-        // else m_driver.setRumble(RumbleType.kLeftRumble, 0);
     }
 
     // private String getFormattedPose() {

@@ -214,7 +214,7 @@ public class Shooter extends SubsystemBase {
     public void runControlLoop() {
         // currentLog.setDouble(m_talon.getSupplyCurrent().getValueAsDouble());
         // veloLog.setDouble(m_talon.getVelocity().getValueAsDouble());
-        System.out.println("velocity " + desiredVelocity);
+        // System.out.println("velocity " + desiredVelocity);
         if(m_talonLeft.getDeviceTemp().getValueAsDouble() > 50){
 
        m_talonLeft.setControl(new NeutralOut());

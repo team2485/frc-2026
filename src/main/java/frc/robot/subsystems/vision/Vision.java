@@ -138,16 +138,27 @@ public class Vision implements Runnable {
             layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
 
             if (m_camera != null) {
+                if(cameraName == "FrontCam"){
 
                 photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                         new Transform3d(new Translation3d(-13.5*0.0254,3.2*0.0254,17.7*0.0254),
                                 new Rotation3d(0, 15/(Math.PI/180), 0)
 
                         )); // MULTI_TAG_PNP uses all cameras in view for positioning
+                }
+                else{
+
+                    photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                        new Transform3d(new Translation3d(-12.5*0.0254,-13.5*0.0254,12.6*0.0254),
+                                new Rotation3d(0, 18.5/(Math.PI/180), Math.PI/2)
+
+                        )); // MULTI_TAG_PNP uses all cameras in view for positionin8.5
+
+                }
                 // estimatorWithError = new PhotonPoseEstimator(layout,
                 // PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 // offset
-                // );
+                // );   
             }
         } catch (Exception e) {
             DriverStation.reportError("Path: ", e.getStackTrace()); // can't estimate poses without known tag positions
