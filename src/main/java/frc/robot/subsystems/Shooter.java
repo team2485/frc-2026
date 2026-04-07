@@ -124,18 +124,18 @@ public class Shooter extends SubsystemBase {
                 break;
             case StateAccelerating:
                 double dist = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
-                if(dist>4){
+                if(dist > 4){
 
                     desiredVelocity = 90;
                     
                 }
                 else if(dist > 3.5){
-                    desiredVelocity = 70;
+                    desiredVelocity = 85;
                     
                 }
-                else if(dist >3){
+                else if(dist > 3){
 
-                    desiredVelocity = 67;
+                    desiredVelocity = 75;
 
 
                 
@@ -157,7 +157,7 @@ public class Shooter extends SubsystemBase {
                 }
                 else if(distPass >3){
 
-                    desiredVelocity = 76;
+                    desiredVelocity = 85;
 
 
                 
@@ -173,12 +173,12 @@ public class Shooter extends SubsystemBase {
 
                 }
                 else if(dist2 > 3.5){
-                    desiredVelocity = 70; // desired velocity tables
+                    desiredVelocity = 85; // desired velocity tables
                     
                 }
                 else if(dist2 >3){
 
-                    desiredVelocity = 67;
+                    desiredVelocity = 75;
 
 
                 

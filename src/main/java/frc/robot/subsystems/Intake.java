@@ -50,9 +50,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import static frc.robot.Constants.IntakeConstants.*;
 import frc.robot.Constants;
-import frc.robot.subsystems.drive.Drivetrain;
-import frc.robot.subsystems.drive.PoseEstimation;
-import frc.robot.subsystems.drive.TargetTracking.TargetingStates;
 
 import com.ctre.phoenix6.controls.Follower;
 
@@ -63,7 +60,7 @@ public class Intake extends SubsystemBase {
     private final TalonFX m_talon_Roll = new TalonFX(26, "Other");
     // private final TalonFX m_talon_L = new TalonFX(25, "Other");
     private final TalonFX m_talon_winchR = new TalonFX(27, "Other");
-    private final TalonFX m_talon_winchL = new TalonFX(24, "Other"); // change so that it's wired to Other canbus later
+    private final TalonFX m_talon_winchL = new TalonFX(24, "Other");
     private double desiredRollerVelocity = 0;
     private double desiredWinchVelocity = 0;
     private boolean extendedIntake = false;

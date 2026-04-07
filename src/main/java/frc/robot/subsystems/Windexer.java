@@ -16,6 +16,8 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 public class Windexer extends SubsystemBase {
   // Misc variables for specific subsystem go here
@@ -37,9 +39,12 @@ public class Windexer extends SubsystemBase {
 
   private final TalonFX m_talon = new TalonFX(31, "Other"); 
   public RobotContainer m_RobotContainer;
+  public GenericEntry windexerActive;
   public Windexer(RobotContainer c) {
     m_RobotContainer=c;
     // Misc setup goes here
+
+    windexerActive = Shuffleboard.getTab("Active").add("Indexer Active", false).getEntry();
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -76,23 +81,33 @@ public class Windexer extends SubsystemBase {
     switch (m_windexerRequestedState) {
       case StateZero:
           desiredVelocity = 0;
+          windexerActive.setBoolean(false);
           break;
       case StateFeed:
-          desiredVelocity = 70;
+                    if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) {
+              desiredVelocity = 70;
+          }
+          else{
+            desiredVelocity = -50;
+          }
+          windexerActive.setBoolean(true);
           break;
       case StateReverse:
           desiredVelocity = -25;
+          windexerActive.setBoolean(true);
           break;
       case StateAutomatedEnable:
           if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) {
               desiredVelocity = 70;
           }
           else{
-            desiredVelocity = 0;
+            desiredVelocity = -50;
           }
+          windexerActive.setBoolean(true);
           break;
       case StateAutomatedOff:
           desiredVelocity = 0;
+          windexerActive.setBoolean(false);
           break;
       default:
       break;

@@ -134,11 +134,11 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
 
             var pose2d = sidePose.estimatedPose.toPose2d();
             m_drivetrain.addVisionMeasurement(pose2d, sidePose.timestampSeconds);
-            System.out.println("Side Pose: " + pose2d);
+            // System.out.println("Side Pose: " + pose2d);
             
         }
         else {
-            System.out.println("uh oh");
+            // System.out.println("uh oh");
         }
         // var dashboardPose = poseEstimator.getEstimatedPosition();
         // if (originPosition == OriginPosition.kRedAllianceWallRightSide) {

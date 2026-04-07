@@ -18,6 +18,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.Shooter.ShooterStates;
+
 // Imports go here
 import static frc.robot.Constants.FeederConstants.*;
 
@@ -38,6 +41,7 @@ public class Feeder extends SubsystemBase {
 
     private double desiredVelocity = 0;
     private final MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0).withSlot(0);
+    public GenericEntry feederActive;
     // private GenericEntry stateLog =
     // Shuffleboard.getTab("Roller").addString("Roller State", "blah").;
     // public static GenericEntry state = Shuffleboard.getTab("Roller").add("State
@@ -50,10 +54,11 @@ public class Feeder extends SubsystemBase {
     // Shuffleboard.getTab("Roller").add("velocity",0.0).getEntry();
 
     // Unit default for TalonFX libraries is rotations
-
-    public Feeder() {
+    private RobotContainer m_rc ;
+    public Feeder(RobotContainer rc) {
         // Misc setup goes here
-        
+        m_rc = rc;
+        feederActive = Shuffleboard.getTab("Active").add("Feeder Active", false).getEntry();
         var talonFXConfigs = new TalonFXConfiguration();
         // These will be derived experimentally but in case you are wondering
         // How these terms are defined from the TalonFX docs
@@ -72,7 +77,7 @@ public class Feeder extends SubsystemBase {
 
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicAcceleration = 100; // Target acceleration of 400 rps/s (0.25 seconds to max)
+        motionMagicConfigs.MotionMagicAcceleration = 200; // Target acceleration of 400 rps/s (0.25 seconds to max)
         // motionMagicConfigs.MotionMagicJerk = 500;
 
 
@@ -104,10 +109,29 @@ public class Feeder extends SubsystemBase {
     public void periodic() {
         switch (m_FeederRequestedState) {
             case StateOff:
+            feederActive.setBoolean(false);
+            if(m_rc.m_shooter.getCurrentState() == ShooterStates.StateShooting){
                 desiredVelocity = 0;
+            }else{
+                desiredVelocity = 0;
+
+                // desiredVelocity = -25;
+
+
+            }   
                 break;
             case StateFeeding:
-                desiredVelocity = 70;
+            feederActive.setBoolean(true);
+                if(m_rc.m_shooter.getCurrentState() == ShooterStates.StateShooting){
+
+
+                    desiredVelocity = 85;
+
+                }
+                else{
+                    desiredVelocity = 0;
+
+                }
                 break;
         }
 

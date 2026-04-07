@@ -46,7 +46,7 @@ public class RobotContainer {
             () -> m_drivetrain.getKinematics().toChassisSpeeds(m_drivetrain.getState().ModuleStates), m_drivetrain);
 //     public final PIDController m_PidController = 
     public final Shooter m_shooter = new Shooter(this);
-    public final Feeder m_feeder = new Feeder();
+    public final Feeder m_feeder = new Feeder(this);
     public final Intake m_intake = new Intake();
 
     public final TargetTracking tracker = new TargetTracking(this, m_drivetrain, m_poseEstimation, m_driver, m_operator, drive);
