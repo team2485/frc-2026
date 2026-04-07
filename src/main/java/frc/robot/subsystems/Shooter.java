@@ -150,7 +150,7 @@ public class Shooter extends SubsystemBase {
                 m_ShooterRequestedState = ShooterStates.StateOff;
                 break;
             case StatePass:
-                 double distPass = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                double distPass = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
                 if(distPass > 3.5){
                     desiredVelocity = 96.7;
                     

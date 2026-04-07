@@ -33,8 +33,6 @@ public class Angler extends SubsystemBase {
     StateOpening,
     StateClosing,
     StateHub,
-    StateTest3,
-    StateTest2,
     StateTest1,
     StateAuto,
     StateAmplify
@@ -119,7 +117,7 @@ public class Angler extends SubsystemBase {
       case StateAuto:
         // m_drivetrain.getState().Pose.getTranslation()
         double dist = m_TargetTracking.getAimPose().getTranslation().getDistance(m_drivetrain.getState().Pose.getTranslation());
-        desiredPosition = lookupTable.getValue(dist ) +rangeBoost;
+        desiredPosition = lookupTable.getValue(dist) +rangeBoost;
         break;
        case StateMid:
         desiredPosition = .5;
@@ -129,13 +127,6 @@ public class Angler extends SubsystemBase {
         break;
       case StateTest1: // This hits at 50 inches from centre (1.27M)
         desiredPosition = .37;
-        break;
-
-      case StateTest2:
-        desiredPosition = .67;
-        break;
-      case StateTest3:
-        desiredPosition = .5;
         break;
       case StateHub:
         desiredPosition = .05;
@@ -161,7 +152,7 @@ public class Angler extends SubsystemBase {
     }
     // System.out.println("Hood: " + desiredPosition);
     desiredPosition *= 9; // gear ratio
-    // desiredPosition += 3 * ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173); // what is this
+    // desiredPosition += 3 * ( m_shooter.getDesiredVelocity() -  m_shooter.getVelocity()) * (1/173);
 
     runControlLoop();
 

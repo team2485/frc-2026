@@ -48,7 +48,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        Logger.recordOutput("robotPose", m_robotContainer.m_drivetrain.getState().Pose);
+        Logger.recordOutput("robotPoseLog", m_robotContainer.m_drivetrain.getState().Pose);
         CommandScheduler.getInstance().run(); 
     }
 
