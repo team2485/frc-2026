@@ -125,7 +125,7 @@ public class Feeder extends SubsystemBase {
                 if(m_rc.m_shooter.getCurrentState() == ShooterStates.StateShooting){
 
 
-                    desiredVelocity = 85;
+                    desiredVelocity = 100;
 
                 }
                 else{
@@ -162,7 +162,7 @@ public class Feeder extends SubsystemBase {
 
 
         }else{
-            m_talon.setControl(request.withVelocity(desiredVelocity));
+            m_talon.set(1);
 
 
         }

@@ -210,12 +210,12 @@ public class TargetTracking extends SubsystemBase {
         
         if(DriverStation.getAlliance().get() == Alliance.Red){
 
-            return new Pose2d(11.91, 4.0345+0.2, new Rotation2d(0)).plus(new Transform2d(-1*opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
+            return new Pose2d(11.91, 4.0345+0.0, new Rotation2d(0)).plus(new Transform2d(-1*opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
 
 
         }
         else{
-            return new Pose2d(4.6228, 4.0345, new Rotation2d(0)).plus(new Transform2d(opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
+            return new Pose2d(4.6228, 4.0345+0.0, new Rotation2d(0)).plus(new Transform2d(opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
 
         }
         // 4.626 from baseline

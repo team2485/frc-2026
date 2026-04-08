@@ -85,7 +85,7 @@ public class Windexer extends SubsystemBase {
           break;
       case StateFeed:
                     if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) {
-              desiredVelocity = 70;
+              desiredVelocity = 60;
           }
           else{
             desiredVelocity = -50;
@@ -98,7 +98,7 @@ public class Windexer extends SubsystemBase {
           break;
       case StateAutomatedEnable:
           if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) {
-              desiredVelocity = 70;
+              desiredVelocity = 60;
           }
           else{
             desiredVelocity = -50;

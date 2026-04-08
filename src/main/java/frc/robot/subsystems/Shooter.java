@@ -137,11 +137,9 @@ public class Shooter extends SubsystemBase {
 
                     desiredVelocity = 75;
 
-
                 
                 }else{
-                    desiredVelocity = 64;
-
+                    desiredVelocity = 70;
                 }
                 m_ShooterRequestedState = ShooterStates.StateShooting;
                 break;
