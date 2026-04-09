@@ -124,22 +124,23 @@ public class Shooter extends SubsystemBase {
                 break;
             case StateAccelerating:
                 double dist = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                // System.out.println("Accelerating Distance: " + dist);
                 if(dist > 4){
 
-                    desiredVelocity = 90;
+                    desiredVelocity = 95;
                     
                 }
                 else if(dist > 3.5){
-                    desiredVelocity = 85;
+                    desiredVelocity = 91;
                     
                 }
                 else if(dist > 3){
 
-                    desiredVelocity = 75;
+                    desiredVelocity = 81;
 
                 
                 }else{
-                    desiredVelocity = 70;
+                    desiredVelocity = 68;
                 }
                 m_ShooterRequestedState = ShooterStates.StateShooting;
                 break;
@@ -160,28 +161,30 @@ public class Shooter extends SubsystemBase {
 
                 
                 }else{
-                    desiredVelocity = 67;
+                    desiredVelocity = 77;
 
                 }
                 break;
             case StateShooting:
                 double dist2 = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                // System.out.println("Shooting Distance: " + dist2);
+                // desired velocity tables
                 if(dist2>4){
                     desiredVelocity = 90;
 
                 }
                 else if(dist2 > 3.5){
-                    desiredVelocity = 85; // desired velocity tables
+                    desiredVelocity = 88.5;
                     
                 }
-                else if(dist2 >3){
+                else if(dist2 > 3){
 
-                    desiredVelocity = 75;
+                    desiredVelocity = 79;
 
 
                 
                 }else{
-                    desiredVelocity = 64;
+                    desiredVelocity = 76;
 
                 }
                 break;

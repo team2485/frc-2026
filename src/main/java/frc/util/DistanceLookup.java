@@ -44,8 +44,9 @@ public final class DistanceLookup { // Singleton class
         intTable.put(1.77, 0.0);
         intTable.put(0.0, 0.0);
         intTable.put(3.08, 0.29-0.03);
-        intTable.put(3.6, 0.3-0.03);
+        intTable.put(3.6, 0.3+0.03);
         intTable.put(4.4, 0.37-0.03);
+        // Add a 2.5 entry to the table if possible
 
 
         // intTable.put(2.743, .63);
