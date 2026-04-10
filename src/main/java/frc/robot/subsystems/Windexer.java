@@ -68,7 +68,7 @@ public class Windexer extends SubsystemBase {
 
     talonFXConfigs.CurrentLimits.StatorCurrentLimit = 50;// edit later
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;// edit later
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;// edit later
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
     m_talon.getConfigurator().apply(talonFXConfigs);
 

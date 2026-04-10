@@ -148,8 +148,8 @@ public class Intake extends SubsystemBase {
         m_talon_Roll.getConfigurator().apply(talonFXConfigs);
         // m_talon_L.getConfigurator().apply(talonFXConfigs);
 
-        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 50;
-        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 80;
+        talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 40;
+        talonFXConfigs.CurrentLimits.StatorCurrentLimit = 70;
         slot0Configs.kP = kPIntakeWinch;
         slot0Configs.kI = kIIntakeWinch;
         slot0Configs.kD = kDIntakeWinch;
@@ -160,6 +160,7 @@ public class Intake extends SubsystemBase {
         motionMagicConfigs.MotionMagicAcceleration = 5;
         // motionMagicConfigs.MotionMagicJerk = 500;
 
+        motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         if (kWinchClockwisePositive) {
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
         } else {
@@ -173,8 +174,6 @@ public class Intake extends SubsystemBase {
         } else {
             motorOutputConfigs.Inverted = InvertedValue.Clockwise_Positive;
         }
-
-        // motorOutputConfigs.NeutralMode = NeutralModeValue.Brake;
 
         m_talon_winchL.getConfigurator().apply(talonFXConfigs);
         m_talon_winchR.setPosition(0);
@@ -363,12 +362,12 @@ public class Intake extends SubsystemBase {
             posWinchRequestL.Position = desiredPosition;
             posWinchRequestR.Position = desiredPosition;
             // if (extendedIntake != lastExtended){// && m_IntakeCurrentState != IntakeStates.StateShooting) {
-                if(Math.abs(Math.abs(m_talon_winchL.getPosition().getValueAsDouble()) - Math.abs(m_talon_winchR.getPosition().getValueAsDouble())) > 12 ){
-                    m_talon_winchL.set(0);
-                    m_talon_winchR.set(0);
-                    return;
+                // if(Math.abs(Math.abs(m_talon_winchL.getPosition().getValueAsDouble()) - Math.abs(m_talon_winchR.getPosition().getValueAsDouble())) > 12 ){
+                //     m_talon_winchL.set(0);
+                //     m_talon_winchR.set(0);
+                //     return;
 
-                }
+                // }
                 if (slow) {
                     m_talon_winchL.setControl(posWinchRequestL.withVelocity(15).withAcceleration(20).withPosition(desiredPosition));
                     m_talon_winchR.setControl(posWinchRequestR.withVelocity(15).withAcceleration(20).withPosition(desiredPosition));
