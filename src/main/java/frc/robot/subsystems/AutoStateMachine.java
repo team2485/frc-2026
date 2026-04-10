@@ -203,7 +203,7 @@ public class AutoStateMachine extends SubsystemBase {
             case StateFollowingPath:
                 if (FollowPathCommand.isFinished()) {
 
-                    if (PathNumber == 0 && !m_Chooser.getSelected().equals("Brisket")) {
+                    if (PathNumber == 0 && ( !m_Chooser.getSelected().equals("Brisket") || !m_Chooser.getSelected().equals("BrisketInverted") || !m_Chooser.getSelected().equals("BrisketDeep")))   {
                         m_requestedState = AutoStates.IdleToShooting;
                         // PathNumber++;
                     }
