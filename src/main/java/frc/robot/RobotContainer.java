@@ -101,7 +101,8 @@ public class RobotContainer {
         // m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
         m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StatePass)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding))));
 
-        m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax))); // Angler
+        m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax)));
+        m_operator.povUp().onFalse(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
         // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
         // m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));

@@ -130,16 +130,17 @@ public class Shooter extends SubsystemBase {
                     desiredVelocity = 95;
                     
                 }
-                else if(dist > 3.5){
+                else if(dist > 3.5) {
                     desiredVelocity = 91;
                     
                 }
-                else if(dist > 3){
+                else if(dist > 3) {
 
                     desiredVelocity = 81;
 
                 
-                }else{
+                }
+                else {
                     desiredVelocity = 68;
                 }
                 m_ShooterRequestedState = ShooterStates.StateShooting;

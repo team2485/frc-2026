@@ -229,7 +229,7 @@ public class Intake extends SubsystemBase {
                 switch(m_IntakeCurrentJiggleState) {
                     case StateGoingIn:
                              System.out.println("Going INN!!!" + m_talon_winchL.getPosition().getValueAsDouble());
-                       desiredPosition = -.1;
+                       desiredPosition = -0.1;
 
                         if(m_talon_winchL.getPosition().getValueAsDouble() >= -0.4 && m_talon_winchR.getPosition().getValueAsDouble() >= -0.4) {
                             m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateIn;
@@ -249,7 +249,7 @@ public class Intake extends SubsystemBase {
                          System.out.println("INNN!!!" + m_talon_winchL.getPosition().getValueAsDouble());
                     break;
                     case StateOut:
-                       desiredPosition = -.1;
+                       desiredPosition = -0.1;
                                                extendedIntake = !extendedIntake;
 
                         m_IntakeCurrentJiggleState = IntakeBackAndForthSubstates.StateGoingIn;
@@ -352,7 +352,7 @@ public class Intake extends SubsystemBase {
             if (extendedIntake && m_IntakeCurrentState != IntakeStates.StateShooting ) {
                 // m_talon_winchL.setControl(posWinchRequestL.withPosition(desiredPosition));
                 // m_talon_winchR.setControl(posWinchRequestR.withPosition(5));
-                desiredPosition = (-18 * 3);
+                desiredPosition = (-18 * 3) - 3.5;
             } else if (m_IntakeCurrentState != IntakeStates.StateStartup && m_IntakeCurrentState != IntakeStates.StateShooting ) {
                 desiredPosition = .1;
                 // m_talon_winchL.setControl(posWinchRequestL.withPosition(0.1));
