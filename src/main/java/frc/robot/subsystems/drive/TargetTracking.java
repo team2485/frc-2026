@@ -46,7 +46,7 @@ public class TargetTracking extends SubsystemBase {
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
     private FieldCentric m_manualDrive; // 24 7 2
     // new PIDController(25,7,1.75);
-    private PIDController m_PidController= new PIDController(20,5,2.5); // TODO: Looks good right now but may need retuning later down the line :(
+    private PIDController m_PidController= new PIDController(18,4.5,3); // TODO: Looks good right now but may need retuning later down the line :(
     private Pose2d aimPosition = new Pose2d();
    StructPublisher aimPosePub = NetworkTableInstance.getDefault().getStructTopic("AimPose", Pose2d.struct).publish();
     private double currentRotation;
@@ -280,7 +280,7 @@ public class TargetTracking extends SubsystemBase {
         anglePublisher.set(currentAngleRadiansFinal);
         var dist = m_drivetrain.getState().Pose.getTranslation()
         .getDistance(aimPosition.getTranslation());
-        double tolernace = AimConstants.kTargetAngleTolerance / (dist/2.5);
+        double tolernace = AimConstants.kTargetAngleTolerance / (dist/2);
         if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < tolernace){
             targetLockPublisher.set( true);
             targetLocked=true;

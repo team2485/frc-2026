@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -59,6 +60,7 @@ public class RobotContainer {
     public RobotContainer() {
         m_drivetrain.setRc(this);
         configureBindings();
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     private void configureBindings() {
@@ -101,8 +103,8 @@ public class RobotContainer {
         m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
         // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
         // m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
-         m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateLongPass)).andThen(new WaitCommand(1)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFORCE))).andThen(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFORCE))));
-         m_operator.leftTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))).andThen(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero))));
+        m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateLongPass)).andThen(new WaitCommand(1)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFORCE))).andThen(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFORCE))));
+        m_operator.leftTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))).andThen(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero))));
          
         m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
         // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
