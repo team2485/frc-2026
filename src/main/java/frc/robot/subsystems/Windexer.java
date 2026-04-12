@@ -28,7 +28,8 @@ public class Windexer extends SubsystemBase {
     StateFeed,
     StateReverse,
     StateAutomatedEnable,
-    StateAutomatedOff
+    StateAutomatedOff,
+    StateFORCE
   }
 
   private double desiredVelocity = 0;
@@ -83,8 +84,13 @@ public class Windexer extends SubsystemBase {
           desiredVelocity = 0;
           windexerActive.setBoolean(false);
           break;
+      case StateFORCE:
+        desiredVelocity = 60;
+          windexerActive.setBoolean(true);
+
+        break;
       case StateFeed:
-                    if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) {
+          if(m_RobotContainer.m_shooter.getCurrentState() == ShooterStates.StateShooting) {
               desiredVelocity = 60;
           }
           else{

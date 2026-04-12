@@ -9,9 +9,11 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Encoder.IndexingType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
@@ -99,11 +101,19 @@ public class RobotContainer {
         m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
         // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
         // m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff)));
-        m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StatePass)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding))));
+         m_operator.leftTrigger().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateLongPass)).andThen(new WaitCommand(1)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFORCE))).andThen(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFORCE))));
+         m_operator.leftTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))).andThen(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero))));
+         
+        m_operator.rightTrigger().onFalse(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateDeccelerating)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateOff))));
+        // m_operator.rightTrigger().onTrue(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding)));
+        // m_operator.right().onTrue(new InstantCommand(() -> m_shooter.requestState(ShooterStates.StateLongPass)).andThen(new InstantCommand(() -> m_feeder.requestState(FeederStates.StateFeeding))).andThen(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFORCE))));
 
         m_operator.povUp().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateMax)));
         m_operator.povUp().onFalse(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
         m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
+        // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.State)));
+        // m_operator.povDown().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateZero)));
+
         // m_operator.povLeft().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest1)));
         // m_operator.povRight().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest2)));
         // m_operator.b().onTrue(new InstantCommand(() -> m_angler.requestState(AnglerStates.StateTest4)));

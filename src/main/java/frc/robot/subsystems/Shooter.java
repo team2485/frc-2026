@@ -30,7 +30,8 @@ public class Shooter extends SubsystemBase {
         StateAccelerating,
         StateDeccelerating,
         StateShooting,
-        StatePass
+        StatePass,
+        StateLongPass,
 
     }
     public static final double kShooterTolernace = 20;//rps
@@ -189,6 +190,9 @@ public class Shooter extends SubsystemBase {
 
                 }
                 break;
+            case StateLongPass:
+                desiredVelocity = 100;
+                break;
         }
         if(m_ShooterRequestedState == ShooterStates.StateAccelerating || m_ShooterRequestedState == ShooterStates.StateDeccelerating){
 
@@ -240,10 +244,10 @@ public class Shooter extends SubsystemBase {
             m_talonLeftBot.setControl(requestLeftBot);
 
         }
-        if(m_ShooterRequestedState == ShooterStates.StateShooting){
+        if(m_ShooterRequestedState == ShooterStates.StateShooting || m_ShooterRequestedState == ShooterStates.StateLongPass ){
             if(Math.abs(m_talonLeft.getVelocity().getValueAsDouble() - desiredVelocity) < kShooterTolernace){ // tolerance
                 
-                m_ShooterCurrentState = ShooterStates.StateShooting;
+                m_ShooterCurrentState = m_ShooterRequestedState;
 
             }
             else{

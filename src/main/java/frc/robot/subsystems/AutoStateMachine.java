@@ -72,6 +72,7 @@ public class AutoStateMachine extends SubsystemBase {
         m_Chooser.addOption("Brisket", "Brisket");
         m_Chooser.addOption("We are in DEEP Brisket", "BrisketDeep");
         m_Chooser.addOption("Inverted Brisket", "BrisketInverted");
+        m_Chooser.addOption("Inverted DEEP Brisket", "BrisketDeepInverted");
 
 
         // m_Chooser.addOption("Test2", "MoveAndShoot");
@@ -175,6 +176,12 @@ public class AutoStateMachine extends SubsystemBase {
                     PathPlannerPath.fromPathFile("Brisket-Mid3").mirrorPath(), /* Mid3 replacing mid2 */
                     PathPlannerPath.fromPathFile("Brisket-ShootMid2").mirrorPath()
                  });
+            autoMap.put("BrisketDeepInverted", new PathPlannerPath[] {
+                    PathPlannerPath.fromPathFile("Brisket-Mid").mirrorPath(),
+                    PathPlannerPath.fromPathFile("Brisket-Shoot").mirrorPath(),
+                    PathPlannerPath.fromPathFile("Brisket-Mid3").mirrorPath(), /* Mid3 replacing mid2 */
+                    PathPlannerPath.fromPathFile("Brisket-ShootMid2").mirrorPath()
+                 });
         } catch (Exception e) {
             System.err.println("chud auto fail!");
         }
@@ -203,7 +210,7 @@ public class AutoStateMachine extends SubsystemBase {
             case StateFollowingPath:
                 if (FollowPathCommand.isFinished()) {
 
-                    if (PathNumber == 0 && ( !m_Chooser.getSelected().equals("Brisket") && !m_Chooser.getSelected().equals("BrisketInverted") && !m_Chooser.getSelected().equals("BrisketDeep")))   {
+                    if (PathNumber == 0 && ( !m_Chooser.getSelected().equals("Brisket") && !m_Chooser.getSelected().equals("BrisketInverted") && !m_Chooser.getSelected().equals("BrisketDeep") && !m_Chooser.getSelected().equals("BrisketDeepInverted")))   {
                         m_requestedState = AutoStates.IdleToShooting;
                         // PathNumber++;
                     }

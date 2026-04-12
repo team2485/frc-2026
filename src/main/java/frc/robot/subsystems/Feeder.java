@@ -30,7 +30,8 @@ public class Feeder extends SubsystemBase {
     // Enum representing all of the states the subsystem can be in
     public enum FeederStates {
         StateOff,
-        StateFeeding
+        StateFeeding,
+        StateFORCE
     }
 
     public static FeederStates m_FeederCurrentState;
@@ -120,9 +121,12 @@ public class Feeder extends SubsystemBase {
 
             }   
                 break;
+            case StateFORCE:
+                desiredVelocity = 100;
+                break;
             case StateFeeding:
             feederActive.setBoolean(true);
-                if(m_rc.m_shooter.getCurrentState() == ShooterStates.StateShooting){
+                if(m_rc.m_shooter.getCurrentState() == ShooterStates.StateShooting ){
 
 
                     desiredVelocity = 100;
