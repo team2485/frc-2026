@@ -20,7 +20,7 @@ public final class DistanceLookup { // Singleton class
         // intTable.put(3.5, 0.6); // maybe 67
         // intTable.put(4.95, 0.9);
         // intTable.put(3.2, 0.57);
-        if (DriverStation.getAlliance().get() == Alliance.Red) {
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
             // distancesOffset *= -1;
         }
         // intTable.put(1.12, 2*0.25+distancesOffset);
