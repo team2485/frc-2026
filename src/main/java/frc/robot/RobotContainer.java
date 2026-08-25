@@ -9,7 +9,10 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Encoder.IndexingType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -17,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 
 import frc.robot.subsystems.*;
 import frc.robot.Constants;
@@ -57,6 +62,23 @@ public class RobotContainer {
     public final Windexer m_windexer = new Windexer(this);
     public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
     // public final AutoStateMachine autoController = new AutoStateMachine(this);
+
+    // Draggables (Visualizing mechanisms in 3D using AdvantageScope)
+    @AutoLogOutput(key = "Draggables/SwerveMeasuredStates")
+    public static SwerveModuleState[] swerveMeasuredStates = new SwerveModuleState[] {};
+    
+    @AutoLogOutput(key = "Draggables/SwerveDesiredStates")
+    public static SwerveModuleState[] swerveDesiredStates = new SwerveModuleState[] {};
+
+    @AutoLogOutput(key = "Draggables/Components3d")
+    public static Pose3d[] components3d = new Pose3d[] { new Pose3d(), new Pose3d(), new Pose3d() };
+
+    @AutoLogOutput(key = "Draggables/DesiredComponents3d")
+    public static Pose3d[] desiredComponents3d = new Pose3d[] { new Pose3d(), new Pose3d(), new Pose3d() };
+
+    @AutoLogOutput(key = "Draggables/RobotPose2d")
+    public static Pose2d robotPose2d = Pose2d.kZero;
+
     public RobotContainer() {
         m_drivetrain.setRc(this);
         configureBindings();
