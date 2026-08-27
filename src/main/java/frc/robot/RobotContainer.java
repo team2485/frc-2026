@@ -4,14 +4,13 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Encoder.IndexingType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,27 +36,18 @@ import frc.robot.subsystems.drive.TargetTracking.TargetingStates;
 
 public class RobotContainer {
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(Constants.MaxSpeed * 0.1).withRotationalDeadband(Constants.MaxAngularRate * 0.1) // Add a 10%
-                                                                                                           // deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
     private final CommandXboxController m_driver = new CommandXboxController(0);
     private final CommandXboxController m_operator = new CommandXboxController(1);
-    public final Drivetrain m_drivetrain = Constants.createDrivetrain();
-    private final Telemetry logger = new Telemetry(Constants.MaxSpeed, m_drivetrain);
-    public final PoseEstimation m_poseEstimation = new PoseEstimation(() -> m_drivetrain.getPigeon2().getRotation2d(),
-            () -> m_drivetrain.getState().ModulePositions,
-            () -> m_drivetrain.getKinematics().toChassisSpeeds(m_drivetrain.getState().ModuleStates), m_drivetrain);
+    public final Drivetrain m_drivetrain = new Drivetrain();
+    public final PoseEstimation m_poseEstimation = new PoseEstimation(m_drivetrain::getYawMod,
+            m_drivetrain::getModulePositionsInverted, m_drivetrain::getChassisSpeeds, m_drivetrain);
+    public final Telemetry logger = new Telemetry(Constants.Swerve.maxSpeed, m_drivetrain, m_poseEstimation);
 //     public final PIDController m_PidController = 
     public final Shooter m_shooter = new Shooter(this);
     public final Feeder m_feeder = new Feeder(this);
     public final Intake m_intake = new Intake();
 
-    public final TargetTracking tracker = new TargetTracking(this, m_drivetrain, m_poseEstimation, m_driver, m_operator, drive);
+    public final TargetTracking tracker = new TargetTracking(this, m_drivetrain, m_poseEstimation, m_driver, m_operator);
     public final Angler m_angler = new Angler(m_drivetrain,tracker,this,m_shooter);
     public final Windexer m_windexer = new Windexer(this);
     public final AutoStateMachine autoStateMachine = new AutoStateMachine(this);
@@ -80,7 +70,6 @@ public class RobotContainer {
     public static Pose2d robotPose2d = Pose2d.kZero;
 
     public RobotContainer() {
-        m_drivetrain.setRc(this);
         configureBindings();
         PathfindingCommand.warmupCommand().schedule();
     }
@@ -101,12 +90,8 @@ public class RobotContainer {
         // )
         // );
 
-        // Idle while the robot is disabled. This ensures the configured
-        // neutral mode is applied to the drive motors while disabled.
-        final var idle = new SwerveRequest.Idle();
-        RobotModeTriggers.disabled().whileTrue(m_drivetrain.applyRequest(() -> idle).ignoringDisable(true));
-
-        m_driver.a().whileTrue(m_drivetrain.applyRequest(() -> brake));
+        m_driver.a().whileTrue(m_drivetrain.run(
+                () -> m_drivetrain.drive(new Translation2d(), 0, false, true, new Translation2d())));
         // m_driver.b().whileTrue(m_drivetrain.applyRequest(() ->
         // point.withModuleDirection(new Rotation2d(-m_driver.getLeftY(),
         // -m_driver.getLeftX()))
@@ -165,23 +150,21 @@ public class RobotContainer {
   
         // Reset the field-centric heading on X press.
         // m_driver.x().onTrue(m_drivetrain.runOnce(m_drivetrain::seedFieldCentric));
-
-        m_drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
         // Simple drive forward auton
-        final var idle = new SwerveRequest.Idle();
         return Commands.sequence(
                 // Reset our field centric heading to match the robot
                 // facing away from our alliance station wall (0 deg).
-                m_drivetrain.runOnce(() -> m_drivetrain.seedFieldCentric(Rotation2d.kZero)),
+                new InstantCommand(m_drivetrain::zeroGyro)
+                        .alongWith(new InstantCommand(m_drivetrain::resetToAbsolute)),
                 // Then slowly drive forward (away from us) for 5 seconds.
-                m_drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
-                        .withVelocityY(0)
-                        .withRotationalRate(0))
+                m_drivetrain.run(
+                        () -> m_drivetrain.drive(new Translation2d(0.5, 0), 0, false, true, new Translation2d()))
                         .withTimeout(5.0),
-                // Finally idle for the rest of auton
-                m_drivetrain.applyRequest(() -> idle));
+                // Finally stop for the rest of auton
+                m_drivetrain.run(
+                        () -> m_drivetrain.drive(new Translation2d(), 0, false, true, new Translation2d())));
     }
 }

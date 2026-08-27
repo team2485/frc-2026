@@ -1,7 +1,5 @@
 package frc.robot.subsystems.drive;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 
@@ -32,6 +30,7 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.AimConstants;
 import frc.robot.Constants.AimConstants.*;
+import frc.robot.commands.DriveWithController;
 import frc.robot.subsystems.Windexer.WindexerStates;
 import frc.util.DistanceLookup;
 
@@ -44,7 +43,7 @@ public class TargetTracking extends SubsystemBase {
     private CommandXboxController driverController;
     private TargetingStates currentState = TargetingStates.StateDriverControlled;
     private TargetingStates requestedState = TargetingStates.StateDriverControlled;
-    private FieldCentric m_manualDrive; // 24 7 2
+    private DriveWithController m_driveWithController;
     // new PIDController(25,7,1.75);
     private PIDController m_PidController= new PIDController(18,4.5,3); // TODO: Looks good right now but may need retuning later down the line :(
     private Pose2d aimPosition = new Pose2d();
@@ -67,13 +66,19 @@ public class TargetTracking extends SubsystemBase {
     }
      
 
-    public TargetTracking(RobotContainer bot, Drivetrain dt, PoseEstimation pe, CommandXboxController cxc,CommandXboxController cxc2,FieldCentric manualDrive) {
+    public TargetTracking(RobotContainer bot, Drivetrain dt, PoseEstimation pe, CommandXboxController cxc,CommandXboxController cxc2) {
         m_drivetrain = dt;
         m_robotContainer = bot;
         m_PoseEstimation = pe;
         driverController = cxc;
         opController = cxc2;
-        m_manualDrive = manualDrive;
+        m_driveWithController = new DriveWithController(
+                driverController::getLeftY,
+                driverController::getLeftX,
+                driverController::getRightX,
+                () -> 1.0,
+                () -> true,
+                m_drivetrain, m_PoseEstimation);
         m_PidController.setTolerance(0.001);
         // m_PidController = pid;
 
@@ -114,7 +119,8 @@ public class TargetTracking extends SubsystemBase {
                     // }
                     // m_drivetrain.runOnce(m_drivetrain::seedFieldCentric);
                     // m_drivetrain.seedFieldCentric();
-                    CommandScheduler.getInstance().schedule(m_drivetrain.resetGyro());
+                    CommandScheduler.getInstance().schedule(new InstantCommand(m_drivetrain::zeroGyro)
+                            .alongWith(new InstantCommand(m_drivetrain::resetToAbsolute)));
                     // m_drivetrain.setOperatorPerspectiveForward(m_drivetrain.getPigeon2().getRotation2d().unaryMinus());
                     // m_drivetrain.resetRotation();
                     requestedState = TargetingStates.StateDriverControlled;
@@ -128,25 +134,7 @@ public class TargetTracking extends SubsystemBase {
                     if(!DriverStation.isTeleopEnabled()){
                         break;
                     }
-                CommandScheduler.getInstance()
-                        .schedule(m_drivetrain.applyRequest(
-                                () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed) // Drive
-                                                                                                                     // forward
-                                                                                                                     // with
-                                                                                                                     // negative
-                                                                                                                     // Y
-                                                                                                                     // (forward)
-                                        .withVelocityY(-driverController.getLeftX() * Constants.MaxSpeed) // Drive left
-                                                                                                          // with
-                                                                                                          // negative X
-                                                                                                          // (left)
-                                        .withRotationalRate(-driverController.getRightX() * Constants.MaxAngularRate) // Drive
-                                                                                                                      // counterclockwise
-                                                                                                                    // with
-                                                                                                                      // negative
-                                                                                                                      // X
-                                                                                                                      // (left)
-                        ));
+                CommandScheduler.getInstance().schedule(m_driveWithController); // teleop drive (2025 DriveWithController)
                 break;
             case StateDriveToAimTransition:
                     aimPosePub.set(aimPosition);
@@ -156,7 +144,8 @@ public class TargetTracking extends SubsystemBase {
                     m_drivetrain.getCurrentCommand().cancel();
                 }
                 CommandScheduler.getInstance()
-                        .schedule(m_drivetrain.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()));
+                        .schedule(m_drivetrain.run(
+                                () -> m_drivetrain.drive(new Translation2d(), 0, false, true, new Translation2d())));
                 requestedState = TargetingStates.StateAiming;
                 break;
             case StateAiming:
@@ -189,18 +178,18 @@ public class TargetTracking extends SubsystemBase {
     }
 
     public void recalculateAimPosition(){
-        double t = DistanceLookup.getTime(m_drivetrain.getState().Pose.getTranslation()
+        double t = DistanceLookup.getTime(m_PoseEstimation.getCurrentPose().getTranslation()
                 .getDistance(aimPosition.getTranslation())); // find time variable from lookup table
         ChassisSpeeds curVelo = ChassisSpeeds.fromRobotRelativeSpeeds(
-                m_drivetrain.getState().Speeds, 
-                m_drivetrain.getState().Pose.getRotation()); // find a field relative velocity of the chassis
+                m_drivetrain.getChassisSpeeds(),
+                m_PoseEstimation.getCurrentPose().getRotation()); // find a field relative velocity of the chassis
         // Pose2d newAimPose = new Pose2d(getHubPose().getX() - curVelo.vxMetersPerSecond*t , // factor in time to hit
         //         getHubPose().getY() - curVelo.vyMetersPerSecond*t ,
         //          Rotation2d.k180deg); // subtract it from the pose of the target to create opposing aim angle
         aimPosition = getHubPose();
     }
     public Rotation2d calculateTargetLockAngle(){
-        Translation2d selfPose = m_drivetrain.getState().Pose.getTranslation();
+        Translation2d selfPose = m_PoseEstimation.getCurrentPose().getTranslation();
         Translation2d dif = aimPosition.getTranslation().minus(selfPose);
         return dif.getAngle();
     }
@@ -256,7 +245,7 @@ public class TargetTracking extends SubsystemBase {
         // double dist = m_poseEstimation.getCurrentPose().getTranslation().getDistance();
 
         // Rotation2d hub = new Rotation2d(Math.PI/3);
-        Rotation2d currentRotation = m_drivetrain.getState().Pose.getRotation();
+        Rotation2d currentRotation = m_PoseEstimation.getCurrentPose().getRotation();
 
         // Rotation2d error = currentRotation.relativeTo(hub);
         
@@ -278,7 +267,7 @@ public class TargetTracking extends SubsystemBase {
         // final double targetAngleRadiansFinal = targetAngleRadians;
         targetPublisher.set(targetAngleRadiansFinal- currentAngleRadiansFinal); // Logs the error
         anglePublisher.set(currentAngleRadiansFinal);
-        var dist = m_drivetrain.getState().Pose.getTranslation()
+        var dist = m_PoseEstimation.getCurrentPose().getTranslation()
         .getDistance(aimPosition.getTranslation());
         double tolernace = AimConstants.kTargetAngleTolerance / (dist/2);
         if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < tolernace){
@@ -299,20 +288,17 @@ public class TargetTracking extends SubsystemBase {
             // stopTurning=1;
             aimingRateLimiter=.2;
         }
-        return m_drivetrain.applyRequest( // Allows for some SWIM control but only .5x speed on the drivetrain.
-                                () -> m_manualDrive.withVelocityX(-driverController.getLeftY() * Constants.MaxSpeed * aimingRateLimiter) // Drive
-                                                                                                                     // forward
-                                                                                                                     // with
-                                                                                                                     // negative
-                                                                                                                     // Y
-                                                                                                                     // (forward)
-                                        .withVelocityY(-driverController.getLeftX() * Constants.MaxSpeed * aimingRateLimiter)
-                                                                                                          // with
-                                                                                                          // negative X
-                                                                                                          // (left)
-                                        .withRotationalRate( stopTurning*m_PidController.calculate((currentAngleRadiansFinal/(2*Math.PI)), (targetAngleRadiansFinal/(2*Math.PI)))) 
-                                                                                          
-                        ); 
+        return m_drivetrain.run( // Allows for some SWIM control but only .2x speed on the drivetrain.
+                () -> m_drivetrain.drive(
+                        // Same stick convention as DriveWithController (x = +leftY, y = -leftX), scaled by the limiter
+                        new Translation2d(driverController.getLeftY(), -driverController.getLeftX())
+                                .times(Constants.Swerve.maxSpeed * aimingRateLimiter),
+                        // drive() treats positive rotation as CW; the PID output is CCW+, so negate it.
+                        // FIELD TEST (on blocks): verify hub-lock rotates TOWARD the hub;
+                        // if it spins away from it, remove this leading minus.
+                        -(stopTurning * m_PidController.calculate((currentAngleRadiansFinal / (2 * Math.PI)),
+                                (targetAngleRadiansFinal / (2 * Math.PI)))),
+                        true, true, new Translation2d()));
 
     }
 }

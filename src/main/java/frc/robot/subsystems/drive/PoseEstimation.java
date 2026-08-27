@@ -81,7 +81,7 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
         // this.m_operator = m_operator;
 
         poseEstimator = new SwerveDrivePoseEstimator(
-                m_drivetrain.getKinematics(),
+                Constants.Swerve.swerveKinematics,
                 rotation.get(),
                 modulePosition.get(),
                 new Pose2d(), stateStdDevs, visionMeasurementStdDevs);
@@ -124,16 +124,13 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
         latestVisPose=visionPose.estimatedPose.toPose2d();
 
             var pose2d = visionPose.estimatedPose.toPose2d();
-            // m_drivetrain.getPigeon2().setYaw(pose2d.getRotation().getDegrees());
-            m_drivetrain.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
-            
-            // poseEstimator.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
+            poseEstimator.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
         }
         var sidePose = photonEstimatorSide.grabLatestEstimatedPose();
         if(sidePose != null) {
 
             var pose2d = sidePose.estimatedPose.toPose2d();
-            m_drivetrain.addVisionMeasurement(pose2d, sidePose.timestampSeconds);
+            poseEstimator.addVisionMeasurement(pose2d, sidePose.timestampSeconds);
             // System.out.println("Side Pose: " + pose2d);
             
         }

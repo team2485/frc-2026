@@ -17,10 +17,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 // import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.drive.CTREConfigs;
 
 
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
+
+    public static CTREConfigs ctreConfigs = new CTREConfigs();
 
     private final RobotContainer m_robotContainer;
 
@@ -46,8 +49,9 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        Logger.recordOutput("robotPoseLog", m_robotContainer.m_drivetrain.getState().Pose);
-        CommandScheduler.getInstance().run(); 
+        m_robotContainer.logger.telemeterize();
+        Logger.recordOutput("robotPoseLog", m_robotContainer.m_poseEstimation.getCurrentPose());
+        CommandScheduler.getInstance().run();
     }
 
     @Override

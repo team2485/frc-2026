@@ -5,8 +5,6 @@ import java.nio.file.Path;
 import java.util.TreeMap;
 
 import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.utility.WheelForceCalculator.Feedforwards;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
@@ -77,23 +75,21 @@ public class AutoStateMachine extends SubsystemBase {
 
         // m_Chooser.addOption("Test2", "MoveAndShoot");
 
-        final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
         try {
 
             AutoBuilder
                     .configure(
-                            () -> new Pose2d(m_rc.m_drivetrain.getState().Pose.getTranslation(),
-                                    m_rc.m_drivetrain.getState().Pose.getRotation()),
-                            (pose) -> m_rc.m_drivetrain.fakeResetPose(pose.rotateBy(Rotation2d.fromDegrees(180))),
-                            () -> m_rc.m_drivetrain.getState().Speeds,
-                            (speeds, feedforward) -> m_rc.m_drivetrain
-                                    .setControl(
-                                            m_pathApplyRobotSpeeds.withSpeeds(ChassisSpeeds.discretize(
-                                                    new ChassisSpeeds(speeds.vxMetersPerSecond,
-                                                            speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond),
-                                                    0.02))), // .withWheelForceFeedforwardsX(feedforward.robotRelativeForcesXNewtons()).withWheelForceFeedforwardsY(feedforward.robotRelativeForcesYNewtons())),
+                            m_rc.m_poseEstimation::getCurrentPose,
+                            m_rc.m_poseEstimation::setCurrentPose,
+                            m_rc.m_drivetrain::getChassisSpeeds,
+                            (speeds, feedforward) -> m_rc.m_drivetrain.driveAuto(speeds),
                             new PPHolonomicDriveController(new PIDConstants(.9, 0, 0), new PIDConstants(1, 0.0, 0)),
-                            RobotConfig.fromGUISettings(),
+                            m_rc.m_drivetrain.pathplannerConfig != null ? m_rc.m_drivetrain.pathplannerConfig
+                                    : RobotConfig.fromGUISettings(),
+                            // FIELD TEST: kept the 2026 "flip when Red" convention; the 2025
+                            // DriveCommandBuilder flipped on Blue instead, and the old
+                            // fakeResetPose(rotateBy(180)) hack was dropped. Verify auto start
+                            // pose/heading for BOTH alliances in sim before competition.
                             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red, this
 
                     );
@@ -266,11 +262,11 @@ public class AutoStateMachine extends SubsystemBase {
                 if (PathNumber == 0) {
                     if (DriverStation.getAlliance().get() == Alliance.Blue) {
 
-                        m_RobotContainer.m_drivetrain.resetPose(PathToFollow.getStartingHolonomicPose().get());
+                        m_RobotContainer.m_poseEstimation.setCurrentPose(PathToFollow.getStartingHolonomicPose().get());
 
                     } else {
-                        m_RobotContainer.m_drivetrain
-                                .resetPose(PathToFollow.flipPath().getStartingHolonomicPose().get());
+                        m_RobotContainer.m_poseEstimation
+                                .setCurrentPose(PathToFollow.flipPath().getStartingHolonomicPose().get());
 
                     }
 

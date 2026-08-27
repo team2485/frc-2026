@@ -29,7 +29,12 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -250,15 +255,6 @@ public class Constants {
             kBackRightSteerMotorId, kBackRightDriveMotorId, kBackRightEncoderId, kBackRightEncoderOffset,
             kBackRightXPos, kBackRightYPos, kInvertRightSide, kBackRightSteerMotorInverted, kBackRightEncoderInverted
         );
-        /**
-         * Creates a Drivetrain instance.
-         * This should only be called once in your robot program,.
-         */
-        public static Drivetrain createDrivetrain() {
-                return new Drivetrain(
-                                DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight);
-        }
-
         /**
          * Swerve Drive class utilizing CTR Electronics' Phoenix 6 API with the selected
          * device types.
@@ -493,5 +489,162 @@ public class Constants {
                 public static final boolean kClimberClockwisePositive = false;
 
                 public static final double kClimberErrorTolerance = 1;
+        }
+
+        public static final class OIConstants {
+                public static final int kDriverPort = 0;
+                public static final int kOperatorPort = 1;
+
+                public static final double kDriverRightXDeadband = 0.05;
+                public static final double kDriverLeftXDeadband = 0.05;
+                public static final double kDriverLeftYDeadband = 0.05;
+
+                public static final double kTriggerThreshold = 0.1;
+        }
+
+        public static final class DriveConstants {
+                // Max speed teleoperated
+                public static final double kTeleopMaxSpeedMetersPerSecond = 3; // meters per second
+                public static final double kTeleopMaxAngularSpeedRadiansPerSecond = 4; // radians per second
+        }
+
+        public static final class Swerve {
+
+                public static final int pigeonID = 20;
+                public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
+
+                public static final COTSFalconSwerveConstants chosenModule = COTSFalconSwerveConstants
+                                .SDSMK5n(COTSFalconSwerveConstants.driveGearRatios.SDSMK5n_L1);
+
+                /* Drivetrain Constants (2026 robot: module corners at +/-11 in) */
+                public static final double lengthBetweenModules = Units.inchesToMeters(22);
+                public static final double widthBetweenModules = Units.inchesToMeters(22);
+                public static final double wheelCircumference = chosenModule.wheelCircumference;
+
+                /*
+                 * Swerve Kinematics
+                 * Module order matches the 2025 convention: Mod0 FL, Mod1 FR, Mod2 BR, Mod3 BL
+                 */
+                public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+                                new Translation2d(Swerve.lengthBetweenModules / 2.0, -Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(Swerve.lengthBetweenModules / 2.0, Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(-Swerve.lengthBetweenModules / 2.0, Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(-Swerve.lengthBetweenModules / 2.0,
+                                                -Swerve.widthBetweenModules / 2.0));
+
+                /* Module Gear Ratios (exact Tuner X values; these feed SensorToMechanismRatio) */
+                public static final double driveGearRatio = 7.026785714285714;
+                public static final double angleGearRatio = 26.09090909090909;
+
+                /*
+                 * Motor Inverts
+                 * NOTE: SwerveModule maps invert=true -> CounterClockwise_Positive (the CTRE
+                 * default), so these flags read as the complement of the Tuner X invert flags.
+                 */
+                public static final boolean angleMotorInvert = chosenModule.angleMotorInvert;
+                public static final boolean driveMotorInvert = chosenModule.driveMotorInvert;
+
+                /* Angle Encoder Invert */
+                public static final boolean canCoderInvert = chosenModule.canCoderInvert;
+
+                /* Swerve Current Limiting */
+                public static final int angleContinuousCurrentLimit = 40;
+                public static final int anglePeakCurrentLimit = 80;
+                public static final double anglePeakCurrentDuration = 0.1;
+                public static final boolean angleEnableCurrentLimit = true;
+
+                public static final int driveContinuousCurrentLimit = 35;
+                public static final int drivePeakCurrentLimit = 60;
+                public static final double drivePeakCurrentDuration = 0.1;
+                public static final boolean driveEnableCurrentLimit = true;
+
+                /*
+                 * These values are used by the drive falcon to ramp in open loop and closed
+                 * loop driving.
+                 */
+                public static final double openLoopRamp = 0.25;
+                public static final double closedLoopRamp = 0.0;
+
+                /* Angle Motor PID Values */
+                public static final double angleKP = 40;
+                public static final double angleKI = 0.0;
+                public static final double angleKD = 0.05;
+                public static final double angleKF = 0;
+                public static final double angleKV = 0;
+
+                /* Drive Motor PID Values */
+                public static final double driveKP = 0.2;
+                public static final double driveKI = 0;
+                public static final double driveKD = 0.0;
+                public static final double driveKF = 0.0;
+
+                /* Drive Motor Characterization Values */
+                public static final double driveKS = 0;
+                public static final double driveKV = 0.124;
+                public static final double driveKA = 0;
+
+                /*
+                 * Swerve Profiling Values
+                 * TUNE: teleop is faster than the old Phoenix setup (which capped requests at
+                 * Constants.MaxSpeed ~2.67 m/s) and rotation is slower (3 vs ~4.71 rad/s).
+                 * Adjust maxAngularVelocity here and the shaping in DriveConstants to taste.
+                 */
+                /** Meters per Second (Tuner kSpeedAt12Volts) */
+                public static final double maxSpeed = 4.54;
+                /** Radians per Second */
+                public static final double maxAngularVelocity = 3;
+
+                /* Neutral Modes */
+                public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Brake;
+                public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake;
+
+                /*
+                 * Module Specific Constants (CAN IDs and offsets from the 2026 Tuner X config)
+                 * FIELD TEST before first drive (robot on blocks):
+                 * - If all wheels drive backward (or odometry runs backward), flip all four
+                 * per-module isInverted flags below as a set.
+                 * - The offsets were calibrated by Tuner X under CCW+ CANcoders, but
+                 * CTREConfigs sets CANcoders CW+. If the wheels sit crooked by consistent
+                 * amounts on enable, negate all four angleOffset values or re-zero them.
+                 */
+                /* Front Left Module - Module 0 */
+                public static final class Mod0 {
+                        public static final int driveMotorID = 1;
+                        public static final int angleMotorID = 2;
+                        public static final int canCoderID = 9;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(-0.356201171875);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, false);
+                }
+
+                /* Front Right Module - Module 1 */
+                public static final class Mod1 {
+                        public static final int driveMotorID = 3;
+                        public static final int angleMotorID = 4;
+                        public static final int canCoderID = 10;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.393798828125);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, true);
+                }
+
+                /* Back Right Module - Module 2 */
+                public static final class Mod2 {
+                        public static final int driveMotorID = 7;
+                        public static final int angleMotorID = 8;
+                        public static final int canCoderID = 12;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.440185546875);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, true);
+                }
+
+                /* Back Left Module - Module 3 */
+                public static final class Mod3 {
+                        public static final int driveMotorID = 5;
+                        public static final int angleMotorID = 6;
+                        public static final int canCoderID = 11;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.053955078125);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, false);
+                }
         }
 }
