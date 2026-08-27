@@ -20,6 +20,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -161,13 +162,18 @@ public class PoseEstimation extends SubsystemBase { // DEPRECATED: USE Drivetrai
     public Pose2d getCurrentPose() {// DEPRECATED: USE Drivetrain.getState()!!!!!!
         var pos = poseEstimator.getEstimatedPosition();
 
-        if (pos.getX() < 0)
-            pos = new Pose2d(new Translation2d(0, poseEstimator.getEstimatedPosition().getY()),
-                    poseEstimator.getEstimatedPosition().getRotation());
-        if (pos.getX() > VisionConstants.kFieldLengthMeters)
-            pos = new Pose2d(
-                    new Translation2d(VisionConstants.kFieldLengthMeters, poseEstimator.getEstimatedPosition().getY()),
-                    poseEstimator.getEstimatedPosition().getRotation());
+        // Field-edge clamp is a real-robot safety net; skip it in sim so odometry bugs are
+        // visible instead of being silently pinned to the X = 0 wall.
+        if (!RobotBase.isSimulation()) {
+            if (pos.getX() < 0)
+                pos = new Pose2d(new Translation2d(0, poseEstimator.getEstimatedPosition().getY()),
+                        poseEstimator.getEstimatedPosition().getRotation());
+            if (pos.getX() > VisionConstants.kFieldLengthMeters)
+                pos = new Pose2d(
+                        new Translation2d(VisionConstants.kFieldLengthMeters,
+                                poseEstimator.getEstimatedPosition().getY()),
+                        poseEstimator.getEstimatedPosition().getRotation());
+        }
 
         return pos;
     }
