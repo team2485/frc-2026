@@ -61,20 +61,23 @@ public class DriveWithController extends Command {
     // SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
     // SmartDashboard.putNumber("xbox left y", m_rotSpeedSupplier.getAsDouble());
     double speedMult = m_speedMult.getAsDouble();
+    /* Standard WPILib frame: +X forward, +Y left, CCW+ rotation. Xbox sticks read +Y down and
+     * +X right, so every axis is negated: the map(-...) below already supplies the minus for
+     * translation, and rotation gets an explicit one. */
     final int xSign = (int)(Math.abs(m_xSpeedSupplier.getAsDouble())/m_xSpeedSupplier.getAsDouble());
     double xSpeed =
         map(-MathUtil.applyDeadband(Math.abs(m_xSpeedSupplier.getAsDouble()*m_xSpeedSupplier.getAsDouble()), kDriverLeftYDeadband)
-            * kTeleopMaxSpeedMetersPerSecond, 0, 1, 0, Swerve.maxSpeed) * -xSign;
+            * kTeleopMaxSpeedMetersPerSecond, 0, 1, 0, Swerve.maxSpeed) * xSign;
 
     final int ySign = (int)(Math.abs(m_ySpeedSupplier.getAsDouble())/m_ySpeedSupplier.getAsDouble());
     double ySpeed =
         map(-MathUtil.applyDeadband(Math.abs(m_ySpeedSupplier.getAsDouble()*m_ySpeedSupplier.getAsDouble()), kDriverLeftXDeadband)
-          * kTeleopMaxSpeedMetersPerSecond, 0, 1, 0, Swerve.maxSpeed) * -ySign;
+          * kTeleopMaxSpeedMetersPerSecond, 0, 1, 0, Swerve.maxSpeed) * ySign;
 
 
     final int rotSign = (int)(Math.abs(m_rotSpeedSupplier.getAsDouble())/m_rotSpeedSupplier.getAsDouble());
     double rot = Math.abs(map(-MathUtil.applyDeadband(m_rotSpeedSupplier.getAsDouble()*m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband)
-            * kTeleopMaxAngularSpeedRadiansPerSecond, 0, 1, 0, Swerve.maxAngularVelocity)) * rotSign;
+            * kTeleopMaxAngularSpeedRadiansPerSecond, 0, 1, 0, Swerve.maxAngularVelocity)) * -rotSign;
 
     boolean fieldRelative = m_fieldRelative.getAsBoolean();
 

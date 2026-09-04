@@ -54,9 +54,7 @@ public class Drivetrain extends SubsystemBase {
         absoluteGyroPos = Shuffleboard.getTab("Swerve").add("AbsoluteGyroPos", 0).getEntry();
         currentGyroPos = Shuffleboard.getTab("Swerve").add("CurrentGyroPos", 0).getEntry();
         gyro.reset();
-        if (DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue)
-            absoluteGyroPosition = 180;
+        absoluteGyroPosition = allianceHeadingOffsetDegrees();
         try {
             pathplannerConfig = RobotConfig.fromGUISettings();
             // System.out.println("asdfadsfasdf" + pathplannerConfig.toString());
@@ -76,24 +74,28 @@ public class Drivetrain extends SubsystemBase {
         // getYaw().times(-1), getModulePositions());
     }
 
+    /**
+     * Drives in the standard WPILib frame: +X forward, +Y left, rotation CCW+ (rad/s). Field
+     * relative uses the driver-zeroed gyro heading (see {@link #zeroGyro()}), which the Pigeon 2
+     * already reports CCW+.
+     */
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop,
             Translation2d centerOfRotation) {
         SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                         translation.getX(),
                         translation.getY(),
-                        -rotation,
-                        Rotation2d.fromDegrees(gyro.getYaw().refresh().getValueAsDouble() * -1) // TODO: all gyro values
-                )
+                        rotation,
+                        getRawYaw())
                         : new ChassisSpeeds(
                                 translation.getX(),
                                 translation.getY(),
                                 rotation),
                 centerOfRotation);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
-        recordSimCommandedOmega(fieldRelative ? -rotation : rotation);
-        absoluteGyroPos.setDouble(getChassisSpeeds().vyMetersPerSecond);
-        currentGyroPos.setDouble(getYaw().times(-1).getDegrees());
+        recordSimCommandedOmega(rotation);
+        absoluteGyroPos.setDouble(absoluteGyroPosition);
+        currentGyroPos.setDouble(getRawYaw().getDegrees());
 
         for (SwerveModule mod : mSwerveMods) {
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
@@ -136,16 +138,16 @@ public class Drivetrain extends SubsystemBase {
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                         translation.getX(),
                         translation.getY(),
-                        -rotation,
+                        rotation,
                         absoluteRotation)
                         : new ChassisSpeeds(
                                 translation.getX(),
                                 translation.getY(),
                                 rotation));
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
-        recordSimCommandedOmega(fieldRelative ? -rotation : rotation);
+        recordSimCommandedOmega(rotation);
         absoluteGyroPos.setDouble(absoluteGyroPosition);
-        currentGyroPos.setDouble(getYaw().times(-1).getDegrees());
+        currentGyroPos.setDouble(getRawYaw().getDegrees());
 
         for (SwerveModule mod : mSwerveMods) {
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
@@ -170,8 +172,10 @@ public class Drivetrain extends SubsystemBase {
         // if(Math.abs(speeds.vyMetersPerSecond) > 0.5) speeds.vyMetersPerSecond = 0.5 *
         // Math.signum(speeds.vyMetersPerSecond); // HARD SPEED LIMIT!!
 
-        driveWithSuppliedRotation(new Translation2d(-speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
-                speeds.omegaRadiansPerSecond, false, true, Rotation2d.fromDegrees(getYawAbsolute().getDegrees() % 180));
+        /* PathPlanner hands us robot-relative speeds in the standard frame; pass them straight
+         * through (open loop, matching teleop, since the drive velocity loop has no kV tuned). */
+        drive(new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
+                speeds.omegaRadiansPerSecond, false, true, new Translation2d());
     }
 
     /* Used by SwerveControllerCommand in Auto */
@@ -198,85 +202,73 @@ public class Drivetrain extends SubsystemBase {
         return states;
     }
 
+    /**
+     * Module positions for odometry: drive distance (forward positive) and the steer motor's
+     * integrated angle, which is seeded from the CANcoder by {@link #resetToAbsolute()}. The
+     * integrated angle is used rather than the CANcoder directly so the same value drives both
+     * control and odometry (and because the Phoenix CANcoder sim is unreliable in simulation).
+     */
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
         for (SwerveModule mod : mSwerveMods) {
-            positions[mod.moduleNumber] = new SwerveModulePosition(mod.getPosition().distanceMeters, mod.getCanCoder());
-        }
-        return positions;
-    }
-
-    public SwerveModulePosition[] getModulePositionsInverted() {
-        SwerveModulePosition[] positions = new SwerveModulePosition[4];
-        for (SwerveModule mod : mSwerveMods) {
-            positions[mod.moduleNumber] = new SwerveModulePosition(-mod.getPosition().distanceMeters,
-                    mod.getCanCoder());
+            positions[mod.moduleNumber] = mod.getPosition();
         }
         return positions;
     }
 
     /**
-     * Module positions fed to the pose estimator. The real robot keeps the historical distance
-     * inversion of {@link #getModulePositionsInverted()}; simulation uses the true (non-inverted)
-     * positions so the rendered pose tracks the commanded motion instead of driving into the
-     * X = 0 field edge.
-     * <p>
-     * TODO: the uniform distance negation is almost certainly a hardware band-aid for another
-     * sign error (gyro or drive-encoder polarity). Verify on blocks and unify the two paths.
-     */
-    public SwerveModulePosition[] getModulePositionsForOdometry() {
-        if (RobotBase.isSimulation()) {
-            /* Use the steer control angle (getAngle(), which tracks the setpoint exactly in sim)
-             * instead of getCanCoder() -- the Phoenix CANcoder sim does not resolve
-             * getAbsolutePosition() predictably here, and its bogus per-module angles skew the
-             * estimated translation by ~21 deg. Distance is negated to match the drive-position
-             * sign convention (forward -> +X). */
-            SwerveModulePosition[] positions = new SwerveModulePosition[4];
-            for (SwerveModule mod : mSwerveMods) {
-                SwerveModulePosition p = mod.getPosition();
-                positions[mod.moduleNumber] = new SwerveModulePosition(-p.distanceMeters, p.angle);
-            }
-            return positions;
-        }
-        return getModulePositionsInverted();
-    }
-
-    /**
-     * Heading fed to the pose estimator. In simulation this matches the field-relative reference
-     * {@code drive()} uses ({@code gyro.getYaw() * -1}) so the rendered pose and the drive command
-     * share one convention and stay consistent after a rotation or a {@code zeroGyro()}. The real
-     * robot keeps the historical {@link #getYawMod()} path (which pairs with the distance inversion
-     * in {@link #getModulePositionsInverted()}).
+     * Heading fed to the pose estimator: the field heading, i.e. the gyro plus the alliance
+     * offset applied by {@link #zeroGyro()}. Same frame as {@code drive()} in both sim and real.
      */
     public Rotation2d getYawForOdometry() {
-        return RobotBase.isSimulation() ? getYaw().times(-1) : getYawMod();
+        return getYawAbsolute();
     }
 
     public ChassisSpeeds getChassisSpeeds() {
         return Constants.Swerve.swerveKinematics.toChassisSpeeds(getModuleStates());
     }
 
+    /**
+     * Field heading the robot is at when the driver presses reset-heading, i.e. squared up facing
+     * away from their own driver station. Kept identical to the old Phoenix operator-perspective
+     * constants this robot's autos/aiming were built against (Blue 180 deg, Red 0 deg).
+     */
+    private static double allianceHeadingOffsetDegrees() {
+        return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue
+                ? 180
+                : 0;
+    }
+
+    /**
+     * Reset-heading: makes the robot's current direction "forward" for field-relative driving and
+     * re-declares the odometry heading as the alliance forward heading (same as Phoenix
+     * seedFieldCentric with the operator perspective set). Only the gyro is touched; the modules
+     * are not moved.
+     */
     public void zeroGyro() {
-        absoluteGyroPosition += getYaw().times(-1).getDegrees();
+        absoluteGyroPosition = allianceHeadingOffsetDegrees();
         gyro.setYaw(0);
+        filter.reset();
     }
 
     public void autoGyro() {
         gyro.setYaw(180);
     }
 
+    /** Driver-zeroed gyro yaw, CCW+, unfiltered (used for field-relative drive commands). */
+    public Rotation2d getRawYaw() {
+        double yawDeg = gyro.getYaw().refresh().getValueAsDouble();
+        return Rotation2d.fromDegrees(Constants.Swerve.invertGyro ? -yawDeg : yawDeg);
+    }
+
+    /** Driver-zeroed gyro yaw, CCW+, median filtered. */
     public Rotation2d getYaw() {
-        return (Constants.Swerve.invertGyro)
-                ? Rotation2d.fromDegrees(filter.calculate(360 - gyro.getYaw().refresh().getValueAsDouble()))
-                : Rotation2d.fromDegrees(filter.calculate(gyro.getYaw().refresh().getValueAsDouble()));
+        return Rotation2d.fromDegrees(filter.calculate(getRawYaw().getDegrees()));
     }
 
+    /** Field heading: driver-zeroed yaw plus the alliance offset set by {@link #zeroGyro()}. */
     public Rotation2d getYawAbsolute() {
-        return Rotation2d.fromDegrees(absoluteGyroPosition).minus(getYaw()).times(-1);
-    }
-
-    public Rotation2d getYawMod() {
-        return Rotation2d.fromDegrees(getYawAbsolute().getDegrees() % 360);
+        return Rotation2d.fromDegrees(absoluteGyroPosition).plus(getYaw());
     }
 
     public void setCustomYawAbsolute(double yawAbsolute) {

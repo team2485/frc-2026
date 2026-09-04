@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -48,11 +47,6 @@ public class SwerveModule {
     private TalonFX mDriveMotor;
     private CANcoder angleEncoder;
     private CANcoderConfigurator angleEncoderConfigurator;
-    //private CANcoderConfiguration angleEncoderConfiguration;
-    final TrapezoidProfile m_profile = new TrapezoidProfile(
-        new TrapezoidProfile.Constraints(8, 16)
-    );
-    TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
 
     private TalonFXConfigurator mDriveConfigurator;
     private TalonFXConfigurator mAngleConfigurator;
@@ -60,12 +54,6 @@ public class SwerveModule {
     private MotorOutputConfigs mAngleOutputConfigs = new MotorOutputConfigs();
     private CANcoderConfiguration mCanCoderConfigs = new CANcoderConfiguration();
     private GenericEntry current;
-
-    //SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(driveKS, driveKV, driveKA); 
-    //PIDController angleContoller = new PIDController(1, 0, 0);
-    
-    
-    private double absAngle = 0;
 
     /* Simulation models (null on a real robot; only built when RobotBase.isSimulation()). */
     private static final DCMotor kSimDriveMotor = DCMotor.getKrakenX60(1);
@@ -80,47 +68,40 @@ public class SwerveModule {
         this.angleOffset = moduleConstants.angleOffset;
         current = Shuffleboard.getTab("Swerve").add("Current: " + moduleNumber, 0).getEntry();
         
-        /* Angle Encoder Config */
+        /* Angle Encoder Config: the shared base config plus this module's magnet offset, applied
+         * once as a complete configuration (a second apply() of a fresh CANcoderConfiguration
+         * would silently reset SensorDirection to its default). */
         angleEncoder = new CANcoder(moduleConstants.cancoderID, "Drive");
         angleEncoderConfigurator = angleEncoder.getConfigurator();
-        angleEncoderConfigurator.apply(Robot.ctreConfigs.swerveCanCoderConfig);
+        CANcoderConfiguration baseCanCoderConfig = Robot.ctreConfigs.swerveCanCoderConfig;
+        mCanCoderConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = baseCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint;
+        mCanCoderConfigs.MagnetSensor.SensorDirection = baseCanCoderConfig.MagnetSensor.SensorDirection;
         mCanCoderConfigs.MagnetSensor.MagnetOffset = angleOffset.getRotations();
         angleEncoderConfigurator.apply(mCanCoderConfigs);
 
-        
-        // configAngleEncoder();
-
-        /* Angle Motor Config */
+        /* Angle Motor Config. Invert flags use Phoenix SwerveModuleConstants semantics
+         * (true -> Clockwise_Positive), so the Tuner X values apply unchanged. */
         //CANivores = "Drive", "Mast"
         mAngleMotor = new TalonFX(moduleConstants.angleMotorID, "Drive");
         mAngleConfigurator = mAngleMotor.getConfigurator();
         mAngleConfigurator.apply(Robot.ctreConfigs.swerveAngleFXConfig);
-        mAngleOutputConfigs.Inverted = angleMotorInvert ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        mAngleOutputConfigs.Inverted = angleMotorInvert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         mAngleOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         mAngleConfigurator.apply(mAngleOutputConfigs);
-        
-        //configAngleMotor();
 
         /* Drive Motor Config */
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "Drive");
         mDriveConfigurator = mDriveMotor.getConfigurator();
         mDriveConfigurator.apply(Robot.ctreConfigs.swerveDriveFXConfig);
-        mDriveOutputConfigs.Inverted = moduleConstants.isInverted ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        mDriveOutputConfigs.Inverted = moduleConstants.isInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         mDriveOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         mDriveConfigurator.apply(mDriveOutputConfigs);
 
-        //angleEncoder.setPosition(0);
-
-        //
-        // configDriveMotor(moduleConstants.isInverted);
-
-        lastAngle = getState().angle;
-
-        // VoltageOut mAngleVoltageOut = new VoltageOut(6);
-        // mAngleMotor.setControl(mAngleVoltageOut);
-        // 
-
         resetToAbsolute();
+
+        /* Hold whatever angle the module is physically at; taking this before the seed would
+         * make the first zero-speed tick steer to a stale pre-seed reading. */
+        lastAngle = getAngle();
 
         if (RobotBase.isSimulation()) {
             mDriveMotorSim = new DCMotorSim(
@@ -178,8 +159,8 @@ public class SwerveModule {
         /* Drive the CANcoder toward the simulated module angle so getCanCoder() roughly tracks
          * getAngle(). This is best-effort only: the Phoenix CANcoder sim does not resolve
          * getAbsolutePosition() predictably here (the MagnetOffset config appears to race the sim
-         * writes), so the sim odometry path uses getAngle() instead -- see
-         * Drivetrain.getModulePositionsForOdometry(). This keeps telemetry readouts sane. */
+         * writes), so odometry uses getAngle() instead -- see Drivetrain.getModulePositions().
+         * This keeps telemetry readouts sane. */
         encoderSimState.setRawPosition(steerRotations - angleOffset.getRotations());
         encoderSimState.setVelocity(steerRotationsPerSec);
     }
@@ -215,29 +196,15 @@ public class SwerveModule {
         //current.setDouble(mAngleMotor.getTorqueCurrent().getValueAsDouble());
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (maxSpeed * 0.005)) ? lastAngle : desiredState.angle; //Prevent rotating module if speed is less then 1%. Prevents Jittering.
 
-        
-        TrapezoidProfile.State m_goal = new TrapezoidProfile.State(angle.getRotations(), 0);
-        m_setpoint = m_profile.calculate(Constants.kTimestepSeconds, m_setpoint, m_goal);
-        
-
-        mAngleMotor.setControl(mAnglePositionVoltage.withPosition(m_setpoint.position).withEnableFOC(true));
-
-        lastAngle = angle;
-    } 
-
-    private void setAngle(Rotation2d angle)
-    {
+        /* Command the goal directly and let the onboard position loop do the motion. (The 2025
+         * code ran this through a TrapezoidProfile with a 40 s timestep, which is the same thing.) */
         mAngleMotor.setControl(mAnglePositionVoltage.withPosition(angle.getRotations()).withEnableFOC(true));
-        lastAngle = Rotation2d.fromRotations(absAngle);
+
         lastAngle = angle;
     }
 
     private Rotation2d getAngle(){
         return Rotation2d.fromDegrees(mAngleMotor.getPosition().getValueAsDouble() * 360);
-    }
-
-    private Rotation2d getAngleForOdometry() {
-        return Rotation2d.fromRotations(mAngleMotor.getPosition().getValueAsDouble() % 1);
     }
 
     public Rotation2d getCanCoder(){
@@ -252,13 +219,19 @@ public class SwerveModule {
         return mAngleMotor;
     }
 
+    /**
+     * Seeds the steer motor's integrated position from the CANcoder so {@link #getAngle()} is the
+     * true module angle. Both sensors count CCW+ (Tuner X verified they agree), so the value is
+     * copied as-is: seeding the negation, as the 2025 hardware needed, makes every reset double
+     * the module's angle instead of cancelling it. Only the feedback is touched -- the wheel is
+     * not commanded anywhere, so a reset never moves the modules.
+     */
     void resetToAbsolute(){
         /* In simulation the steer position is driven entirely by updateSimState(); these blocking
-         * config/control calls would just be overwritten next tick, and running four of them on a
-         * button press (e.g. the reset-heading combo) blows the 20 ms loop and stutters the sim. */
+         * config calls would just be overwritten next tick, and running four of them on a button
+         * press (e.g. the reset-heading combo) blows the 20 ms loop and stutters the sim. */
         if (RobotBase.isSimulation()) return;
-        mAngleMotor.setPosition(-getCanCoder().getRotations());
-        setAngle(Rotation2d.fromRotations(0));
+        mAngleMotor.setPosition(getCanCoder().getRotations());
     }
 
     private void configAngleEncoder(){        

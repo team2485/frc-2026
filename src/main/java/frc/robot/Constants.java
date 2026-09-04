@@ -522,30 +522,31 @@ public class Constants {
                 public static final double wheelCircumference = chosenModule.wheelCircumference;
 
                 /*
-                 * Swerve Kinematics
-                 * Module order matches the 2025 convention: Mod0 FL, Mod1 FR, Mod2 BR, Mod3 BL
+                 * Swerve Kinematics -- standard WPILib frame: +X forward, +Y LEFT, CCW+.
+                 * Index order is the module number: Mod0 FL, Mod1 FR, Mod2 BR, Mod3 BL, and each
+                 * translation is that module's physical corner (matches the Tuner X k*XPos/YPos).
                  */
                 public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
-                                new Translation2d(Swerve.lengthBetweenModules / 2.0, -Swerve.widthBetweenModules / 2.0),
                                 new Translation2d(Swerve.lengthBetweenModules / 2.0, Swerve.widthBetweenModules / 2.0),
-                                new Translation2d(-Swerve.lengthBetweenModules / 2.0, Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(Swerve.lengthBetweenModules / 2.0, -Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(-Swerve.lengthBetweenModules / 2.0, -Swerve.widthBetweenModules / 2.0),
                                 new Translation2d(-Swerve.lengthBetweenModules / 2.0,
-                                                -Swerve.widthBetweenModules / 2.0));
+                                                Swerve.widthBetweenModules / 2.0));
 
                 /* Module Gear Ratios (exact Tuner X values; these feed SensorToMechanismRatio) */
                 public static final double driveGearRatio = 7.026785714285714;
                 public static final double angleGearRatio = 26.09090909090909;
 
                 /*
-                 * Motor Inverts
-                 * NOTE: SwerveModule maps invert=true -> CounterClockwise_Positive (the CTRE
-                 * default), so these flags read as the complement of the Tuner X invert flags.
+                 * Motor / encoder inverts, straight from the Tuner X project (same semantics as
+                 * Phoenix's SwerveModuleConstants: true -> Clockwise_Positive, false ->
+                 * CounterClockwise_Positive). Tuner X verified these on the real modules, so
+                 * with them the steer motor, the CANcoder and the WPILib module angle all count
+                 * CCW+ together. All four modules share the steer/encoder flags; the per-module
+                 * drive flag lives in Mod0..Mod3 below.
                  */
-                public static final boolean angleMotorInvert = chosenModule.angleMotorInvert;
-                public static final boolean driveMotorInvert = chosenModule.driveMotorInvert;
-
-                /* Angle Encoder Invert */
-                public static final boolean canCoderInvert = chosenModule.canCoderInvert;
+                public static final boolean angleMotorInvert = kFrontLeftSteerMotorInverted;
+                public static final boolean canCoderInvert = kFrontLeftEncoderInverted;
 
                 /* Swerve Current Limiting */
                 public static final int angleContinuousCurrentLimit = 40;
@@ -599,13 +600,11 @@ public class Constants {
                 public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake;
 
                 /*
-                 * Module Specific Constants (CAN IDs and offsets from the 2026 Tuner X config)
-                 * FIELD TEST before first drive (robot on blocks):
-                 * - If all wheels drive backward (or odometry runs backward), flip all four
-                 * per-module isInverted flags below as a set.
-                 * - The offsets were calibrated by Tuner X under CCW+ CANcoders, but
-                 * CTREConfigs sets CANcoders CW+. If the wheels sit crooked by consistent
-                 * amounts on enable, negate all four angleOffset values or re-zero them.
+                 * Module Specific Constants -- CAN IDs, CANcoder magnet offsets and drive inverts
+                 * copied from the 2026 Tuner X config above (kFrontLeft*, kFrontRight*, ...).
+                 * The offset is applied as the CANcoder MagnetOffset exactly like Tuner X does,
+                 * so getCanCoder() reads 0 with the wheel pointing forward; nothing here needs
+                 * re-zeroing unless a magnet physically moves.
                  */
                 /* Front Left Module - Module 0 */
                 public static final class Mod0 {
@@ -614,7 +613,7 @@ public class Constants {
                         public static final int canCoderID = 9;
                         public static final Rotation2d angleOffset = Rotation2d.fromRotations(-0.356201171875);
                         public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
-                                        driveMotorID, angleMotorID, canCoderID, angleOffset, false);
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertLeftSide);
                 }
 
                 /* Front Right Module - Module 1 */
@@ -624,7 +623,7 @@ public class Constants {
                         public static final int canCoderID = 10;
                         public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.393798828125);
                         public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
-                                        driveMotorID, angleMotorID, canCoderID, angleOffset, true);
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertRightSide);
                 }
 
                 /* Back Right Module - Module 2 */
@@ -634,7 +633,7 @@ public class Constants {
                         public static final int canCoderID = 12;
                         public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.440185546875);
                         public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
-                                        driveMotorID, angleMotorID, canCoderID, angleOffset, true);
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertRightSide);
                 }
 
                 /* Back Left Module - Module 3 */
@@ -644,7 +643,7 @@ public class Constants {
                         public static final int canCoderID = 11;
                         public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.053955078125);
                         public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
-                                        driveMotorID, angleMotorID, canCoderID, angleOffset, false);
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertLeftSide);
                 }
         }
 }

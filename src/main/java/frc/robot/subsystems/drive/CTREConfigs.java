@@ -63,10 +63,9 @@ public final class CTREConfigs {
 
         swerveDriveFXConfig.Feedback.SensorToMechanismRatio = driveGearRatio;
 
-        /* Swerve CANCoder Configuration */
-        swerveCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint =0.5 ; // TODO: what does this mean? Used to be AbsoluteSensorRange, removed in 2025?
-        swerveCanCoderConfig.MagnetSensor.MagnetOffset = .5;
-        swerveCanCoderConfig.MagnetSensor.SensorDirection = canCoderInvert ? SensorDirectionValue.CounterClockwise_Positive : SensorDirectionValue.Clockwise_Positive;
+        /* Swerve CANCoder Configuration (MagnetOffset is per module; SwerveModule fills it in) */
+        swerveCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5; // absolute position reported in [-0.5, 0.5) rotations
+        swerveCanCoderConfig.MagnetSensor.SensorDirection = canCoderInvert ? SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive; // Phoenix EncoderInverted semantics
         // swerveCanCoderConfig.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
         // swerveCanCoderConfig.sensorDirection = canCoderInvert;
         // swerveCanCoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;

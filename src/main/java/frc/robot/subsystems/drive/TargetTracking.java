@@ -290,14 +290,12 @@ public class TargetTracking extends SubsystemBase {
         }
         return m_drivetrain.run( // Allows for some SWIM control but only .2x speed on the drivetrain.
                 () -> m_drivetrain.drive(
-                        // Same stick convention as DriveWithController (x = +leftY, y = -leftX), scaled by the limiter
-                        new Translation2d(driverController.getLeftY(), -driverController.getLeftX())
+                        // Same stick convention as DriveWithController (forward = -leftY, left = -leftX), scaled by the limiter
+                        new Translation2d(-driverController.getLeftY(), -driverController.getLeftX())
                                 .times(Constants.Swerve.maxSpeed * aimingRateLimiter),
-                        // drive() treats positive rotation as CW; the PID output is CCW+, so negate it.
-                        // FIELD TEST (on blocks): verify hub-lock rotates TOWARD the hub;
-                        // if it spins away from it, remove this leading minus.
-                        -(stopTurning * m_PidController.calculate((currentAngleRadiansFinal / (2 * Math.PI)),
-                                (targetAngleRadiansFinal / (2 * Math.PI)))),
+                        // drive() and the pose heading are both CCW+, so the PID output feeds straight through.
+                        stopTurning * m_PidController.calculate((currentAngleRadiansFinal / (2 * Math.PI)),
+                                (targetAngleRadiansFinal / (2 * Math.PI))),
                         true, true, new Translation2d()));
 
     }

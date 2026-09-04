@@ -40,7 +40,7 @@ public class RobotContainer {
     private final CommandXboxController m_operator = new CommandXboxController(1);
     public final Drivetrain m_drivetrain = new Drivetrain();
     public final PoseEstimation m_poseEstimation = new PoseEstimation(m_drivetrain::getYawForOdometry,
-            m_drivetrain::getModulePositionsForOdometry, m_drivetrain::getChassisSpeeds, m_drivetrain);
+            m_drivetrain::getModulePositions, m_drivetrain::getChassisSpeeds, m_drivetrain);
     public final Telemetry logger = new Telemetry(Constants.Swerve.maxSpeed, m_drivetrain, m_poseEstimation);
 //     public final PIDController m_PidController = 
     public final Shooter m_shooter = new Shooter(this);
