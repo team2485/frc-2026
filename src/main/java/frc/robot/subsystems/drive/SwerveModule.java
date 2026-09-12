@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -97,11 +98,11 @@ public class SwerveModule {
         mDriveOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         mDriveConfigurator.apply(mDriveOutputConfigs);
 
-        resetToAbsolute();
-
-        /* Hold whatever angle the module is physically at; taking this before the seed would
-         * make the first zero-speed tick steer to a stale pre-seed reading. */
+        /* Hold whatever angle the module is physically at (resetToAbsolute() refines this on a
+         * real robot from the CANcoder); a stale pre-seed reading here would make the first
+         * zero-speed tick steer somewhere else. */
         lastAngle = getAngle();
+        resetToAbsolute();
 
         if (RobotBase.isSimulation()) {
             mDriveMotorSim = new DCMotorSim(
@@ -231,7 +232,28 @@ public class SwerveModule {
          * config calls would just be overwritten next tick, and running four of them on a button
          * press (e.g. the reset-heading combo) blows the 20 ms loop and stutters the sim. */
         if (RobotBase.isSimulation()) return;
-        mAngleMotor.setPosition(getCanCoder().getRotations());
+
+        /* The integrated position is continuous (it keeps counting past +/-0.5 rot while driving)
+         * but the CANcoder is wrapped to [-0.5, 0.5). Seeding the raw CANcoder value would jump
+         * the feedback by whole rotations while the held setpoint (lastAngle) stays put, and the
+         * module would then spin those rotations back. So apply only the wrapped correction on top
+         * of the current position, and hold that as the setpoint. */
+        double current = mAngleMotor.getPosition().getValueAsDouble();
+        double correction = MathUtil.inputModulus(getCanCoder().getRotations() - current, -0.5, 0.5);
+        double seeded = current + correction;
+        mAngleMotor.setPosition(seeded);
+
+        /* Then snap the wheel straight (nearest zero to where it is, so at most a half turn).
+         * Not needed for correctness; it gives the drivers an audible/visible confirmation that
+         * the reset registered, like the old drivetrain did. */
+        double straight = seeded - MathUtil.inputModulus(seeded, -0.5, 0.5);
+        setAngle(Rotation2d.fromRotations(straight));
+    }
+
+    /** Directly commands the module to {@code angle} and holds it there at zero speed. */
+    private void setAngle(Rotation2d angle){
+        mAngleMotor.setControl(mAnglePositionVoltage.withPosition(angle.getRotations()).withEnableFOC(true));
+        lastAngle = angle;
     }
 
     private void configAngleEncoder(){        
