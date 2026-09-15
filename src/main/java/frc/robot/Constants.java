@@ -33,7 +33,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -349,7 +352,8 @@ public class Constants {
 
         }
         public static final class VisionConstants {
-                public static final String kCameraName = "photonvision";
+                public static final String kFrontCameraName = "FrontCam";
+                public static final String kSideCameraName = "SideCam";
 
                 // old constraints (might want to use again)
 
@@ -388,14 +392,39 @@ public class Constants {
                 // public static final double THETA_kI = 0.5;
                 // public static final double THETA_kD = 0.15;
 
-                // TODO: ensure validity of measurements
-                // public static final Transform3d kRobotToCameraLeft = new Transform3d(
-                // new Translation3d(0.3719, 0.27305, 0.09),
-                // new Rotation3d(0, .1745, 0));
-                // public static final Transform3d kRobotToCameraRight = new Transform3d(
-                // new Translation3d(0.3719, -0.27305, 0.09),
-                // new Rotation3d(0, .1745, 0));
-                // -0.698
+                /*
+                 * Robot-to-camera transforms (robot frame: +X forward, +Y left, +Z up; Rotation3d is
+                 * roll, pitch, yaw in radians). WPILib positive pitch rotates +X toward -Z, i.e. the
+                 * camera tilts DOWN. The pitch sign has never been field-verified (the old code
+                 * divided by PI/180 instead of multiplying), so check with a tape measure: if the
+                 * logged Vision/<cam>/RawPose is off by tens of centimetres at 2-3 m, negate the pitch.
+                 */
+                public static final Transform3d kRobotToFrontCamera = new Transform3d(
+                                new Translation3d(Units.inchesToMeters(-13.5), Units.inchesToMeters(3.2),
+                                                Units.inchesToMeters(17.7)),
+                                new Rotation3d(0, Units.degreesToRadians(15), 0));
+                public static final Transform3d kRobotToSideCamera = new Transform3d(
+                                new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(-13.5),
+                                                Units.inchesToMeters(12.6)),
+                                new Rotation3d(0, Units.degreesToRadians(18.5), Math.PI / 2));
+
+                /* Vision fusion gates and trust model (see VisionMeasurementMath). */
+                /** Frames older than this at fusion time are dropped; must stay under the 1.5 s estimator buffer. */
+                public static final double kMaxVisionAgeSeconds = 0.5;
+                /** AdvantageKit stamps Timer at loop start, so a frame can look up to one loop "in the future". */
+                public static final double kMaxVisionFutureSeconds = 0.02;
+                /** Single-tag solves with more ambiguity than this are dropped (PhotonVision docs threshold). */
+                public static final double kMaxSingleTagAmbiguity = 0.2;
+                /** Frames captured while spinning faster than this are dropped (~115 deg/s; maxAngularVelocity is 3). */
+                public static final double kMaxOmegaForVisionRadPerSec = 2.0;
+                /** A 3D solve whose Z is further than this from the floor is a bad solve. */
+                public static final double kMaxVisionZErrorMeters = 0.5;
+                /** X/Y std dev in metres for 1 tag at 1 m; scales by avgDist^2 / numTags. K ~ 0.25 vs state std 0.1. */
+                public static final double kXYStdDevCoefficient = 0.3;
+                /** Heading std dev: huge so the gyro owns heading. Lower it to let multi-tag frames correct heading. */
+                public static final double kVisionThetaStdDevRadians = 1e3;
+                /** Extra X/Y std dev per metre the robot moved along that field axis while the frame was in flight. */
+                public static final double kMotionStdDevGain = 1.0;
 
                 public static final double kFieldLengthMeters = 17.55;
                 public static final double kFieldWidthMeters = 8.05;

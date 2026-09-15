@@ -153,7 +153,7 @@ public class TargetTracking extends SubsystemBase {
 
                 CommandScheduler.getInstance().schedule(alignToHub(m_drivetrain, m_PoseEstimation));
                 // var targetLocked = ;
-                if(targetLocked){
+                if(targetLocked) {
 
                     m_robotContainer.m_windexer.requestState(WindexerStates.StateAutomatedEnable);
                     driverController.setRumble(RumbleType.kBothRumble, 0);
