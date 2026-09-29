@@ -146,6 +146,7 @@ public class RobotContainer {
 
         //m_operator.leftBumper().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateReverse)));
         m_operator.x().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateZero))); // These overide the auto windexer control
+        // m_operator.b().onTrue(new InstantCommand(() -> m_windexer.requestState(WindexerStates.StateFeed)));
 
   
         // Reset the field-centric heading on X press.
