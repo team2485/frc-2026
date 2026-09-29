@@ -29,7 +29,15 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -251,15 +259,6 @@ public class Constants {
             kBackRightXPos, kBackRightYPos, kInvertRightSide, kBackRightSteerMotorInverted, kBackRightEncoderInverted
         );
         /**
-         * Creates a Drivetrain instance.
-         * This should only be called once in your robot program,.
-         */
-        public static Drivetrain createDrivetrain() {
-                return new Drivetrain(
-                                DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight);
-        }
-
-        /**
          * Swerve Drive class utilizing CTR Electronics' Phoenix 6 API with the selected
          * device types.
          */
@@ -353,7 +352,8 @@ public class Constants {
 
         }
         public static final class VisionConstants {
-                public static final String kCameraName = "photonvision";
+                public static final String kFrontCameraName = "FrontCam";
+                public static final String kSideCameraName = "SideCam";
 
                 // old constraints (might want to use again)
 
@@ -392,14 +392,39 @@ public class Constants {
                 // public static final double THETA_kI = 0.5;
                 // public static final double THETA_kD = 0.15;
 
-                // TODO: ensure validity of measurements
-                // public static final Transform3d kRobotToCameraLeft = new Transform3d(
-                // new Translation3d(0.3719, 0.27305, 0.09),
-                // new Rotation3d(0, .1745, 0));
-                // public static final Transform3d kRobotToCameraRight = new Transform3d(
-                // new Translation3d(0.3719, -0.27305, 0.09),
-                // new Rotation3d(0, .1745, 0));
-                // -0.698
+                /*
+                 * Robot-to-camera transforms (robot frame: +X forward, +Y left, +Z up; Rotation3d is
+                 * roll, pitch, yaw in radians). WPILib positive pitch rotates +X toward -Z, i.e. the
+                 * camera tilts DOWN. The pitch sign has never been field-verified (the old code
+                 * divided by PI/180 instead of multiplying), so check with a tape measure: if the
+                 * logged Vision/<cam>/RawPose is off by tens of centimetres at 2-3 m, negate the pitch.
+                 */
+                public static final Transform3d kRobotToFrontCamera = new Transform3d(
+                                new Translation3d(Units.inchesToMeters(-13.5), Units.inchesToMeters(3.2),
+                                                Units.inchesToMeters(17.7)),
+                                new Rotation3d(0, Units.degreesToRadians(15), 0));
+                public static final Transform3d kRobotToSideCamera = new Transform3d(
+                                new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(-13.5),
+                                                Units.inchesToMeters(12.6)),
+                                new Rotation3d(0, Units.degreesToRadians(18.5), Math.PI / 2));
+
+                /* Vision fusion gates and trust model (see VisionMeasurementMath). */
+                /** Frames older than this at fusion time are dropped; must stay under the 1.5 s estimator buffer. */
+                public static final double kMaxVisionAgeSeconds = 0.5;
+                /** AdvantageKit stamps Timer at loop start, so a frame can look up to one loop "in the future". */
+                public static final double kMaxVisionFutureSeconds = 0.02;
+                /** Single-tag solves with more ambiguity than this are dropped (PhotonVision docs threshold). */
+                public static final double kMaxSingleTagAmbiguity = 0.2;
+                /** Frames captured while spinning faster than this are dropped (~115 deg/s; maxAngularVelocity is 3). */
+                public static final double kMaxOmegaForVisionRadPerSec = 2.0;
+                /** A 3D solve whose Z is further than this from the floor is a bad solve. */
+                public static final double kMaxVisionZErrorMeters = 0.5;
+                /** X/Y std dev in metres for 1 tag at 1 m; scales by avgDist^2 / numTags. K ~ 0.25 vs state std 0.1. */
+                public static final double kXYStdDevCoefficient = 0.3;
+                /** Heading std dev: huge so the gyro owns heading. Lower it to let multi-tag frames correct heading. */
+                public static final double kVisionThetaStdDevRadians = 1e3;
+                /** Extra X/Y std dev per metre the robot moved along that field axis while the frame was in flight. */
+                public static final double kMotionStdDevGain = 1.0;
 
                 public static final double kFieldLengthMeters = 17.55;
                 public static final double kFieldWidthMeters = 8.05;
@@ -493,5 +518,161 @@ public class Constants {
                 public static final boolean kClimberClockwisePositive = false;
 
                 public static final double kClimberErrorTolerance = 1;
+        }
+
+        public static final class OIConstants {
+                public static final int kDriverPort = 0;
+                public static final int kOperatorPort = 1;
+
+                public static final double kDriverRightXDeadband = 0.05;
+                public static final double kDriverLeftXDeadband = 0.05;
+                public static final double kDriverLeftYDeadband = 0.05;
+
+                public static final double kTriggerThreshold = 0.1;
+        }
+
+        public static final class DriveConstants {
+                // Max speed teleoperated
+                public static final double kTeleopMaxSpeedMetersPerSecond = 3; // meters per second
+                public static final double kTeleopMaxAngularSpeedRadiansPerSecond = 4; // radians per second
+        }
+
+        public static final class Swerve {
+
+                public static final int pigeonID = 20;
+                public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
+
+                public static final COTSFalconSwerveConstants chosenModule = COTSFalconSwerveConstants
+                                .SDSMK5n(COTSFalconSwerveConstants.driveGearRatios.SDSMK5n_L1);
+
+                /* Drivetrain Constants (2026 robot: module corners at +/-11 in) */
+                public static final double lengthBetweenModules = Units.inchesToMeters(22);
+                public static final double widthBetweenModules = Units.inchesToMeters(22);
+                public static final double wheelCircumference = chosenModule.wheelCircumference;
+
+                /*
+                 * Swerve Kinematics -- standard WPILib frame: +X forward, +Y LEFT, CCW+.
+                 * Index order is the module number: Mod0 FL, Mod1 FR, Mod2 BR, Mod3 BL, and each
+                 * translation is that module's physical corner (matches the Tuner X k*XPos/YPos).
+                 */
+                public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+                                new Translation2d(Swerve.lengthBetweenModules / 2.0, Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(Swerve.lengthBetweenModules / 2.0, -Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(-Swerve.lengthBetweenModules / 2.0, -Swerve.widthBetweenModules / 2.0),
+                                new Translation2d(-Swerve.lengthBetweenModules / 2.0,
+                                                Swerve.widthBetweenModules / 2.0));
+
+                /* Module Gear Ratios (exact Tuner X values; these feed SensorToMechanismRatio) */
+                public static final double driveGearRatio = 7.026785714285714;
+                public static final double angleGearRatio = 26.09090909090909;
+
+                /*
+                 * Motor / encoder inverts, straight from the Tuner X project (same semantics as
+                 * Phoenix's SwerveModuleConstants: true -> Clockwise_Positive, false ->
+                 * CounterClockwise_Positive). Tuner X verified these on the real modules, so
+                 * with them the steer motor, the CANcoder and the WPILib module angle all count
+                 * CCW+ together. All four modules share the steer/encoder flags; the per-module
+                 * drive flag lives in Mod0..Mod3 below.
+                 */
+                public static final boolean angleMotorInvert = kFrontLeftSteerMotorInverted;
+                public static final boolean canCoderInvert = kFrontLeftEncoderInverted;
+
+                /* Swerve Current Limiting */
+                public static final int angleContinuousCurrentLimit = 40;
+                public static final int anglePeakCurrentLimit = 80;
+                public static final double anglePeakCurrentDuration = 0.1;
+                public static final boolean angleEnableCurrentLimit = true;
+
+                public static final int driveContinuousCurrentLimit = 35;
+                public static final int drivePeakCurrentLimit = 60;
+                public static final double drivePeakCurrentDuration = 0.1;
+                public static final boolean driveEnableCurrentLimit = true;
+
+                /*
+                 * These values are used by the drive falcon to ramp in open loop and closed
+                 * loop driving.
+                 */
+                public static final double openLoopRamp = 0.25;
+                public static final double closedLoopRamp = 0.0;
+
+                /* Angle Motor PID Values */
+                public static final double angleKP = 40;
+                public static final double angleKI = 0.0;
+                public static final double angleKD = 0.05;
+                public static final double angleKF = 0;
+                public static final double angleKV = 0;
+
+                /* Drive Motor PID Values */
+                public static final double driveKP = 0.2;
+                public static final double driveKI = 0;
+                public static final double driveKD = 0.0;
+                public static final double driveKF = 0.0;
+
+                /* Drive Motor Characterization Values */
+                public static final double driveKS = 0;
+                public static final double driveKV = 0.124;
+                public static final double driveKA = 0;
+
+                /*
+                 * Swerve Profiling Values
+                 * TUNE: teleop is faster than the old Phoenix setup (which capped requests at
+                 * Constants.MaxSpeed ~2.67 m/s) and rotation is slower (3 vs ~4.71 rad/s).
+                 * Adjust maxAngularVelocity here and the shaping in DriveConstants to taste.
+                 */
+                /** Meters per Second (Tuner kSpeedAt12Volts) */
+                public static final double maxSpeed = 4.54;
+                /** Radians per Second */
+                public static final double maxAngularVelocity = 3;
+
+                /* Neutral Modes */
+                public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Brake;
+                public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake;
+
+                /*
+                 * Module Specific Constants -- CAN IDs, CANcoder magnet offsets and drive inverts
+                 * copied from the 2026 Tuner X config above (kFrontLeft*, kFrontRight*, ...).
+                 * The offset is applied as the CANcoder MagnetOffset exactly like Tuner X does,
+                 * so getCanCoder() reads 0 with the wheel pointing forward; nothing here needs
+                 * re-zeroing unless a magnet physically moves.
+                 */
+                /* Front Left Module - Module 0 */
+                public static final class Mod0 {
+                        public static final int driveMotorID = 1;
+                        public static final int angleMotorID = 2;
+                        public static final int canCoderID = 9;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(-0.356201171875);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertLeftSide);
+                }
+
+                /* Front Right Module - Module 1 */
+                public static final class Mod1 {
+                        public static final int driveMotorID = 3;
+                        public static final int angleMotorID = 4;
+                        public static final int canCoderID = 10;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.393798828125);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertRightSide);
+                }
+
+                /* Back Right Module - Module 2 */
+                public static final class Mod2 {
+                        public static final int driveMotorID = 7;
+                        public static final int angleMotorID = 8;
+                        public static final int canCoderID = 12;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.440185546875);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertRightSide);
+                }
+
+                /* Back Left Module - Module 3 */
+                public static final class Mod3 {
+                        public static final int driveMotorID = 5;
+                        public static final int angleMotorID = 6;
+                        public static final int canCoderID = 11;
+                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.053955078125);
+                        public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
+                                        driveMotorID, angleMotorID, canCoderID, angleOffset, kInvertLeftSide);
+                }
         }
 }

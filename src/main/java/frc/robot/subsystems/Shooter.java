@@ -124,7 +124,7 @@ public class Shooter extends SubsystemBase {
                 desiredVelocity = 0;
                 break;
             case StateAccelerating:
-                double dist = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                double dist = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_poseEstimation.getCurrentPose().getTranslation());
                 // System.out.println("Accelerating Distance: " + dist);
                 if(dist > 4){
 
@@ -151,7 +151,7 @@ public class Shooter extends SubsystemBase {
                 m_ShooterRequestedState = ShooterStates.StateOff;
                 break;
             case StatePass:
-                double distPass = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                double distPass = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_poseEstimation.getCurrentPose().getTranslation());
                 if(distPass > 3.5){
                     desiredVelocity = 96.7;
                     
@@ -168,7 +168,7 @@ public class Shooter extends SubsystemBase {
                 }
                 break;
             case StateShooting:
-                double dist2 = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_drivetrain.getState().Pose.getTranslation());
+                double dist2 = m_rc.tracker.getAimPose().getTranslation().getDistance(m_rc.m_poseEstimation.getCurrentPose().getTranslation());
                 // System.out.println("Shooting Distance: " + dist2);
                 // desired velocity tables
                 if(dist2>4){

@@ -115,8 +115,7 @@ public class Angler extends SubsystemBase {
         desiredPosition = 0.001;
         break;
       case StateAuto:
-        // m_drivetrain.getState().Pose.getTranslation()
-        double dist = m_TargetTracking.getAimPose().getTranslation().getDistance(m_drivetrain.getState().Pose.getTranslation());
+        double dist = m_TargetTracking.getAimPose().getTranslation().getDistance(m_robotContainer.m_poseEstimation.getCurrentPose().getTranslation());
         desiredPosition = lookupTable.getValue(dist) +rangeBoost;
         break;
        case StateMid:

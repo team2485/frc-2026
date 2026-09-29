@@ -3,7 +3,6 @@ package frc.robot;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,23 +15,28 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.subsystems.drive.Drivetrain;
+import frc.robot.subsystems.drive.PoseEstimation;
+import frc.robot.subsystems.drive.SwerveModule;
 
 public class Telemetry {
     private final double MaxSpeed;
 
     private final Drivetrain m_drivetrain;
+    private final PoseEstimation m_poseEstimation;
+
     /**
      * Construct a telemetry object, with the specified max speed of the robot
-     * 
+     *
      * @param maxSpeed Maximum speed in meters per second
      */
-    public Telemetry(double maxSpeed, Drivetrain drivetrain) {
+    public Telemetry(double maxSpeed, Drivetrain drivetrain, PoseEstimation poseEstimation) {
         MaxSpeed = maxSpeed;
         SignalLogger.start();
 
@@ -41,6 +45,7 @@ public class Telemetry {
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
         m_drivetrain = drivetrain;
+        m_poseEstimation = poseEstimation;
     }
 
     /* What to publish over networktables for telemetry */
@@ -48,13 +53,11 @@ public class Telemetry {
 
     /* Robot swerve drive state */
     private final NetworkTable driveStateTable = inst.getTable("DriveState");
-    private final StructPublisher<Pose2d> drivePose = driveStateTable.getStructTopic("Pose", Pose2d.struct).publish(); // This might be the incorrect one
+    private final StructPublisher<Pose2d> drivePose = driveStateTable.getStructTopic("Pose", Pose2d.struct).publish();
     private final StructPublisher<ChassisSpeeds> driveSpeeds = driveStateTable.getStructTopic("Speeds", ChassisSpeeds.struct).publish();
     private final StructArrayPublisher<SwerveModuleState> driveModuleStates = driveStateTable.getStructArrayTopic("ModuleStates", SwerveModuleState.struct).publish();
-    private final StructArrayPublisher<SwerveModuleState> driveModuleTargets = driveStateTable.getStructArrayTopic("ModuleTargets", SwerveModuleState.struct).publish();
     private final StructArrayPublisher<SwerveModulePosition> driveModulePositions = driveStateTable.getStructArrayTopic("ModulePositions", SwerveModulePosition.struct).publish();
     private final DoublePublisher driveTimestamp = driveStateTable.getDoubleTopic("Timestamp").publish();
-    private final DoublePublisher driveOdometryFrequency = driveStateTable.getDoubleTopic("OdometryFrequency").publish();
 
     /* Robot pose for field positioning */
     private final NetworkTable table = inst.getTable("Pose");
@@ -89,49 +92,49 @@ public class Telemetry {
 
     private final double[] m_poseArray = new double[3];
 
-    /** Accept the swerve drive state and telemeterize it to SmartDashboard and SignalLogger. */
-    public void telemeterize(SwerveDriveState state) {
-        
+    /** Pull the drive state from the drivetrain/pose estimation and telemeterize it to SmartDashboard and SignalLogger. */
+    public void telemeterize() {
+        Pose2d pose = m_poseEstimation.getCurrentPose();
+        ChassisSpeeds speeds = m_drivetrain.getChassisSpeeds();
+        SwerveModuleState[] moduleStates = m_drivetrain.getModuleStates();
+        SwerveModulePosition[] modulePositions = m_drivetrain.getModulePositions();
+
         /* Telemeterize the swerve drive state */
-        drivePose.set(state.Pose);
-        driveSpeeds.set(state.Speeds);
-        driveModuleStates.set(state.ModuleStates);
-        driveModuleTargets.set(state.ModuleTargets);
-        driveModulePositions.set(state.ModulePositions);
-        driveTimestamp.set(state.Timestamp);
-        driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
+        drivePose.set(pose);
+        driveSpeeds.set(speeds);
+        driveModuleStates.set(moduleStates);
+        driveModulePositions.set(modulePositions);
+        driveTimestamp.set(Timer.getFPGATimestamp());
 
         /* Also write to log file */
-        SignalLogger.writeStruct("DriveState/Pose", Pose2d.struct, state.Pose); // this is the CORRECT one
-        SignalLogger.writeStruct("DriveState/Speeds", ChassisSpeeds.struct, state.Speeds);
-        SignalLogger.writeStructArray("DriveState/ModuleStates", SwerveModuleState.struct, state.ModuleStates);
-        SignalLogger.writeStructArray("DriveState/ModuleTargets", SwerveModuleState.struct, state.ModuleTargets);
-        SignalLogger.writeStructArray("DriveState/ModulePositions", SwerveModulePosition.struct, state.ModulePositions);
-        SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
+        SignalLogger.writeStruct("DriveState/Pose", Pose2d.struct, pose);
+        SignalLogger.writeStruct("DriveState/Speeds", ChassisSpeeds.struct, speeds);
+        SignalLogger.writeStructArray("DriveState/ModuleStates", SwerveModuleState.struct, moduleStates);
+        SignalLogger.writeStructArray("DriveState/ModulePositions", SwerveModulePosition.struct, modulePositions);
 
-        var modules = m_drivetrain.getModules();
         for(int i = 0; i < 4; i++) {
-            Logger.recordOutput("Drive/" + "Module" + i + "_steerCurrent", modules[i].getSteerMotor().getStatorCurrent().getValueAsDouble());
-            Logger.recordOutput("Drive/" + "Module" + i + "_driveCurrent", modules[i].getDriveMotor().getStatorCurrent().getValueAsDouble());
-            Logger.recordOutput("Drive/" + "Module" + i + "_steerVoltage", modules[i].getSteerMotor().getMotorVoltage().getValueAsDouble());
-            Logger.recordOutput("Drive/" + "Module" + i + "_driveVoltage", modules[i].getDriveMotor().getMotorVoltage().getValueAsDouble());
-            Logger.recordOutput("Drive/" + "Module" + i + "_steerVelocity", modules[i].getSteerMotor().getVelocity().getValueAsDouble());
-            Logger.recordOutput("Drive/" + "Module" + i + "_driveVelocity", modules[i].getDriveMotor().getVelocity().getValueAsDouble());
+            SwerveModule module = m_drivetrain.mSwerveMods[i];
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerCurrent", module.getAngleMotor().getStatorCurrent().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveCurrent", module.getDriveMotor().getStatorCurrent().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerVoltage", module.getAngleMotor().getMotorVoltage().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveVoltage", module.getDriveMotor().getMotorVoltage().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_steerVelocity", module.getAngleMotor().getVelocity().getValueAsDouble());
+            Logger.recordOutput("Drive/" + "Module" + i + "_driveVelocity", module.getDriveMotor().getVelocity().getValueAsDouble());
         }
 
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");
 
-        m_poseArray[0] = state.Pose.getX();
-        m_poseArray[1] = state.Pose.getY();
-        m_poseArray[2] = state.Pose.getRotation().getDegrees();
+        m_poseArray[0] = pose.getX();
+        m_poseArray[1] = pose.getY();
+        m_poseArray[2] = pose.getRotation().getDegrees();
         fieldPub.set(m_poseArray);
 
         /* Telemeterize each module state to a Mechanism2d */
         for (int i = 0; i < 4; ++i) {
-            m_moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
-            m_moduleDirections[i].setAngle(state.ModuleStates[i].angle);
-            m_moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * MaxSpeed));
+            m_moduleSpeeds[i].setAngle(moduleStates[i].angle);
+            m_moduleDirections[i].setAngle(moduleStates[i].angle);
+            m_moduleSpeeds[i].setLength(moduleStates[i].speedMetersPerSecond / (2 * MaxSpeed));
         }
     }
 }
