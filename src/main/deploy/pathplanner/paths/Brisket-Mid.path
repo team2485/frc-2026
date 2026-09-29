@@ -16,28 +16,28 @@
     },
     {
       "anchor": {
-        "x": 8.575008849557522,
-        "y": 7.135923303834808
+        "x": 6.706006410256411,
+        "y": 6.796698717948718
       },
       "prevControl": {
-        "x": 8.595589743589745,
-        "y": 7.7269551282051285
+        "x": 6.726587304288635,
+        "y": 7.387730542319039
       },
       "nextControl": {
-        "x": 8.540934204778443,
-        "y": 6.157384692391675
+        "x": 6.671931765477333,
+        "y": 5.8181601065055855
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.875652173913041,
+        "x": 6.8,
         "y": 4.562730179028134
       },
       "prevControl": {
-        "x": 8.195787614582251,
-        "y": 5.121721761158952
+        "x": 6.601354715979761,
+        "y": 5.005956092641149
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1.0,
-      "rotationDegrees": 62.32792177724118
+      "rotationDegrees": -123.69006752597973
     }
   ],
   "constraintZones": [
@@ -84,7 +84,7 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 59.5972782697758
+    "rotation": -153.5
   },
   "reversed": false,
   "folder": "GoodPaths",
