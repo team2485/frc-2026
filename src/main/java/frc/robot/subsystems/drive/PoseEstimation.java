@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,6 +79,11 @@ public class PoseEstimation extends SubsystemBase {
     private Optional<VisionEstimate> latestAccepted = Optional.empty();
     private Optional<Pose2d> visionOnlyPoseProjected = Optional.empty();
 
+    /** True while waiting for the cameras to set the heading (see {@link #seedHeadingFromVision()}). */
+    private boolean headingSeedPending = false;
+    /** Recent per-frame (vision heading - estimator heading at capture), newest last. */
+    private final ArrayDeque<Rotation2d> headingSeedDeltas = new ArrayDeque<>();
+
     private double angleToTags = 0;
 
     Drivetrain m_drivetrain;
@@ -149,7 +155,10 @@ public class PoseEstimation extends SubsystemBase {
                 double age = now - est.timestampSeconds();
                 Matrix<N3, N1> stdDevs = VisionMeasurementMath.stdDevs(est, fieldSpeeds, age);
 
-                if (reason == RejectReason.ACCEPTED) {
+                if (reason == RejectReason.ACCEPTED && headingSeedPending && offerHeadingSeed(est)) {
+                    // Heading just reset from vision; later frames this loop predate it and are dropped.
+                    acceptedCount[i]++;
+                } else if (reason == RejectReason.ACCEPTED) {
                     poseEstimator.addVisionMeasurement(est.pose(), est.timestampSeconds(), stdDevs);
                     acceptedCount[i]++;
                     lastAcceptedTime = now;
@@ -188,6 +197,8 @@ public class PoseEstimation extends SubsystemBase {
         Logger.recordOutput("Vision/VisionOnlyAgeSeconds",
                 latestAccepted.map(est -> now - est.timestampSeconds()).orElse(-1.0));
         Logger.recordOutput("Vision/FieldSpeeds", fieldSpeeds);
+        Logger.recordOutput("Vision/HeadingSeedPending", headingSeedPending);
+        SmartDashboard.putBoolean("Heading Seeded", !headingSeedPending);
         SmartDashboard.putBoolean("Camera Positioned For Auto",
                 now - lastAcceptedTime <= VisionConstants.kMaxVisionAgeSeconds);
 
@@ -223,6 +234,8 @@ public class PoseEstimation extends SubsystemBase {
         visionResetTimestamp = Timer.getFPGATimestamp();
         latestAccepted = Optional.empty();
         visionOnlyPoseProjected = Optional.empty();
+        headingSeedPending = false;
+        headingSeedDeltas.clear();
 
         if (simGroundTruth != null) {
             simGroundTruth.resetPosition(rotation.get(), modulePosition.get(), newPose);
@@ -231,6 +244,69 @@ public class PoseEstimation extends SubsystemBase {
                 visionSim.resetRobotPose(newPose);
             }
         }
+    }
+
+    /** Re-declares the fused heading, keeping the current X/Y. */
+    public void setCurrentHeading(Rotation2d heading) {
+        setCurrentPose(new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), heading));
+    }
+
+    /**
+     * Lets the cameras set the heading once (teleop without an auto, robot placed anywhere). Normal
+     * fusion never corrects heading, so until a seed lands the heading is whatever it was before.
+     * Cancelled by any pose reset ({@link #setCurrentPose}), e.g. an auto starting.
+     */
+    public void seedHeadingFromVision() {
+        headingSeedPending = true;
+        headingSeedDeltas.clear();
+    }
+
+    /**
+     * Collects one frame toward the vision heading seed. Each frame contributes the difference
+     * between its heading and the estimator's heading at the frame's capture time, so camera
+     * latency and any turning since then cancel out. Once {@code kHeadingSeedFrames} recent frames
+     * agree within {@code kHeadingSeedMaxSpreadDegrees}, their mean difference is applied to the
+     * current heading.
+     *
+     * @return true if the heading was reset by this frame
+     */
+    private boolean offerHeadingSeed(VisionEstimate est) {
+        if (!est.multiTag() && est.avgTagDistanceMeters() > VisionConstants.kHeadingSeedMaxSingleTagDistanceMeters) {
+            return false;
+        }
+        Optional<Pose2d> atCapture = poseEstimator.sampleAt(est.timestampSeconds());
+        if (atCapture.isEmpty()) {
+            return false;
+        }
+        headingSeedDeltas.addLast(est.pose().getRotation().minus(atCapture.get().getRotation()));
+        while (headingSeedDeltas.size() > VisionConstants.kHeadingSeedFrames) {
+            headingSeedDeltas.removeFirst();
+        }
+        if (headingSeedDeltas.size() < VisionConstants.kHeadingSeedFrames) {
+            return false;
+        }
+
+        // Circular mean, so deltas either side of +/-180 deg average correctly.
+        double sumCos = 0, sumSin = 0;
+        for (Rotation2d d : headingSeedDeltas) {
+            sumCos += d.getCos();
+            sumSin += d.getSin();
+        }
+        Rotation2d mean = new Rotation2d(sumCos, sumSin);
+        for (Rotation2d d : headingSeedDeltas) {
+            if (Math.abs(d.minus(mean).getDegrees()) > VisionConstants.kHeadingSeedMaxSpreadDegrees) {
+                return false; // keep sliding the window until the frames agree
+            }
+        }
+
+        poseEstimator.resetRotation(poseEstimator.getEstimatedPosition().getRotation().plus(mean));
+        visionResetTimestamp = Timer.getFPGATimestamp();
+        latestAccepted = Optional.empty();
+        visionOnlyPoseProjected = Optional.empty();
+        headingSeedPending = false;
+        headingSeedDeltas.clear();
+        Logger.recordOutput("Vision/HeadingSeedCorrectionDeg", mean.getDegrees());
+        return true;
     }
 
     public void resetFieldPosition() {

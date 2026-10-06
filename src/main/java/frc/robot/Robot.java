@@ -14,10 +14,12 @@ import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 // import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drive.CTREConfigs;
+import frc.robot.subsystems.drive.Drivetrain;
 
 
 public class Robot extends LoggedRobot {
@@ -82,6 +84,13 @@ public class Robot extends LoggedRobot {
     public void teleopInit() {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
+        } else {
+            // No auto ran this boot, so nothing has set the field heading. Start from the alliance
+            // default as a guess, then let the cameras set the real heading once they agree.
+            // After an auto, its heading is kept.
+            m_robotContainer.m_poseEstimation.setCurrentHeading(
+                    Rotation2d.fromDegrees(Drivetrain.allianceHeadingOffsetDegrees()));
+            m_robotContainer.m_poseEstimation.seedHeadingFromVision();
         }
     }
 

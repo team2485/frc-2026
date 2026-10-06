@@ -233,20 +233,22 @@ public class Drivetrain extends SubsystemBase {
      * away from their own driver station. Kept identical to the old Phoenix operator-perspective
      * constants this robot's autos/aiming were built against (Blue 180 deg, Red 0 deg).
      */
-    private static double allianceHeadingOffsetDegrees() {
+    public static double allianceHeadingOffsetDegrees() {
         return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue
                 ? 180
                 : 0;
     }
 
     /**
-     * Reset-heading: makes the robot's current direction "forward" for field-relative driving and
-     * re-declares the odometry heading as the alliance forward heading (same as Phoenix
-     * seedFieldCentric with the operator perspective set). Only the gyro is touched; the modules
-     * are not moved.
+     * Reset-heading: makes the robot's current direction "forward" for field-relative driving.
+     * The odometry heading ({@link #getYawAbsolute()}) is kept continuous across the reset by
+     * folding the current field heading into the offset, so the pose estimator (and auto-align,
+     * which aims off its heading) is not yanked to the alliance default. The field heading is only
+     * re-declared by a pose reset ({@code PoseEstimation.setCurrentPose}). Only the gyro is
+     * touched; the modules are not moved.
      */
     public void zeroGyro() {
-        absoluteGyroPosition = allianceHeadingOffsetDegrees();
+        absoluteGyroPosition += getRawYaw().getDegrees();
         gyro.setYaw(0);
         filter.reset();
     }

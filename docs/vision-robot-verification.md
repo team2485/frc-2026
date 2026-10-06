@@ -75,9 +75,9 @@ If the fused pose lags or leads the raw camera pose while moving, the timestamps
 
 ## 5. Pose resets
 
-- [ ] Press reset-heading (driver X): the pose heading changes to the alliance forward heading and there is no position jump back toward the old pose in the next second. `RejectReason` may show `BEFORE_RESET` for a few frames right after.
-- [ ] Start an auto: after PathPlanner sets the starting pose, the same holds. Frames captured before the reset are dropped, then `ACCEPTED` resumes.
-- [ ] Reminder: the gyro owns heading. If the driver squares up badly before reset-heading, vision will **not** fix the heading. Lower `kVisionThetaStdDevRadians` only if the team decides vision should correct heading.
+- [ ] Press reset-heading (driver X): only field-relative "forward" changes; the pose heading does not jump. Full checks are in `docs/heading-reset-verification.md`.
+- [ ] Start an auto: after PathPlanner sets the starting pose, there is no position jump back toward the old pose in the next second. `RejectReason` may show `BEFORE_RESET` for a few frames right after, then `ACCEPTED` resumes.
+- [ ] Reminder: the gyro owns heading during normal fusion. The exception is teleop without an auto, where the cameras set the heading once (see `docs/heading-reset-verification.md`).
 
 ## 6. Long drive and recovery
 

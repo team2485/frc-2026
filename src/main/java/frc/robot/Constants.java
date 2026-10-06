@@ -426,6 +426,14 @@ public class Constants {
                 /** Extra X/Y std dev per metre the robot moved along that field axis while the frame was in flight. */
                 public static final double kMotionStdDevGain = 1.0;
 
+                /* Vision heading seed (PoseEstimation.seedHeadingFromVision). */
+                /** Consecutive agreeing frames needed before vision is allowed to set the heading. */
+                public static final int kHeadingSeedFrames = 5;
+                /** Max spread (deg) of those frames' headings around their mean; more means a bad solve slipped in. */
+                public static final double kHeadingSeedMaxSpreadDegrees = 3.0;
+                /** Single-tag frames only count toward the seed when closer than this; multi-tag always counts. */
+                public static final double kHeadingSeedMaxSingleTagDistanceMeters = 3.0;
+
                 public static final double kFieldLengthMeters = 17.55;
                 public static final double kFieldWidthMeters = 8.05;
                 // DOCS:
