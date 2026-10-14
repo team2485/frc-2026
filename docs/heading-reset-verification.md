@@ -5,12 +5,41 @@ Covers two changes to how the field heading (the pose estimator's rotation) is s
 1. **Reset-heading (driver X) no longer touches the pose heading.** `Drivetrain.zeroGyro()` only
    re-zeros "forward" for field-relative driving. It folds the current yaw into the odometry offset,
    so `getYawForOdometry()` stays continuous and auto-align keeps aiming off the right heading.
-2. **Teleop without an auto takes its heading from the cameras.** `Robot.teleopInit()` sets the
-   alliance default heading (blue 180 deg, red 0 deg) as a placeholder, then calls
+2. **Teleop takes its heading from the cameras whenever nothing else has set it.** If
+   `PoseEstimation.isHeadingKnown()` is false, `Robot.teleopInit()` sets the alliance default
+   heading (blue 180 deg, red 0 deg) as a placeholder, then calls
    `PoseEstimation.seedHeadingFromVision()`. The robot can start anywhere, facing any direction.
+   The heading counts as known after a pose reset (a PathPlanner auto start) or a landed seed.
 
 Neither change has been run on the robot. Simulation cannot test the vision heading seed: the sim
 camera's heading always matches the gyro, so the correction there is always about 0 deg.
+
+## Changes since the first version of this checklist
+
+Not yet run on the robot. The build passes, and so do the unit tests.
+
+- **Auto-align lock check now wraps at +/-180 deg** (`TargetTracking.alignToHub`). The aim error is
+  `MathUtil.angleModulus(target - current)`. Before, aiming at about 180 deg (always the case on
+  red) compared e.g. +179 deg to -179 deg as 358 deg apart. The robot turned to the hub, since the PID
+  already wrapped, but `Target Locked` stayed false: the windexer never fed and the controllers kept
+  rumbling. Blue (aiming at about 0 deg) was not affected. `Target Tracking/Aim Error` now logs this
+  wrapped error. There was no degrees-vs-radians bug in the aim path; the units were already
+  consistent.
+- **Seeding no longer depends on whether an auto command existed.** `getAutonomousCommand()` never
+  returns null, so before, entering auto mode at all this boot (FMS, practice mode, a stray click)
+  skipped the seed. The drive-forward auto never sets the pose, so the heading stayed at the boot
+  value of 0 deg, which is backwards on blue. `teleopInit` now checks `isHeadingKnown()` instead.
+  This also means re-enabling teleop after a seed landed keeps the seeded heading. Before, every
+  teleop enable without an auto reset the heading to the placeholder and seeded again.
+- **Aim PID is reset at the start of every aim** (`StateDriveToAimTransition`), so leftover integral
+  from the last aim doesn't carry over.
+- **Operator aim-point nudge (operator left stick) has a deadband**, `OIConstants.kOperatorAimBiasDeadband`
+  (0.1). Before, stick drift moved the hub aim point, by up to 1 m at full deflection.
+- **Field size updated to 2026**: `kFieldLengthMeters` 17.55 -> 16.541 and `kFieldWidthMeters`
+  8.05 -> 8.069 (from WPILib's `k2026RebuiltWelded` layout). These control the vision
+  outside-the-field rejection and the X clamp on the fused pose.
+- **New log `Vision/HeadingSeedSpreadDeg`**: how far the last 5 seed frames disagree. If the seed
+  never lands, compare this to `kHeadingSeedMaxSpreadDegrees` (3 deg).
 
 ## How the vision heading seed works
 
@@ -34,6 +63,9 @@ In AdvantageScope (`/RealOutputs/...`) and on the dashboard:
 | `Heading Seeded` (SmartDashboard) | true once the vision seed has landed, or when none was requested |
 | `Vision/HeadingSeedPending` | true while waiting for the cameras to agree |
 | `Vision/HeadingSeedCorrectionDeg` | how much the seed changed the heading, logged when it lands |
+| `Vision/HeadingSeedSpreadDeg` | how far the last 5 seed frames disagree; the seed lands only at 3 deg or less |
+| `Target Tracking/Aim Error` (NT) | wrapped aim error in radians, always in [-pi, pi] |
+| `Target Tracking/Target Locked` (NT) | true when the aim error is within tolerance; the windexer feeds only then |
 | `robotPoseLog` | fused pose; its rotation is the heading auto-align uses |
 | `Vision/<cam>/RawPose` | each camera's solved pose, including its heading |
 
@@ -81,13 +113,29 @@ Power-cycle or redeploy so no auto has run this boot.
   either waits or lands on the correct heading. It must never land on a heading that is clearly
   wrong. If it does, lower `kHeadingSeedMaxSpreadDegrees` or `kHeadingSeedMaxSingleTagDistanceMeters`,
   or raise `kHeadingSeedFrames`.
-- [ ] If the seed never lands even with good tags in view, the frames disagree by more than 3 deg.
-  Check the camera transforms, then consider raising `kHeadingSeedMaxSpreadDegrees` slightly.
+- [ ] If the seed never lands even with good tags in view, the frames disagree by more than 3 deg;
+  `Vision/HeadingSeedSpreadDeg` shows by how much. Check the camera transforms, then consider
+  raising `kHeadingSeedMaxSpreadDegrees` slightly.
 
-## 5. Auto still owns heading
+## 5. Auto and heading
 
-- [ ] Run a full auto, then go to teleop. `Heading Seeded` stays true (no seed is requested) and the
-  heading carries over from the auto without a jump.
+- [ ] Run a PathPlanner auto (one that resets the pose), then go to teleop. `Heading Seeded` stays
+  true (no seed is requested), and the heading carries over from the auto without a jump.
+- [ ] Run the drive-forward auto (it does not reset the pose), then go to teleop. A seed is
+  requested: `Heading Seeded` goes false, then true once tags are in view.
+- [ ] After a seed lands, disable and re-enable teleop. The heading does **not** jump back to the
+  alliance default, and no new seed is requested.
+
+## 6. Auto-align locks on both alliances
+
+- [ ] Set the alliance to **red** in the Driver Station. With the heading seeded, hold right trigger
+  to aim at the hub. `Target Tracking/Aim Error` settles near 0 (never near +/-6.28),
+  `Target Locked` goes true, the rumble stops, and the windexer feeds.
+- [ ] Repeat on **blue**.
+- [ ] Aim twice in a row from different spots. The second aim doesn't overshoot more than the first
+  (the PID integral is reset each time).
+- [ ] With the operator's left stick untouched, `AimPose` sits exactly on the hub. Pushing the stick
+  past the deadband nudges it.
 
 ## Record for the team
 

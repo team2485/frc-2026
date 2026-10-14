@@ -434,8 +434,9 @@ public class Constants {
                 /** Single-tag frames only count toward the seed when closer than this; multi-tag always counts. */
                 public static final double kHeadingSeedMaxSingleTagDistanceMeters = 3.0;
 
-                public static final double kFieldLengthMeters = 17.55;
-                public static final double kFieldWidthMeters = 8.05;
+                /* 2026 REBUILT field (WPILib k2026RebuiltWelded layout). */
+                public static final double kFieldLengthMeters = 16.541;
+                public static final double kFieldWidthMeters = 8.069;
                 // DOCS:
                 // https://firstfrc.blob.core.windows.net/frc2025/FieldAssets/2025FieldDrawings-FieldLayoutAndMarking.pdf
                 // Z-Rotation is Yaw, X-Rotation is Pitch
@@ -537,6 +538,8 @@ public class Constants {
                 public static final double kDriverLeftYDeadband = 0.05;
 
                 public static final double kTriggerThreshold = 0.1;
+                /** Operator left-stick deadband for the auto-align aim-point nudge (TargetTracking). */
+                public static final double kOperatorAimBiasDeadband = 0.1;
         }
 
         public static final class DriveConstants {

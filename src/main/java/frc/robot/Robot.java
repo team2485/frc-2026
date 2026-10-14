@@ -84,10 +84,13 @@ public class Robot extends LoggedRobot {
     public void teleopInit() {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
-        } else {
-            // No auto ran this boot, so nothing has set the field heading. Start from the alliance
-            // default as a guess, then let the cameras set the real heading once they agree.
-            // After an auto, its heading is kept.
+        }
+        // Nothing has declared the field heading this boot: no auto ran, or the auto never reset
+        // the pose (the drive-forward auto doesn't), or an earlier seed never landed. Start from the
+        // alliance default as a guess, then let the cameras set the real heading once they agree.
+        // A heading from a PathPlanner auto or an earlier seed is kept, so re-enabling teleop
+        // doesn't throw it away.
+        if (!m_robotContainer.m_poseEstimation.isHeadingKnown()) {
             m_robotContainer.m_poseEstimation.setCurrentHeading(
                     Rotation2d.fromDegrees(Drivetrain.allianceHeadingOffsetDegrees()));
             m_robotContainer.m_poseEstimation.seedHeadingFromVision();

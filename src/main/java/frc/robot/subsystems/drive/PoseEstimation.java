@@ -83,6 +83,11 @@ public class PoseEstimation extends SubsystemBase {
     private boolean headingSeedPending = false;
     /** Recent per-frame (vision heading - estimator heading at capture), newest last. */
     private final ArrayDeque<Rotation2d> headingSeedDeltas = new ArrayDeque<>();
+    /**
+     * True once something has declared the real field heading this boot: a pose reset (PathPlanner
+     * auto start) or a landed vision seed. False at boot and while a seed is pending.
+     */
+    private boolean headingKnown = false;
 
     private double angleToTags = 0;
 
@@ -236,6 +241,7 @@ public class PoseEstimation extends SubsystemBase {
         visionOnlyPoseProjected = Optional.empty();
         headingSeedPending = false;
         headingSeedDeltas.clear();
+        headingKnown = true;
 
         if (simGroundTruth != null) {
             simGroundTruth.resetPosition(rotation.get(), modulePosition.get(), newPose);
@@ -259,6 +265,15 @@ public class PoseEstimation extends SubsystemBase {
     public void seedHeadingFromVision() {
         headingSeedPending = true;
         headingSeedDeltas.clear();
+        headingKnown = false;
+    }
+
+    /**
+     * Whether the field heading has been declared this boot (pose reset or landed vision seed).
+     * An auto that never resets the pose (e.g. the drive-forward auto) leaves this false.
+     */
+    public boolean isHeadingKnown() {
+        return headingKnown;
     }
 
     /**
@@ -293,10 +308,14 @@ public class PoseEstimation extends SubsystemBase {
             sumSin += d.getSin();
         }
         Rotation2d mean = new Rotation2d(sumCos, sumSin);
+        double spreadDeg = 0;
         for (Rotation2d d : headingSeedDeltas) {
-            if (Math.abs(d.minus(mean).getDegrees()) > VisionConstants.kHeadingSeedMaxSpreadDegrees) {
-                return false; // keep sliding the window until the frames agree
-            }
+            spreadDeg = Math.max(spreadDeg, Math.abs(d.minus(mean).getDegrees()));
+        }
+        // If the seed never lands, this shows how far the frames disagree (vs kHeadingSeedMaxSpreadDegrees).
+        Logger.recordOutput("Vision/HeadingSeedSpreadDeg", spreadDeg);
+        if (spreadDeg > VisionConstants.kHeadingSeedMaxSpreadDegrees) {
+            return false; // keep sliding the window until the frames agree
         }
 
         poseEstimator.resetRotation(poseEstimator.getEstimatedPosition().getRotation().plus(mean));
@@ -305,6 +324,7 @@ public class PoseEstimation extends SubsystemBase {
         visionOnlyPoseProjected = Optional.empty();
         headingSeedPending = false;
         headingSeedDeltas.clear();
+        headingKnown = true;
         Logger.recordOutput("Vision/HeadingSeedCorrectionDeg", mean.getDegrees());
         return true;
     }

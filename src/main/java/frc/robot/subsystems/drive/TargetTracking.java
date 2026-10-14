@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -138,6 +139,8 @@ public class TargetTracking extends SubsystemBase {
                 break;
             case StateDriveToAimTransition:
                     aimPosePub.set(aimPosition);
+                // Fresh aim: drop integral/derivative state left over from the previous one.
+                m_PidController.reset();
 
                 if (m_drivetrain.getCurrentCommand() != null) {
 
@@ -199,17 +202,27 @@ public class TargetTracking extends SubsystemBase {
         
         if(DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red){
 
-            return new Pose2d(11.91, 4.0345+0.0, new Rotation2d(0)).plus(new Transform2d(-1*opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
+            return new Pose2d(11.91, 4.0345+0.0, new Rotation2d(0)).plus(new Transform2d(-1*operatorAimBiasX(), operatorAimBiasY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
 
 
         }
         else{
-            return new Pose2d(4.6228, 4.0345+0.0, new Rotation2d(0)).plus(new Transform2d(opController.getLeftX(), opController.getLeftY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
+            return new Pose2d(4.6228, 4.0345+0.0, new Rotation2d(0)).plus(new Transform2d(operatorAimBiasX(), operatorAimBiasY(), Rotation2d.kZero)); // Red hub from blue origin TODO add team switching logics
 
         }
         // 4.626 from baseline
         // 4.035 from sideline
     }
+
+    /** Operator left stick nudges the aim point (metres); deadbanded so stick drift doesn't move it. */
+    private double operatorAimBiasX() {
+        return MathUtil.applyDeadband(opController.getLeftX(), Constants.OIConstants.kOperatorAimBiasDeadband);
+    }
+
+    private double operatorAimBiasY() {
+        return MathUtil.applyDeadband(opController.getLeftY(), Constants.OIConstants.kOperatorAimBiasDeadband);
+    }
+
     public void stateSwitchLogic() {
 
         currentState = requestedState; // Put the checks for switching states here :)
@@ -250,9 +263,11 @@ public class TargetTracking extends SubsystemBase {
         // Rotation2d error = currentRotation.relativeTo(hub);
         
         // double targetAngleRadians = hub.getRadians();
-        double currentAngleRotations = currentRotation.getRotations();
-        final double currentAngleRadiansFinal = (currentAngleRotations - (int) currentAngleRotations) * 2 * Math.PI; // plugging in different math stuff
+        final double currentAngleRadiansFinal = MathUtil.angleModulus(currentRotation.getRadians());
         final double targetAngleRadiansFinal = calculateTargetLockAngle().getRadians() ;
+        // Shortest signed error, wrapped to [-pi, pi]. Without the wrap, aiming near 180 deg (red
+        // alliance) compared e.g. +179 deg to -179 deg as 358 deg apart and never locked.
+        final double aimErrorRadians = MathUtil.angleModulus(targetAngleRadiansFinal - currentAngleRadiansFinal);
  
         // while(targetAngleRadians < 0) Shouldn't be needed since I put the calculations into rotations and bounded the PID -.5 to .5
         // {
@@ -265,12 +280,12 @@ public class TargetTracking extends SubsystemBase {
         //    currentAngleRadians += Math.PI *2;
         // }
         // final double targetAngleRadiansFinal = targetAngleRadians;
-        targetPublisher.set(targetAngleRadiansFinal- currentAngleRadiansFinal); // Logs the error
+        targetPublisher.set(aimErrorRadians); // Logs the error
         anglePublisher.set(currentAngleRadiansFinal);
         var dist = m_PoseEstimation.getCurrentPose().getTranslation()
         .getDistance(aimPosition.getTranslation());
         double tolernace = AimConstants.kTargetAngleTolerance / (dist/2);
-        if(Math.abs(currentAngleRadiansFinal - targetAngleRadiansFinal) < tolernace){
+        if(Math.abs(aimErrorRadians) < tolernace){
             targetLockPublisher.set( true);
             targetLocked=true;
         }
