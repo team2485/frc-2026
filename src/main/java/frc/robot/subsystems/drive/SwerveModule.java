@@ -17,7 +17,8 @@ import frc.robot.subsystems.drive.CTREConfigs;
 import frc.util.CTREModuleState;
 import frc.util.Conversions;
 import frc.util.CTREModuleState;
-import frc.util.SwerveModuleConstants;
+// import frc.util.SwerveModuleConstants;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import static frc.robot.Constants.Swerve.*;
 
@@ -27,6 +28,7 @@ import frc.robot.Robot;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CANcoderConfigurator;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.*;
@@ -64,15 +66,15 @@ public class SwerveModule {
     private DCMotorSim mDriveMotorSim;
     private DCMotorSim mAngleMotorSim;
 
-    public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
+    public SwerveModule(int moduleNumber, SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> moduleConstants){
         this.moduleNumber = moduleNumber;
-        this.angleOffset = moduleConstants.angleOffset;
+        this.angleOffset = new Rotation2d(moduleConstants.EncoderOffset);
         current = Shuffleboard.getTab("Swerve").add("Current: " + moduleNumber, 0).getEntry();
         
-        /* Angle Encoder Config: the shared base config plus this module's magnet offset, applied
+        /* Angle Encoder Config: the shared base config plus this module's offset, applied
          * once as a complete configuration (a second apply() of a fresh CANcoderConfiguration
          * would silently reset SensorDirection to its default). */
-        angleEncoder = new CANcoder(moduleConstants.cancoderID, "Drive");
+        angleEncoder = new CANcoder(moduleConstants.EncoderId, "Drive");
         angleEncoderConfigurator = angleEncoder.getConfigurator();
         CANcoderConfiguration baseCanCoderConfig = Robot.ctreConfigs.swerveCanCoderConfig;
         mCanCoderConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = baseCanCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint;
@@ -83,7 +85,7 @@ public class SwerveModule {
         /* Angle Motor Config. Invert flags use Phoenix SwerveModuleConstants semantics
          * (true -> Clockwise_Positive), so the Tuner X values apply unchanged. */
         //CANivores = "Drive", "Mast"
-        mAngleMotor = new TalonFX(moduleConstants.angleMotorID, "Drive");
+        mAngleMotor = new TalonFX(moduleConstants.SteerMotorId, "Drive");
         mAngleConfigurator = mAngleMotor.getConfigurator();
         mAngleConfigurator.apply(Robot.ctreConfigs.swerveAngleFXConfig);
         mAngleOutputConfigs.Inverted = angleMotorInvert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
@@ -91,10 +93,10 @@ public class SwerveModule {
         mAngleConfigurator.apply(mAngleOutputConfigs);
 
         /* Drive Motor Config */
-        mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "Drive");
+        mDriveMotor = new TalonFX(moduleConstants.DriveMotorId, "Drive");
         mDriveConfigurator = mDriveMotor.getConfigurator();
         mDriveConfigurator.apply(Robot.ctreConfigs.swerveDriveFXConfig);
-        mDriveOutputConfigs.Inverted = moduleConstants.isInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        mDriveOutputConfigs.Inverted = moduleConstants.DriveMotorInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         mDriveOutputConfigs.NeutralMode = NeutralModeValue.Brake;
         mDriveConfigurator.apply(mDriveOutputConfigs);
 
