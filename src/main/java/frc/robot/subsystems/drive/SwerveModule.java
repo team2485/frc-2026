@@ -68,7 +68,7 @@ public class SwerveModule {
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> moduleConstants){
         this.moduleNumber = moduleNumber;
-        this.angleOffset = new Rotation2d(moduleConstants.EncoderOffset);
+        this.angleOffset = Rotation2d.fromRotations(moduleConstants.EncoderOffset);
         current = Shuffleboard.getTab("Swerve").add("Current: " + moduleNumber, 0).getEntry();
         
         /* Angle Encoder Config: the shared base config plus this module's offset, applied
