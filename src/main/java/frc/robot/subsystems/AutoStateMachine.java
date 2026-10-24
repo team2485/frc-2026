@@ -152,13 +152,14 @@ public class AutoStateMachine extends SubsystemBase {
                     PathPlannerPath.fromPathFile("TSideShootMid"),
                     PathPlannerPath.fromPathFile("TSideMidToZone"),
                     PathPlannerPath.fromPathFile("TSideZoneToMid"),
-                    PathPlannerPath.fromPathFile("TSideZoneToDepot") });
+                    PathPlannerPath.fromPathFile("TSideZoneToDepot") 
+                 });
             autoMap.put("Brisket", new PathPlannerPath[] {
                     PathPlannerPath.fromPathFile("Brisket-Mid"),
                     PathPlannerPath.fromPathFile("Brisket-Shoot"),
                     PathPlannerPath.fromPathFile("Brisket-Mid2"), /* Mid3 replacing mid2 */
                     PathPlannerPath.fromPathFile("Brisket-ShootMid2"),
-                    PathPlannerPath.fromPathFile("Brisket-Mid2")
+                    PathPlannerPath.fromPathFile("Brisket-Mid3") //Updated from Brisket-Mid2 to Brisket-Mid3 so the Brisket Jigma actually works - Pryton
                  });
             autoMap.put("BrisketDeep", new PathPlannerPath[] {
                     PathPlannerPath.fromPathFile("Brisket-Mid"),

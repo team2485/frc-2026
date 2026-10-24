@@ -27,6 +27,12 @@
           "data": {
             "pathName": "Brisket-ShootMid2"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Brisket-Mid3"
+          }
         }
       ]
     }
