@@ -75,6 +75,9 @@ public class PoseEstimation extends SubsystemBase {
     private final List<Vision> cameras = List.of(
             new Vision(VisionConstants.kFrontCameraName, VisionConstants.kRobotToFrontCamera),
             new Vision(VisionConstants.kSideCameraName, VisionConstants.kRobotToSideCamera));
+    /** Per camera, same order as {@link #cameras}: whether its frames may correct the pose. */
+    private final boolean[] fusionEnabled = {
+            VisionConstants.kFrontCameraFusionEnabled, VisionConstants.kSideCameraFusionEnabled };
     private final int[] acceptedCount = new int[cameras.size()];
     private final int[] rejectedCount = new int[cameras.size()];
 
@@ -171,8 +174,10 @@ public class PoseEstimation extends SubsystemBase {
             Logger.recordOutput(prefix + "ResultsThisLoop", estimates.size());
 
             for (VisionEstimate est : estimates) {
-                RejectReason reason = VisionMeasurementMath.evaluate(est, now, visionResetTimestamp,
-                        robotSpeeds.omegaRadiansPerSecond);
+                RejectReason reason = fusionEnabled[i]
+                        ? VisionMeasurementMath.evaluate(est, now, visionResetTimestamp,
+                                robotSpeeds.omegaRadiansPerSecond)
+                        : RejectReason.CAMERA_DISABLED;
                 double age = now - est.timestampSeconds();
                 Matrix<N3, N1> stdDevs = VisionMeasurementMath.stdDevs(est, fieldSpeeds, age);
 

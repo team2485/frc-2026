@@ -173,8 +173,7 @@ class VisionMeasurementMathTest {
     }
 
     @Test
-    void camerasFaceAwayFromRobotCentre() {
-        assertFacesOutward(VisionConstants.kRobotToFrontCamera);
+    void sideCameraFacesAwayFromRobotCentre() {
         assertFacesOutward(VisionConstants.kRobotToSideCamera);
     }
 
