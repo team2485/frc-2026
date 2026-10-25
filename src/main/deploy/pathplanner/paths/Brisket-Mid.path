@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.623188888888889,
-        "y": 7.504022222222222
+        "x": 6.691483594864478,
+        "y": 7.2890727532097
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.977666666666666,
-        "y": 7.231177777777777
+        "x": 7.273723252496433,
+        "y": 7.10793152639087
       },
       "prevControl": {
-        "x": 7.452383590736377,
-        "y": 7.50287592050034
+        "x": 6.748440176566144,
+        "y": 7.3796296691134335
       },
       "nextControl": {
-        "x": 8.542844444444444,
-        "y": 6.9388444444444435
+        "x": 7.8389010302742115,
+        "y": 6.815598193057537
       },
       "isLocked": false,
       "linkedName": null
@@ -90,7 +90,7 @@
   "folder": "GoodPaths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.3753942619484187
   },
   "useDefaultConstraints": false
 }

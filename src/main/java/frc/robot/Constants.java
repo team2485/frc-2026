@@ -205,7 +205,7 @@ public class Constants {
     private static final int kFrontRightDriveMotorId = 3;
     private static final int kFrontRightSteerMotorId = 4;
     private static final int kFrontRightEncoderId = 10;
-    private static final Angle kFrontRightEncoderOffset = Rotations.of(0.367431640625);
+    private static final Angle kFrontRightEncoderOffset = Rotations.of(-0.060302734375);
     private static final boolean kFrontRightSteerMotorInverted = false;
     private static final boolean kFrontRightEncoderInverted = false;
     private static final boolean kFrontRightDriveInverted = true;
@@ -375,22 +375,16 @@ public class Constants {
                 /*
                  * Robot-to-camera transforms (robot frame: +X forward, +Y left, +Z up; Rotation3d is
                  * roll, pitch, yaw in radians). WPILib positive pitch rotates +X toward -Z, i.e. the
-                 * camera tilts DOWN.
-                 *
-                 * The translation is FROM robot centre TO the camera. FrontCam is on the front edge
-                 * looking forward and SideCam on the left side looking left; the X/Y used to be
-                 * measured the other way round (camera to robot), which put each camera on the far
-                 * edge looking back through the robot and shifted every solve ~0.7 m (front) /
-                 * ~0.9 m (side). The pitch sign has never been field-verified: park the robot at a
-                 * tape-measured spot and read the "Camera Offset Check" dashboard values
-                 * (PoseEstimation), which report the real transform of each camera.
+                 * camera tilts DOWN. The pitch sign has never been field-verified (the old code
+                 * divided by PI/180 instead of multiplying), so check with a tape measure: if the
+                 * logged Vision/<cam>/RawPose is off by tens of centimetres at 2-3 m, negate the pitch.
                  */
                 public static final Transform3d kRobotToFrontCamera = new Transform3d(
-                                new Translation3d(Units.inchesToMeters(13.5), Units.inchesToMeters(-3.2),
+                                new Translation3d(Units.inchesToMeters(-13.5), Units.inchesToMeters(3.2),
                                                 Units.inchesToMeters(17.7)),
                                 new Rotation3d(0, Units.degreesToRadians(15), 0));
                 public static final Transform3d kRobotToSideCamera = new Transform3d(
-                                new Translation3d(Units.inchesToMeters(12.5), Units.inchesToMeters(13.5),
+                                new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(-13.5),
                                                 Units.inchesToMeters(12.6)),
                                 new Rotation3d(0, Units.degreesToRadians(18.5), Math.PI / 2));
 
@@ -407,10 +401,7 @@ public class Constants {
                 public static final double kMaxVisionZErrorMeters = 0.5;
                 /** X/Y std dev in metres for 1 tag at 1 m; scales by avgDist^2 / numTags. K ~ 0.25 vs state std 0.1. */
                 public static final double kXYStdDevCoefficient = 0.3;
-                /**
-                 * Heading std dev, logged only: PoseEstimation fuses each frame at the estimator's own heading,
-                 * so vision never moves the heading (the gyro and the one-time vision seed own it).
-                 */
+                /** Heading std dev: huge so the gyro owns heading. Lower it to let multi-tag frames correct heading. */
                 public static final double kVisionThetaStdDevRadians = 1e3;
                 /** Extra X/Y std dev per metre the robot moved along that field axis while the frame was in flight. */
                 public static final double kMotionStdDevGain = 1.0;
@@ -655,7 +646,7 @@ public class Constants {
                         public static final int driveMotorID = 3;
                         public static final int angleMotorID = 4;
                         public static final int canCoderID = 10;
-                        public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.393798828125);
+                        // public static final Rotation2d angleOffset = Rotation2d.fromRotations(-0.060302734375);
                         // public static final frc.util.SwerveModuleConstants constants = new frc.util.SwerveModuleConstants(
                         //                 driveMotorID, angleMotorID, canCoderID, angleOffset, kFrontRightDriveInverted);
                             public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants =
