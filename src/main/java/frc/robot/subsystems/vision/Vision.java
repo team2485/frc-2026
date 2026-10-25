@@ -35,6 +35,8 @@ public class Vision {
     private final Transform3d m_robotToCamera;
     /** Null if the AprilTag field layout failed to load; the camera is then silently disabled. */
     private final PhotonPoseEstimator m_photonPoseEstimator;
+    /** Field pose of the camera from the newest frame with a solve, for the mount-offset check. */
+    private Optional<Pose3d> m_latestCameraPose = Optional.empty();
 
     public Vision(String cameraName, Transform3d robotToCamera) {
         m_name = cameraName;
@@ -75,6 +77,9 @@ public class Vision {
             }
             EstimatedRobotPose estimate = maybeEstimate.get();
             Pose3d pose = estimate.estimatedPose;
+            // Before the field check: a wrong robotToCamera can push the robot off the field, and
+            // this pose is what measures the right one.
+            m_latestCameraPose = Optional.of(VisionMeasurementMath.cameraPose(pose, m_robotToCamera));
             if (pose.getX() < 0.0 || pose.getX() > kFieldLengthMeters
                     || pose.getY() < 0.0 || pose.getY() > kFieldWidthMeters
                     || Math.abs(pose.getZ()) > kMaxVisionZErrorMeters) {
@@ -110,6 +115,14 @@ public class Vision {
 
     public boolean isConnected() {
         return m_camera.isConnected();
+    }
+
+    /**
+     * Where the newest frame says the camera itself is on the field. Depends only on the tags, not
+     * on {@code robotToCamera}; empty until the camera has seen a tag.
+     */
+    public Optional<Pose3d> getLatestCameraPose() {
+        return m_latestCameraPose;
     }
 
     /** For simulation wiring only. */

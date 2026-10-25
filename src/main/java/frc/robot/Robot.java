@@ -86,7 +86,8 @@ public class Robot extends LoggedRobot {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
         // Nothing has declared the field heading this boot: no auto ran, or the auto never reset
-        // the pose (the drive-forward auto doesn't), or an earlier seed never landed. Start from the
+        // the pose (the drive-forward auto doesn't), and the seed armed at boot (PoseEstimation
+        // constructor) never landed because no tags were in view while disabled. Start from the
         // alliance default as a guess, then let the cameras set the real heading once they agree.
         // A heading from a PathPlanner auto or an earlier seed is kept, so re-enabling teleop
         // doesn't throw it away.

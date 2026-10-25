@@ -19,6 +19,7 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -26,6 +27,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -51,7 +53,10 @@ import frc.robot.subsystems.vision.VisionMeasurementMath.RejectReason;
  * <li>Each frame's X/Y trust is reduced by how far the robot travelled along that field axis while
  * the frame was in flight (speed x age), so the two cameras' different latencies are weighed
  * individually and only along the direction of travel.</li>
- * <li>The gyro owns heading: the vision heading std dev is huge, so only X/Y are corrected.</li>
+ * <li>The gyro owns heading: each frame is fused at the estimator's own heading for that instant,
+ * so only X/Y are corrected and a camera yaw that is slightly off cannot drag the heading.</li>
+ * <li>The cameras set the heading once, from boot (so it is right before enabling), and again in
+ * teleop if nothing else set it (see {@link #seedHeadingFromVision()}).</li>
  * <li>Frames captured before a pose reset (auto start, PathPlanner) are ignored so they cannot drag
  * the freshly reset pose back.</li>
  * </ul>
@@ -91,6 +96,9 @@ public class PoseEstimation extends SubsystemBase {
 
     private double angleToTags = 0;
 
+    /* Camera mount-offset check: park the robot at a tape-measured pose, type it in, turn it on. */
+    private static final String kOffsetCheck = "Camera Offset Check/";
+
     Drivetrain m_drivetrain;
     SwerveDriveKinematics m_Kinematics;
 
@@ -116,6 +124,14 @@ public class PoseEstimation extends SubsystemBase {
                 rotation.get(),
                 modulePosition.get(),
                 new Pose2d(), stateStdDevs, visionMeasurementStdDevs);
+
+        // The boot heading is just 0 deg; let the cameras fix it while the robot sits disabled.
+        seedHeadingFromVision();
+
+        SmartDashboard.putBoolean(kOffsetCheck + "Active", false);
+        SmartDashboard.putNumber(kOffsetCheck + "Robot X (m)", 0.0);
+        SmartDashboard.putNumber(kOffsetCheck + "Robot Y (m)", 0.0);
+        SmartDashboard.putNumber(kOffsetCheck + "Robot Heading (deg)", 0.0);
 
         if (RobotBase.isSimulation()) {
             setUpVisionSim();
@@ -164,7 +180,14 @@ public class PoseEstimation extends SubsystemBase {
                     // Heading just reset from vision; later frames this loop predate it and are dropped.
                     acceptedCount[i]++;
                 } else if (reason == RejectReason.ACCEPTED) {
-                    poseEstimator.addVisionMeasurement(est.pose(), est.timestampSeconds(), stdDevs);
+                    // X/Y only: give the frame the estimator's heading at capture, so the heading
+                    // correction is exactly zero and the gyro alone moves the heading.
+                    Optional<Pose2d> atCapture = poseEstimator.sampleAt(est.timestampSeconds());
+                    if (atCapture.isPresent()) {
+                        poseEstimator.addVisionMeasurement(
+                                new Pose2d(est.pose().getTranslation(), atCapture.get().getRotation()),
+                                est.timestampSeconds(), stdDevs);
+                    }
                     acceptedCount[i]++;
                     lastAcceptedTime = now;
                     if (latestAccepted.isEmpty()
@@ -189,7 +212,9 @@ public class PoseEstimation extends SubsystemBase {
             }
             Logger.recordOutput(prefix + "Accepted", acceptedCount[i]);
             Logger.recordOutput(prefix + "Rejected", rejectedCount[i]);
+            cam.getLatestCameraPose().ifPresent(p -> Logger.recordOutput(prefix + "CameraPose", p));
         }
+        updateOffsetCheck();
 
         visionOnlyPoseProjected = latestAccepted
                 .filter(est -> now - est.timestampSeconds() <= VisionConstants.kMaxVisionAgeSeconds)
@@ -327,6 +352,32 @@ public class PoseEstimation extends SubsystemBase {
         headingKnown = true;
         Logger.recordOutput("Vision/HeadingSeedCorrectionDeg", mean.getDegrees());
         return true;
+    }
+
+    /**
+     * Reports each camera's real robot-to-camera transform, measured against a robot parked at the
+     * dashboard pose. Works even when kRobotTo*Camera is wrong, so the numbers shown can replace
+     * the constants as-is. Best with the robot still and two or more tags in view (MultiTag true).
+     */
+    private void updateOffsetCheck() {
+        if (!SmartDashboard.getBoolean(kOffsetCheck + "Active", false)) {
+            return;
+        }
+        Pose2d parked = new Pose2d(
+                SmartDashboard.getNumber(kOffsetCheck + "Robot X (m)", 0.0),
+                SmartDashboard.getNumber(kOffsetCheck + "Robot Y (m)", 0.0),
+                Rotation2d.fromDegrees(SmartDashboard.getNumber(kOffsetCheck + "Robot Heading (deg)", 0.0)));
+        for (Vision cam : cameras) {
+            cam.getLatestCameraPose().ifPresent(cameraPose -> {
+                Transform3d t = VisionMeasurementMath.robotToCamera(parked, cameraPose);
+                Logger.recordOutput("Vision/" + cam.getName() + "/MeasuredRobotToCamera", t);
+                SmartDashboard.putString(kOffsetCheck + cam.getName(), String.format(
+                        "x %.1f in, y %.1f in, z %.1f in | roll %.1f, pitch %.1f, yaw %.1f deg",
+                        Units.metersToInches(t.getX()), Units.metersToInches(t.getY()),
+                        Units.metersToInches(t.getZ()), Math.toDegrees(t.getRotation().getX()),
+                        Math.toDegrees(t.getRotation().getY()), Math.toDegrees(t.getRotation().getZ())));
+            });
+        }
     }
 
     public void resetFieldPosition() {

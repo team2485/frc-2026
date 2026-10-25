@@ -18,6 +18,8 @@ or open the `.wpilog` from the RIO afterwards). The fused pose is `/RealOutputs/
 | `Vision/<cam>/StdDevs` | `[x, y, theta]` trust used for that frame (bigger = trusted less) |
 | `Vision/VisionOnlyPoseRaw` / `VisionOnlyPoseProjected` | newest accepted frame, raw and moved forward to now |
 | `Vision/FieldSpeeds` | chassis speeds in the field frame |
+| `Vision/<cam>/CameraPose` | field pose of the camera itself from the tags (independent of the transform constants) |
+| `Vision/<cam>/MeasuredRobotToCamera` | real transform while `Camera Offset Check/Active` is on |
 
 Tuning constants are in `Constants.VisionConstants`; camera transforms are `kRobotToFrontCamera` and
 `kRobotToSideCamera`.
@@ -43,16 +45,27 @@ If this fails:
 - `FUTURE` / large negative age: time sync between coprocessor and RIO is broken (check the PhotonVision time-sync status).
 - `STALE`: NetworkTables lag or the coprocessor is overloaded (check `PipelineLatencyMs`).
 
-## 2. Camera transforms and the pitch sign (tape measure)
+## 2. Camera transforms and the pitch sign (Camera Offset Check)
 
-The old code used degrees divided by pi/180, so the pitch values have **never** been valid on the robot.
-WPILib positive pitch tilts the camera down.
+The X/Y offsets used to be measured camera-to-robot instead of robot-to-camera, which put each camera
+on the far edge of the robot looking back through it (front solves ~0.7 m too far forward, side
+~0.9 m off). That is fixed in code; the pitch signs are still unverified. The dashboard tool below
+measures each camera's real transform directly, whatever the constants say.
 
-- [ ] Park the robot at a measured spot 2 to 3 m from a tag, squared to the field, with only the front camera seeing tags. Compare `Vision/FrontCam/RawPose` X and Y with the tape measure. Expect agreement within about 10 cm.
-- [ ] If it is off by tens of centimetres, or the reported position slides as you tilt the robot slightly, negate the pitch in `kRobotToFrontCamera` (`Units.degreesToRadians(-15)`), redeploy, re-measure.
-- [ ] Repeat for the side camera with `kRobotToSideCamera` (pitch 18.5 deg, yaw +90 deg). Also confirm the side camera's pose does not flip sides when you move the robot left/right; a mirrored result means the yaw sign is wrong.
+- [ ] Park the robot still, flat, 2 to 3 m from two or more tags (`MultiTag` true), at a tape-measured
+  spot. Measure the robot **centre** in field metres (blue-origin) and its heading.
+- [ ] On SmartDashboard, set `Camera Offset Check/Robot X (m)`, `Robot Y (m)`, `Robot Heading (deg)`,
+  then tick `Camera Offset Check/Active`.
+- [ ] Read `Camera Offset Check/FrontCam` and `Camera Offset Check/SideCam`. Each shows the real
+  robot-to-camera transform (inches, and roll/pitch/yaw in degrees, the same order as `Rotation3d`).
+  Expect roughly FrontCam x +13.5 y -3.2 z 17.7, yaw 0, and SideCam x +12.5 y +13.5 z 12.6, yaw +90.
+- [ ] Where the reading differs from `kRobotToFrontCamera` / `kRobotToSideCamera` by more than ~1 in
+  or ~2 deg (in particular a pitch with the opposite sign), copy the measured values into the
+  constants, redeploy and re-check. A few cm of measuring error in the parked pose shows up 1:1
+  in x/y, so measure the parked spot carefully.
+- [ ] Untick `Active` when done.
 - [ ] With **both** cameras seeing tags at the same time and the robot stationary, the two `RawPose` values agree within about 10 cm. Disagreement here is a transform error, not a latency problem.
-- [ ] Rotate the robot 90 deg in place and re-check: the fused pose heading tracks the gyro (vision does not correct heading by design), and `RawPose` X/Y stays put.
+- [ ] Rotate the robot 90 deg in place and re-check: the fused pose heading tracks the gyro (vision never moves the heading; each frame is fused at the estimator's own heading), and `RawPose` X/Y stays put.
 
 ## 3. Reject gates behave
 

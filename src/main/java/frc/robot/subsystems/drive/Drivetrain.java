@@ -230,14 +230,15 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Field heading the robot is at when the driver presses reset-heading, i.e. squared up facing
-     * away from their own driver station. Kept identical to the old Phoenix operator-perspective
-     * constants this robot's autos/aiming were built against (Blue 180 deg, Red 0 deg).
+     * Field heading of a robot squared up facing away from its own driver station (front, where
+     * FrontCam is, toward the far wall): Blue 0 deg (+X), Red 180 deg. Only a placeholder until the
+     * vision heading seed lands (see Robot.teleopInit). The old Blue 180 / Red 0 values came from the
+     * Phoenix drivetrain's operator perspective and were 180 deg off in this drivetrain's frame.
      */
     public static double allianceHeadingOffsetDegrees() {
         return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue
-                ? 180
-                : 0;
+                ? 0
+                : 180;
     }
 
     /**

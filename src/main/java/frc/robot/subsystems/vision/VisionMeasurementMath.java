@@ -12,6 +12,8 @@ import static frc.robot.Constants.VisionConstants.kXYStdDevCoefficient;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
@@ -82,7 +84,7 @@ public final class VisionMeasurementMath {
      * each field axis gets an extra term equal to the distance the robot travelled along that axis
      * while the frame was in flight ({@code |v_axis| * age * gain}), so a frame from the
      * higher-latency camera is trusted less along the direction of travel and normally when the robot
-     * is stationary. Theta is huge so the gyro owns heading.
+     * is stationary. Theta is logged only; PoseEstimation never lets vision move the heading.
      *
      * @param est                 the frame
      * @param fieldRelativeSpeeds current chassis speeds in the field frame
@@ -97,6 +99,24 @@ public final class VisionMeasurementMath {
         double theta = kVisionThetaStdDevRadians
                 + Math.abs(fieldRelativeSpeeds.omegaRadiansPerSecond) * age * kMotionStdDevGain;
         return VecBuilder.fill(x, y, theta);
+    }
+
+    /**
+     * Field pose of the camera itself for a frame. PhotonLib solves the camera's pose from the tags
+     * and then applies {@code robotToCamera} backwards to get the robot, so this undoes that step:
+     * the result depends only on the tags, not on whether {@code robotToCamera} is right.
+     */
+    public static Pose3d cameraPose(Pose3d estimatedRobotPose, Transform3d robotToCamera) {
+        return estimatedRobotPose.transformBy(robotToCamera);
+    }
+
+    /**
+     * The robot-to-camera transform a frame implies when the robot is really at
+     * {@code actualRobotPose} (parked flat on the carpet). Its translation and Rotation3d
+     * roll/pitch/yaw can be pasted straight into {@code kRobotTo*Camera}.
+     */
+    public static Transform3d robotToCamera(Pose2d actualRobotPose, Pose3d cameraPose) {
+        return new Transform3d(new Pose3d(actualRobotPose), cameraPose);
     }
 
     /**

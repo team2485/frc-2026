@@ -7,7 +7,7 @@ Covers two changes to how the field heading (the pose estimator's rotation) is s
    so `getYawForOdometry()` stays continuous and auto-align keeps aiming off the right heading.
 2. **Teleop takes its heading from the cameras whenever nothing else has set it.** If
    `PoseEstimation.isHeadingKnown()` is false, `Robot.teleopInit()` sets the alliance default
-   heading (blue 180 deg, red 0 deg) as a placeholder, then calls
+   heading (blue 0 deg, red 180 deg: facing away from your own driver station) as a placeholder, then calls
    `PoseEstimation.seedHeadingFromVision()`. The robot can start anywhere, facing any direction.
    The heading counts as known after a pose reset (a PathPlanner auto start) or a landed seed.
 
@@ -15,6 +15,17 @@ Neither change has been run on the robot. Simulation cannot test the vision head
 camera's heading always matches the gyro, so the correction there is always about 0 deg.
 
 ## Changes since the first version of this checklist
+
+- **The seed is also armed at boot**, so the heading is set from the cameras while the robot sits
+  disabled (`Heading Seeded` turns true once tags are seen). Before, the heading stayed at 0 deg
+  until teleop was enabled. `teleopInit` only re-seeds if that boot seed never landed.
+- **Alliance placeholder flipped to blue 0 / red 180.** In this drivetrain's frame (+X = the
+  FrontCam end), facing away from your own driver station is 0 deg on blue. The old blue 180 /
+  red 0 came from the Phoenix drivetrain's operator perspective. **Revert it** (swap the `0` and
+  `180` in `Drivetrain.allianceHeadingOffsetDegrees()`) if your robot normally starts a match facing
+  its own driver station instead. It only matters until the seed lands, or if no tags are ever seen.
+- **Vision no longer nudges the heading between seeds.** Each frame is fused at the estimator's
+  own heading, so only the gyro, pose resets and the seed move it.
 
 Not yet run on the robot. The build passes, and so do the unit tests.
 
@@ -28,7 +39,7 @@ Not yet run on the robot. The build passes, and so do the unit tests.
 - **Seeding no longer depends on whether an auto command existed.** `getAutonomousCommand()` never
   returns null, so before, entering auto mode at all this boot (FMS, practice mode, a stray click)
   skipped the seed. The drive-forward auto never sets the pose, so the heading stayed at the boot
-  value of 0 deg, which is backwards on blue. `teleopInit` now checks `isHeadingKnown()` instead.
+  value of 0 deg, which was wrong unless the robot happened to face +X. `teleopInit` now checks `isHeadingKnown()` instead.
   This also means re-enabling teleop after a seed landed keeps the seeded heading. Before, every
   teleop enable without an auto reset the heading to the placeholder and seeded again.
 - **Aim PID is reset at the start of every aim** (`StateDriveToAimTransition`), so leftover integral
@@ -68,6 +79,7 @@ In AdvantageScope (`/RealOutputs/...`) and on the dashboard:
 | `Target Tracking/Target Locked` (NT) | true when the aim error is within tolerance; the windexer feeds only then |
 | `robotPoseLog` | fused pose; its rotation is the heading auto-align uses |
 | `Vision/<cam>/RawPose` | each camera's solved pose, including its heading |
+| `Swerve/CurrentGyroPos` (Shuffleboard) | raw Pigeon yaw in degrees, zeroed by reset-heading; the pose heading follows it 1:1 between seeds |
 
 Tuning constants are in `Constants.VisionConstants`.
 
@@ -136,6 +148,21 @@ Power-cycle or redeploy so no auto has run this boot.
   (the PID integral is reset each time).
 - [ ] With the operator's left stick untouched, `AimPose` sits exactly on the hub. Pushing the stick
   past the deadband nudges it.
+
+## 7. Heading drift while driving
+
+Vision can no longer move the heading between seeds, so any remaining drift comes from the gyro or
+from the robot really turning.
+
+- [ ] Drive straight back and forth (no rotation input) for 10 to 20 s with tags in view. Watch
+  `Swerve/CurrentGyroPos` and the `robotPoseLog` heading.
+- [ ] The two change by the same amount. If the pose heading moves while `CurrentGyroPos` stays put,
+  something other than the gyro is moving the heading. That is a bug; save the log.
+- [ ] If `CurrentGyroPos` drifts but the robot did **not** physically turn (check against a floor
+  line or the field wall): it's the Pigeon. Run the Pigeon 2 mount calibration in Tuner X (robot
+  flat and still), make sure the Pigeon is mounted rigidly, then re-test.
+- [ ] If the robot **did** physically turn while translating, the pose is right and the drivetrain is
+  the cause (module offsets, or no heading hold during field-relative driving), not the pose code.
 
 ## Record for the team
 
