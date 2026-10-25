@@ -1,6 +1,6 @@
 # Vision fusion: on-robot verification checklist
 
-Covers the two-camera PhotonVision fusion in `PoseEstimation` (branch `feat/drivetrain`).
+Covers the two-camera PhotonVision fusion in `PoseEstimation`. SideCam fusion is currently off; see section 2.
 Everything below was verified in simulation only; these are the checks that need the physical robot.
 
 All logged values live under `/RealOutputs/Vision/...` in AdvantageScope (connect over NetworkTables,
@@ -10,7 +10,7 @@ or open the `.wpilog` from the RIO afterwards). The fused pose is `/RealOutputs/
 |---|---|
 | `Vision/<cam>/Connected` | PhotonLib heartbeat from that camera |
 | `Vision/<cam>/Accepted`, `Rejected` | running counts of frames fused / dropped |
-| `Vision/<cam>/RejectReason` | `ACCEPTED`, `BEFORE_RESET`, `FUTURE`, `STALE`, `TOO_FAR`, `AMBIGUOUS`, `ROTATING_TOO_FAST` |
+| `Vision/<cam>/RejectReason` | `ACCEPTED`, `BEFORE_RESET`, `FUTURE`, `STALE`, `TOO_FAR`, `AMBIGUOUS`, `ROTATING_TOO_FAST`, `CAMERA_DISABLED` |
 | `Vision/<cam>/RawPose` | pose solved from the last frame, before fusion |
 | `Vision/<cam>/AgeSeconds` | now minus capture time (what the fusion uses) |
 | `Vision/<cam>/PipelineLatencyMs` | coprocessor latency reported by PhotonVision |
@@ -45,25 +45,66 @@ If this fails:
 - `FUTURE` / large negative age: time sync between coprocessor and RIO is broken (check the PhotonVision time-sync status).
 - `STALE`: NetworkTables lag or the coprocessor is overloaded (check `PipelineLatencyMs`).
 
-## 2. Camera transforms and the pitch sign (Camera Offset Check)
+## 2. Camera mount calibration (Camera Offset Check)
 
-The X/Y offsets used to be measured camera-to-robot instead of robot-to-camera, which put each camera
-on the far edge of the robot looking back through it (front solves ~0.7 m too far forward, side
-~0.9 m off). That is fixed in code; the pitch signs are still unverified. The dashboard tool below
-measures each camera's real transform directly, whatever the constants say.
+### Current state
 
-- [ ] Park the robot still, flat, 2 to 3 m from two or more tags (`MultiTag` true), at a tape-measured
-  spot. Measure the robot **centre** in field metres (blue-origin) and its heading.
-- [ ] On SmartDashboard, set `Camera Offset Check/Robot X (m)`, `Robot Y (m)`, `Robot Heading (deg)`,
-  then tick `Camera Offset Check/Active`.
-- [ ] Read `Camera Offset Check/FrontCam` and `Camera Offset Check/SideCam`. Each shows the real
-  robot-to-camera transform (inches, and roll/pitch/yaw in degrees, the same order as `Rotation3d`).
-  Expect roughly FrontCam x +13.5 y -3.2 z 17.7, yaw 0, and SideCam x +12.5 y +13.5 z 12.6, yaw +90.
-- [ ] Where the reading differs from `kRobotToFrontCamera` / `kRobotToSideCamera` by more than ~1 in
-  or ~2 deg (in particular a pitch with the opposite sign), copy the measured values into the
-  constants, redeploy and re-check. A few cm of measuring error in the parked pose shows up 1:1
-  in x/y, so measure the parked spot carefully.
-- [ ] Untick `Active` when done.
+| Camera | Transform in code (`Constants.VisionConstants`) | Fused into the pose? |
+|---|---|---|
+| FrontCam | x -13.5 in, y +3.2 in, z 17.7 in, pitch 15 deg, yaw 0 (original measurement) | yes (`kFrontCameraFusionEnabled = true`) |
+| SideCam | x +12.5 in, y +13.5 in, z 12.6 in, pitch 18.5 deg, yaw +90 (unverified) | **no** (`kSideCameraFusionEnabled = false`) |
+
+SideCam is still read and logged while disabled. Its frames show `RejectReason` = `CAMERA_DISABLED`
+and never move the pose or the heading seed. That way it can be calibrated with the steps below
+without affecting the robot. Neither camera's pitch sign has been verified (positive pitch = tilted down).
+
+Recalibrating a camera in the PhotonVision UI only fixes the lens model. It does not tell the robot
+code where the camera is mounted; that is the `kRobotTo*Camera` transform, and this check measures it.
+
+### How the check works
+
+The tags tell PhotonVision exactly where the camera itself is on the field, whatever the code's
+transform says. The code logs that as `Vision/<cam>/CameraPose`. If you also tell the code exactly where
+the robot is, it can work out the real robot-to-camera transform. So the readout is correct even while
+the constants are wrong.
+
+### Steps
+
+1. **Pick a spot** 2 to 3 m from at least two AprilTags that the camera you are calibrating can see.
+   Check `Vision/<cam>/MultiTag` is true. Single-tag solves are noisier and can come out flipped.
+2. **Park the robot flat and still** at that spot, squared to the field walls if you can (heading
+   exactly 0, 90, 180 or -90 deg is easiest to get right).
+3. **Measure the robot centre** in field metres, using the blue-origin WPILib field frame:
+   - X = distance from the blue alliance wall, toward red.
+   - Y = distance from the field edge on your right when you stand behind the blue driver station.
+   - Heading: 0 deg = robot front (the end that drives forward) pointing at the red wall, +90 deg =
+     pointing left from the blue driver station's view.
+   - Robot centre = bumper edge + half the bumper-to-bumper length. An error of 2 cm here shows up as
+     2 cm in the result, so measure carefully.
+4. **Enter it on SmartDashboard**: `Camera Offset Check/Robot X (m)`, `Robot Y (m)`,
+   `Robot Heading (deg)`, then tick `Camera Offset Check/Active`.
+5. **Read** `Camera Offset Check/FrontCam` and `Camera Offset Check/SideCam`. Each shows
+   `x .. in, y .. in, z .. in | roll .., pitch .., yaw .. deg`. That is the camera position from the
+   robot centre (+x forward, +y left, +z up from the floor) and its angles, in the same order as
+   `new Rotation3d(roll, pitch, yaw)`. The values wobble by a few tenths; read the middle of the range.
+   They are also logged as `Vision/<cam>/MeasuredRobotToCamera`.
+6. **Repeat from a second spot** (different distance or angle). The two readings should agree within
+   about 1 in and 2 deg. If they don't, the parked pose was mis-measured or the lens calibration is poor.
+7. **Copy the averaged reading into the constant**, keeping the units:
+   ```java
+   new Transform3d(
+           new Translation3d(Units.inchesToMeters(x), Units.inchesToMeters(y), Units.inchesToMeters(z)),
+           new Rotation3d(Units.degreesToRadians(roll), Units.degreesToRadians(pitch),
+                   Units.degreesToRadians(yaw)));
+   ```
+   Roll should come out near 0. A pitch with the opposite sign to the constant means the old pitch
+   sign was wrong.
+8. **Untick `Active`**, redeploy, and re-park at one of the spots. `Vision/<cam>/RawPose` should now
+   match the tape-measured pose within about 5 to 10 cm.
+9. **Re-enable SideCam** once its transform is measured: set `kSideCameraFusionEnabled = true`, redeploy.
+
+### After both cameras are calibrated
+
 - [ ] With **both** cameras seeing tags at the same time and the robot stationary, the two `RawPose` values agree within about 10 cm. Disagreement here is a transform error, not a latency problem.
 - [ ] Rotate the robot 90 deg in place and re-check: the fused pose heading tracks the gyro (vision never moves the heading; each frame is fused at the estimator's own heading), and `RawPose` X/Y stays put.
 

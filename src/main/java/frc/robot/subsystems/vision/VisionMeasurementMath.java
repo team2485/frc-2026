@@ -42,7 +42,9 @@ public final class VisionMeasurementMath {
         /** Single-tag solve whose ambiguity exceeds {@code kMaxSingleTagAmbiguity}. */
         AMBIGUOUS,
         /** Robot was spinning faster than {@code kMaxOmegaForVisionRadPerSec} (rotation blur). */
-        ROTATING_TOO_FAST
+        ROTATING_TOO_FAST,
+        /** Camera turned off in {@code k*CameraFusionEnabled}; logged but never fused. */
+        CAMERA_DISABLED
     }
 
     /**

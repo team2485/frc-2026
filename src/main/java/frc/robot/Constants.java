@@ -377,22 +377,29 @@ public class Constants {
                  * roll, pitch, yaw in radians). WPILib positive pitch rotates +X toward -Z, i.e. the
                  * camera tilts DOWN.
                  *
-                 * The translation is FROM robot centre TO the camera. FrontCam is on the front edge
-                 * looking forward and SideCam on the left side looking left; the X/Y used to be
-                 * measured the other way round (camera to robot), which put each camera on the far
-                 * edge looking back through the robot and shifted every solve ~0.7 m (front) /
-                 * ~0.9 m (side). The pitch sign has never been field-verified: park the robot at a
+                 * The translation is FROM robot centre TO the camera. SideCam is on the left side
+                 * looking left; its X/Y used to be measured the other way round (camera to robot).
+                 * FrontCam is the original measurement: flipping it the same way made it worse on
+                 * the robot. The pitch sign has never been field-verified: park the robot at a
                  * tape-measured spot and read the "Camera Offset Check" dashboard values
                  * (PoseEstimation), which report the real transform of each camera.
                  */
                 public static final Transform3d kRobotToFrontCamera = new Transform3d(
-                                new Translation3d(Units.inchesToMeters(13.5), Units.inchesToMeters(-3.2),
+                                new Translation3d(Units.inchesToMeters(-13.5), Units.inchesToMeters(3.2),
                                                 Units.inchesToMeters(17.7)),
                                 new Rotation3d(0, Units.degreesToRadians(15), 0));
                 public static final Transform3d kRobotToSideCamera = new Transform3d(
                                 new Translation3d(Units.inchesToMeters(12.5), Units.inchesToMeters(13.5),
                                                 Units.inchesToMeters(12.6)),
                                 new Rotation3d(0, Units.degreesToRadians(18.5), Math.PI / 2));
+
+                /*
+                 * Which cameras correct the pose. A disabled camera is still read and logged (RawPose,
+                 * CameraPose, Camera Offset Check), so it can be calibrated, but it never moves the pose
+                 * or the heading seed. SideCam is off until its transform is measured.
+                 */
+                public static final boolean kFrontCameraFusionEnabled = true;
+                public static final boolean kSideCameraFusionEnabled = false;
 
                 /* Vision fusion gates and trust model (see VisionMeasurementMath). */
                 /** Frames older than this at fusion time are dropped; must stay under the 1.5 s estimator buffer. */
