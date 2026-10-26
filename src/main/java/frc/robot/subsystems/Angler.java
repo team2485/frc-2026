@@ -8,17 +8,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 //import static frc.robot.Constants.RollerConstants.*;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.Drivetrain;
-import frc.robot.subsystems.drive.PoseEstimation;
 import frc.robot.subsystems.drive.TargetTracking;
 import frc.util.DistanceLookup;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Shooter.ShooterStates;
 
 // Imports go here
 import static frc.robot.Constants.AnglerConstants.*;
